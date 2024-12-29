@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import '../i18n/config';
 
 const Index = () => {
@@ -155,6 +156,7 @@ const Index = () => {
                     <TabsTrigger value="insights">{t('analysis')}</TabsTrigger>
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
+                    <TabsTrigger value="integrations">Integracje</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="spaces" className="space-y-6">
@@ -225,12 +227,15 @@ const Index = () => {
                   <TabsContent value="sensors">
                     <SensorsPanel />
                   </TabsContent>
+
+                  <TabsContent value="integrations">
+                    <IntegrationsPanel />
+                  </TabsContent>
                 </Tabs>
               </motion.div>
             </main>
           </div>
         </SidebarProvider>
-        {/* Only show FloatingChatbot in specific sections */}
         {location.hash !== '#spaces' && <FloatingChatbot />}
       </div>
     </div>
