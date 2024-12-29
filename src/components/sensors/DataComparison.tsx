@@ -25,7 +25,7 @@ export const DataComparison = () => {
 
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">{t('dataComparison')}</h3>
+      <h3 className="text-lg font-semibold mb-4">{t('Porównanie danych')}</h3>
       <div className="grid gap-4 mb-6">
         <div className="flex gap-4">
           <Select value={city1} onValueChange={setCity1}>
