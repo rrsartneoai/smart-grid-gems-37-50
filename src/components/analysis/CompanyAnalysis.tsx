@@ -1,9 +1,4 @@
-import { FloatingChatbot } from "../FloatingChatbot";
-import { Card } from "@/components/ui/card";
-import { useCompanyStore } from "@/components/CompanySidebar";
-import { companiesData } from "@/data/companies";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
   Legend, Area, AreaChart, ComposedChart, Scatter,
 } from "recharts";
@@ -17,198 +12,192 @@ import { ExportButtons } from "./ExportButtons";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-const calculateForecast = (data: any[]) => {
-  const forecast = data.map((item, index) => ({
-    name: `Forecast ${index + 1}`,
-    consumption: item.consumption * 1.1,
-    production: item.production * 1.15,
-    efficiency: Math.min(item.efficiency * 1.05, 100),
-  }));
-  return forecast;
-};
+const energyData = [
+  { name: 'Styczeń', value: 400 },
+  { name: 'Luty', value: 300 },
+  { name: 'Marzec', value: 200 },
+  { name: 'Kwiecień', value: 278 },
+  { name: 'Maj', value: 189 },
+];
+
+const sourceData = [
+  { name: 'Węgiel', value: 400 },
+  { name: 'Gaz', value: 300 },
+  { name: 'Odnawialne', value: 300 },
+  { name: 'Inne', value: 200 },
+];
+
+const forecastData = [
+  { name: 'Styczeń', actual: 400, forecast: 450 },
+  { name: 'Luty', actual: 300, forecast: 350 },
+  { name: 'Marzec', actual: 200, forecast: 250 },
+  { name: 'Kwiecień', actual: 278, forecast: 300 },
+  { name: 'Maj', actual: 189, forecast: 220 },
+];
 
 export function CompanyAnalysis() {
-  const { toast } = useToast();
-  const { selectedCompanyId } = useCompanyStore();
-  const selectedCompany = companiesData.find(
-    (company) => company.id === selectedCompanyId
-  );
   const [showForecast, setShowForecast] = useState(false);
+  const { toast } = useToast();
+  const selectedCompany = {
+    name: "EnergiaPro S.A.",
+  };
 
   const handleExport = async (format: 'pdf' | 'jpg' | 'xlsx' | 'csv') => {
     try {
-      const element = document.getElementById('company-analysis');
-      if (!element) return;
+      const element = document.getElementById('analysis-content');
+      if (!element) {
+        throw new Error('Content element not found');
+      }
 
-      if (format === 'pdf' || format === 'jpg') {
-        const canvas = await html2canvas(element);
-        
-        if (format === 'jpg') {
-          const link = document.createElement('a');
-          link.download = 'company-analysis.jpg';
-          link.href = canvas.toDataURL('image/jpeg');
-          link.click();
-        } else {
+      switch (format) {
+        case 'pdf': {
+          const canvas = await html2canvas(element, {
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+          });
           const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF();
-          const imgProps = pdf.getImageProperties(imgData);
+          const pdf = new jsPDF('p', 'mm', 'a4');
           const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
           
           pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-          pdf.save('company-analysis.pdf');
+          pdf.save(`energiapro-analysis.pdf`);
+          break;
         }
-      } else {
-        const data = selectedCompany?.energyData || [];
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Analysis Data");
-        
-        if (format === 'csv') {
-          XLSX.writeFile(wb, 'company-analysis.csv');
-        } else {
-          XLSX.writeFile(wb, 'company-analysis.xlsx');
+        case 'jpg': {
+          const canvas = await html2canvas(element, {
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+          });
+          const link = document.createElement('a');
+          link.download = 'energiapro-analysis.jpg';
+          link.href = canvas.toDataURL('image/jpeg');
+          link.click();
+          break;
+        }
+        case 'xlsx': {
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.json_to_sheet([
+            { date: '2024-01', consumption: 150, production: 200 },
+            { date: '2024-02', consumption: 160, production: 210 },
+          ]);
+          XLSX.utils.book_append_sheet(wb, ws, "Analysis");
+          XLSX.writeFile(wb, "energiapro-analysis.xlsx");
+          break;
+        }
+        case 'csv': {
+          const data = [
+            ['Date', 'Consumption', 'Production'],
+            ['2024-01', 150, 200],
+            ['2024-02', 160, 210],
+          ];
+          const csvContent = data.map(row => row.join(',')).join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'energiapro-analysis.csv';
+          link.click();
+          break;
         }
       }
 
       toast({
-        title: "Export completed",
-        description: `File exported as ${format.toUpperCase()}`,
+        title: "Eksport zakończony",
+        description: `Plik został wyeksportowany w formacie ${format.toUpperCase()}`,
       });
     } catch (error) {
+      console.error('Export error:', error);
       toast({
-        title: "Export failed",
-        description: "An error occurred during export",
         variant: "destructive",
+        title: "Błąd eksportu",
+        description: "Nie udało się wyeksportować danych. Spróbuj ponownie.",
       });
     }
   };
 
   return (
-    <div className="relative">
-      <div className="grid gap-6" id="company-analysis">
-        <div className="flex justify-between items-center flex-wrap gap-2">
-          <h2 className="text-2xl font-bold">
-            Analiza - {selectedCompany?.name}
-          </h2>
-          <ExportButtons 
-            onExport={handleExport}
-            onGenerateForecast={() => setShowForecast(true)}
-            showForecast={showForecast}
-          />
-        </div>
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">
+          Analiza - {selectedCompany?.name}
+        </h2>
+        <ExportButtons 
+          onExport={handleExport}
+          onGenerateForecast={() => setShowForecast(true)}
+          showForecast={showForecast}
+        />
+      </div>
 
+      <div id="analysis-content" className="space-y-8">
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Trendy zużycia energii</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={showForecast ? [...(selectedCompany?.energyData || []), ...calculateForecast(selectedCompany?.energyData || [])] : selectedCompany?.energyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+          <Card>
+            <CardHeader>
+              <CardTitle>Zużycie energii</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={energyData}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="consumption"
-                    name="Zużycie"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="production"
-                    name="Produkcja"
-                    stroke="#82ca9d"
-                    strokeWidth={2}
-                  />
-                </LineChart>
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
               </ResponsiveContainer>
-            </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Analiza wydajności</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={showForecast ? [...(selectedCompany?.energyData || []), ...calculateForecast(selectedCompany?.energyData || [])] : selectedCompany?.energyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="efficiency"
-                    name="Wydajność"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Źródła energii</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
+          <Card>
+            <CardHeader>
+              <CardTitle>Źródła energii</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: "Energia słoneczna", value: 30 },
-                      { name: "Energia wiatrowa", value: 25 },
-                      { name: "Biomasa", value: 20 },
-                      { name: "Inne źródła", value: 25 },
-                    ]}
+                    data={sourceData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
+                    outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
                     label
                   >
-                    {[
-                      { name: "Energia słoneczna", value: 30 },
-                      { name: "Energia wiatrowa", value: 25 },
-                      { name: "Biomasa", value: 20 },
-                      { name: "Inne źródła", value: 25 },
-                    ].map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+                    {sourceData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
+            </CardContent>
           </Card>
+        </div>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Analiza korelacji</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={showForecast ? [...(selectedCompany?.energyData || []), ...calculateForecast(selectedCompany?.energyData || [])] : selectedCompany?.energyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+        {showForecast && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Prognoza zużycia energii</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <ComposedChart data={forecastData}>
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="consumption" name="Zużycie" fill="#8884d8" />
-                  <Scatter dataKey="efficiency" name="Wydajność" fill="#82ca9d" />
+                  <Area type="monotone" dataKey="actual" fill="#8884d8" stroke="#8884d8" />
+                  <Scatter dataKey="forecast" fill="#82ca9d" />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
+            </CardContent>
           </Card>
-        </div>
-
-        <UploadOptions />
+        )}
       </div>
-      <FloatingChatbot />
+
+      <UploadOptions />
     </div>
   );
 }
