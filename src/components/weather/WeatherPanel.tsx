@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ export const WeatherPanel = () => {
     queryKey: ['weather', selectedCity.id],
     queryFn: async () => {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=96b7e811c904f7bf183cf3a334ed6977&units=metric&lang=pl`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${import.meta.env.VITE_GOOGLE_API_KEY}&units=metric&lang=pl`
       );
       if (!response.ok) {
         throw new Error('Błąd pobierania danych pogodowych');
