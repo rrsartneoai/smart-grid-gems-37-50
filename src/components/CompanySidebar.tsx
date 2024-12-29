@@ -2,14 +2,14 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { companiesData } from "@/data/companies";
 import { create } from "zustand";
 import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
-import { useLocation, useNavigate } from "react-router-dom";
+import { SidebarButtons } from "./sidebar/SidebarButtons";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompanyId: "1",
@@ -22,11 +22,6 @@ export function CompanySidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const currentHash = location.hash.slice(1);
-  const isAIAssistantVisible = ['insights', 'status', 'sensors'].includes(currentHash);
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -39,18 +34,6 @@ export function CompanySidebar() {
     });
   };
 
-  const handleOpenAssistant = () => {
-    if (!isAIAssistantVisible) {
-      toast({
-        title: "Asystent AI",
-        description: "Asystent AI jest dostępny tylko w sekcjach Analiza, Status i Czujniki.",
-        variant: "destructive"
-      });
-      return;
-    }
-    navigate('/assistant');
-  };
-
   const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -61,19 +44,17 @@ export function CompanySidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="lg:hidden fixed top-4 left-4 z-50"
         >
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px] p-0">
         <SidebarContent 
-          handleAddCompany={handleAddCompany} 
-          handleOpenAssistant={handleOpenAssistant}
+          handleAddCompany={handleAddCompany}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
-          isAIAssistantVisible={isAIAssistantVisible}
         />
       </SheetContent>
       <aside className={`fixed left-0 top-0 z-30 h-screen transition-all duration-300 bg-background border-r ${collapsed ? "w-[60px]" : "w-[300px]"} hidden lg:block`}>
@@ -96,12 +77,10 @@ export function CompanySidebar() {
         </Button>
         <SidebarContent 
           collapsed={collapsed} 
-          handleAddCompany={handleAddCompany} 
-          handleOpenAssistant={handleOpenAssistant}
+          handleAddCompany={handleAddCompany}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
-          isAIAssistantVisible={isAIAssistantVisible}
         />
       </aside>
     </Sheet>
@@ -111,21 +90,17 @@ export function CompanySidebar() {
 interface SidebarContentProps {
   collapsed?: boolean;
   handleAddCompany: () => void;
-  handleOpenAssistant: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filteredCompanies: typeof companiesData;
-  isAIAssistantVisible: boolean;
 }
 
 function SidebarContent({ 
   collapsed = false, 
   handleAddCompany,
-  handleOpenAssistant,
   searchQuery,
   setSearchQuery,
   filteredCompanies,
-  isAIAssistantVisible
 }: SidebarContentProps) {
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
 
@@ -168,25 +143,10 @@ function SidebarContent({
               </Button>
             </div>
           ))}
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className={`w-full justify-start ${collapsed ? "px-2" : ""}`}
-              onClick={handleAddCompany}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {!collapsed && <span>Dodaj firmę</span>}
-            </Button>
-            <Button
-              variant="outline"
-              className={`w-full justify-start ${collapsed ? "px-2" : ""} ${!isAIAssistantVisible ? 'opacity-50' : ''}`}
-              onClick={handleOpenAssistant}
-              disabled={!isAIAssistantVisible}
-            >
-              <Bot className="h-4 w-4 mr-2" />
-              {!collapsed && <span>Asystent AI</span>}
-            </Button>
-          </div>
+          <SidebarButtons 
+            collapsed={collapsed}
+            handleAddCompany={handleAddCompany}
+          />
         </div>
       </ScrollArea>
       {!collapsed && (
