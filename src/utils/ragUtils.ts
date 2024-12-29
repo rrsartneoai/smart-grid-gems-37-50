@@ -1,4 +1,3 @@
-```typescript
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_API_KEY || "");
@@ -37,13 +36,11 @@ export async function generateRAGResponse(input: string): Promise<string> {
     
     console.log('Przetwarzanie fragmentu tekstu o długości:', processableInput.length);
     
-    const prompt = `
-      Jesteś asystentem AI specjalizującym się w zarządzaniu siecią energetyczną i systemami energetycznymi.
-      Odpowiedz na następujące zapytanie w języku polskim: ${processableInput}
-      
-      Odpowiadaj w profesjonalny ale przyjazny sposób, skupiając się na informacjach związanych z siecią energetyczną.
-      Zachowaj zwięzłość i trzymaj się tematu.
-    `;
+    const prompt = 
+      "Jesteś asystentem AI specjalizującym się w zarządzaniu siecią energetyczną i systemami energetycznymi.\n" +
+      `Odpowiedz na następujące zapytanie w języku polskim: ${processableInput}\n\n` +
+      "Odpowiadaj w profesjonalny ale przyjazny sposób, skupiając się na informacjach związanych z siecią energetyczną.\n" +
+      "Zachowaj zwięzłość i trzymaj się tematu.";
 
     const result = await model.generateContent(prompt);
     const response = result.response;
@@ -64,12 +61,10 @@ export async function processDocumentForRAG(text: string): Promise<string> {
     
     let summary = '';
     for (const chunk of chunks) {
-      const prompt = `
-        Przeanalizuj poniższy fragment tekstu i wyodrębnij najważniejsze informacje związane z energetyką, 
-        sieciami energetycznymi lub zarządzaniem energią. Przedstaw wyniki w zwięzłej formie po polsku:
-
-        ${chunk}
-      `;
+      const prompt = 
+        "Przeanalizuj poniższy fragment tekstu i wyodrębnij najważniejsze informacje związane z energetyką,\n" +
+        "sieciami energetycznymi lub zarządzaniem energią. Przedstaw wyniki w zwięzłej formie po polsku:\n\n" +
+        `${chunk}`;
       
       const result = await model.generateContent(prompt);
       summary += result.response.text() + '\n\n';
@@ -81,4 +76,3 @@ export async function processDocumentForRAG(text: string): Promise<string> {
     return "Przepraszam, wystąpił błąd podczas przetwarzania dokumentu. Proszę spróbować ponownie.";
   }
 }
-```
