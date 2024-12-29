@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Battery, Cloud, Factory, Flame, Nuclear, Sun, Water, Wind } from "lucide-react";
+import { Battery, Cloud, Factory, Flame, Atom, Droplet, Wind, Sun } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
 
@@ -19,8 +19,8 @@ interface EnergySource {
 
 export function FranceEnergyCard() {
   const productionData: EnergySource[] = [
-    { name: "Nuclear", value: 49351, icon: Nuclear, color: COLORS.nuclear },
-    { name: "Hydro", value: 9084, icon: Water, color: COLORS.renewable },
+    { name: "Nuclear", value: 49351, icon: Atom, color: COLORS.nuclear },
+    { name: "Hydro", value: 9084, icon: Droplet, color: COLORS.renewable },
     { name: "Wind", value: 1157, icon: Wind, color: COLORS.renewable },
     { name: "Solar", value: 0, icon: Sun, color: COLORS.renewable },
     { name: "Gas", value: 3904, icon: Flame, color: COLORS.fossil },
