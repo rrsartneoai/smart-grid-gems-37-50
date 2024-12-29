@@ -17,7 +17,22 @@ interface UploadingFile {
    status: 'uploading' | 'completed' | 'error';
    preview?: string;
    speed?: string;
+   error?: string;
 }
+
+const ALLOWED_FILE_TYPES = {
+   'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'],
+   'application/pdf': ['.pdf'],
+   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+   'text/plain': ['.txt'],
+   'text/csv': ['.csv'],
+   'application/xml': ['.xml'],
+   'audio/*': ['.mp3', '.wav'],
+   'video/*': ['.mp4', '.mov']
+};
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_TOTAL_SIZE = 200 * 1024 * 1024; // 200MB
 
 export function FileUpload() {
    const { toast } = useToast();
@@ -39,11 +54,49 @@ export function FileUpload() {
        return `${formatFileSize(bytesPerSecond)}/s`;
    };
 
+   const validateFile = (file: File) => {
+       // Check file size
+       if (file.size > MAX_FILE_SIZE) {
+           return `Plik jest za duży. Maksymalny rozmiar to ${formatFileSize(MAX_FILE_SIZE)}`;
+       }
+
+       // Check total size
+       const currentTotalSize = uploadingFiles.reduce((acc, f) => acc + f.file.size, 0);
+       if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
+           return `Przekroczono łączny limit rozmiaru plików (${formatFileSize(MAX_TOTAL_SIZE)})`;
+       }
+
+       // Check file type
+       const isValidType = Object.entries(ALLOWED_FILE_TYPES).some(([type, extensions]) => {
+           if (type.includes('*')) {
+               const baseType = type.split('/')[0];
+               return file.type.startsWith(baseType);
+           }
+           return type === file.type || extensions.some(ext => file.name.toLowerCase().endsWith(ext));
+       });
+
+       if (!isValidType) {
+           return "Nieobsługiwany format pliku";
+       }
+
+       return null;
+   };
+
    const handleFileUpload = async (file: File) => {
        const startTime = Date.now();
        let preview = undefined;
 
-       if (file.type.includes("image")) {
+       const validationError = validateFile(file);
+       if (validationError) {
+           toast({
+               variant: "destructive",
+               title: "Błąd walidacji",
+               description: validationError,
+           });
+           return;
+       }
+
+       if (file.type.startsWith("image/")) {
            preview = URL.createObjectURL(file);
        }
 
@@ -72,14 +125,11 @@ export function FileUpload() {
                }));
            }, 200);
 
-           if (file.type.includes("image")) {
+           if (file.type.startsWith("image/")) {
                text = await processImageFile(file);
            } else if (file.type === "application/pdf") {
                text = await processPdfFile(file);
-           } else if (
-               file.type ===
-               "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-           ) {
+           } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
                text = await processDocxFile(file);
            } else {
                throw new Error("Nieobsługiwany format pliku");
@@ -104,7 +154,11 @@ export function FileUpload() {
        } catch (error) {
            console.error("Error processing file:", error);
            setUploadingFiles(prev => prev.map(f =>
-               f.file === file ? { ...f, status: 'error' } : f
+               f.file === file ? { 
+                   ...f, 
+                   status: 'error',
+                   error: error instanceof Error ? error.message : "Nieznany błąd" 
+               } : f
            ));
            toast({
                variant: "destructive",
@@ -123,12 +177,8 @@ export function FileUpload() {
    const { getRootProps, getInputProps } = useDropzone({
        onDrop,
        maxFiles: 5,
-       maxSize: 20 * 1024 * 1024,
-       accept: {
-           'image/*': ['.png', '.jpg', '.jpeg'],
-           'application/pdf': ['.pdf'],
-           'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
-       },
+       maxSize: MAX_FILE_SIZE,
+       accept: ALLOWED_FILE_TYPES,
        onDragEnter: () => setIsDragActive(true),
        onDragLeave: () => setIsDragActive(false),
    });
@@ -150,8 +200,9 @@ export function FileUpload() {
                            <HelpCircle className="h-5 w-5 text-muted-foreground cursor-help" />
                        </TooltipTrigger>
                        <TooltipContent className="max-w-xs">
-                           <p>Obsługiwane formaty: PDF, DOCX, PNG, JPG</p>
-                           <p>Maksymalny rozmiar: 20MB na plik</p>
+                           <p>Obsługiwane formaty: PDF, DOCX, TXT, CSV, XML, obrazy, audio, wideo</p>
+                           <p>Maksymalny rozmiar: {formatFileSize(MAX_FILE_SIZE)} na plik</p>
+                           <p>Łączny limit: {formatFileSize(MAX_TOTAL_SIZE)}</p>
                            <p>Limit plików: 5</p>
                        </TooltipContent>
                    </Tooltip>
@@ -160,7 +211,7 @@ export function FileUpload() {
 
            <Card
                {...getRootProps()}
-               className={`p-6 border-2 border-dashed cursor-pointer transition-colors relative ${
+               className={`p-6 border-2 border-dashed cursor-pointer transition-colors ${
                    isDragActive ? "border-primary bg-primary/10" : "border-gray-300"
                }`}
            >
@@ -186,7 +237,8 @@ export function FileUpload() {
                                    Przeciągnij i upuść pliki lub kliknij, aby wybrać
                                </p>
                                <p className="mt-2 text-xs text-gray-500">
-                                   Obsługiwane formaty: PDF, DOCX, PNG, JPG (max 20MB na plik, do 5 plików)
+                                   Obsługiwane formaty: PDF, DOCX, TXT, CSV, XML, obrazy, audio, wideo
+                                   (max {formatFileSize(MAX_FILE_SIZE)} na plik)
                                </p>
                            </div>
                        )}
@@ -240,6 +292,11 @@ export function FileUpload() {
                                                <span>{uploadingFile.speed}</span>
                                            )}
                                        </div>
+                                       {uploadingFile.error && (
+                                           <p className="mt-1 text-xs text-destructive">
+                                               {uploadingFile.error}
+                                           </p>
+                                       )}
                                    </div>
                                </div>
                            </Card>
@@ -252,13 +309,12 @@ export function FileUpload() {
                <>
                 {uploadingFiles.filter(f => f.status === 'completed').map(completedFile =>(
                     <FileInfo
-                      key = {completedFile.file.name}
+                      key={completedFile.file.name}
                       file={completedFile.file}
                       topics={topics}
                     />
                 ))}
                 </>
-
            )}
        </div>
    );
