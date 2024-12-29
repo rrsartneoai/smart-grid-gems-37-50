@@ -7,6 +7,7 @@ import { ApiKeySettings } from "@/components/settings/ApiKeySettings";
 import { CompanySidebar } from "@/components/CompanySidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { CompanyAnalysis } from "@/components/analysis/CompanyAnalysis";
 import { IoTStatus } from "@/components/status/IoTStatus";
 import SensorsPanel from "@/components/sensors/SensorsPanel";
