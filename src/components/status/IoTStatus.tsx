@@ -21,6 +21,7 @@ import { DeviceStatusDetail } from "./DeviceStatusDetail";
 import { SystemPerformanceDetail } from "./SystemPerformanceDetail";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { getCompanyStatusData } from "./IoTStatusData";
 
 const StatusIndicator = ({ value }: { value: number }) => {
   const getColor = (value: number) => {
@@ -98,6 +99,9 @@ export function IoTStatus() {
   );
   const [activeView, setActiveView] = useState<'overview' | 'devices' | 'system'>('overview');
 
+  const statusData = getCompanyStatusData(selectedCompanyId || "1");
+  const { deviceStatus, systemStatus } = statusData;
+
   const getOverallStatus = (values: number[]) => {
     const average = values.reduce((a, b) => a + b, 0) / values.length;
     if (average >= 80) return t("optimal");
@@ -105,9 +109,10 @@ export function IoTStatus() {
     return t("critical");
   };
 
-  const deviceStatus = [85, 92, 78];
-  const systemStatus = [45, 60, 25];
-  const overallStatus = getOverallStatus([...deviceStatus, ...systemStatus]);
+  const overallStatus = getOverallStatus([
+    ...Object.values(deviceStatus),
+    ...Object.values(systemStatus)
+  ]);
 
   if (activeView === 'devices') {
     return (
@@ -164,7 +169,7 @@ export function IoTStatus() {
             {t('iotStatus')} - {selectedCompany?.name}
           </h2>
           <div className="flex items-center gap-2">
-            <StatusIndicator value={deviceStatus[0]} />
+            <StatusIndicator value={deviceStatus.activeDevices} />
             <span className="text-sm text-muted-foreground">
               {t('overallStatus')}: {overallStatus}
             </span>
@@ -187,21 +192,21 @@ export function IoTStatus() {
           <div className="space-y-6">
             <ProgressItem
               label={t('activeDevices')}
-              value={85}
+              value={deviceStatus.activeDevices}
               icon={Cpu}
               description={t('devicesOnline')}
               onClick={() => setActiveView('devices')}
             />
             <ProgressItem
               label={t('networkConnection')}
-              value={92}
+              value={deviceStatus.networkConnection}
               icon={Network}
               description={t('networkStability')}
               onClick={() => setActiveView('devices')}
             />
             <ProgressItem
               label={t('signalQuality')}
-              value={78}
+              value={deviceStatus.signalQuality}
               icon={Signal}
               description={t('signalStrength')}
               onClick={() => setActiveView('devices')}
@@ -217,21 +222,21 @@ export function IoTStatus() {
           <div className="space-y-6">
             <ProgressItem
               label={t('cpuUsage')}
-              value={45}
+              value={systemStatus.cpuUsage}
               icon={Cpu}
               description={t('processorLoad')}
               onClick={() => setActiveView('system')}
             />
             <ProgressItem
               label={t('memoryUsage')}
-              value={60}
+              value={systemStatus.memoryUsage}
               icon={Database}
               description={t('ramUsage')}
               onClick={() => setActiveView('system')}
             />
             <ProgressItem
               label={t('networkLatency')}
-              value={25}
+              value={systemStatus.networkLatency}
               icon={Network}
               description={t('connectionLatency')}
               onClick={() => setActiveView('system')}
