@@ -4,16 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
-import { Home, Zap, Globe, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { 
+  Home, 
+  Zap, 
+  Globe, 
+  Cloud, 
+  Bell, 
+  Droplet,
+  AlertCircle, 
+  CheckCircle, 
+  Loader2,
+  MicIcon,
+  SmartphoneIcon 
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-type IntegrationType = "smartHome" | "energyManagement" | "zapier";
-
-interface IntegrationConfig {
-  webhook?: string;
-  apiKey?: string;
-  endpoint?: string;
-}
+import { IntegrationType, IntegrationConfig } from "@/types/integrations";
 
 export const IntegrationsPanel = () => {
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationType | null>(null);
@@ -22,21 +27,80 @@ export const IntegrationsPanel = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
 
+  const integrations = [
+    {
+      type: "smartHome" as const,
+      icon: Home,
+      name: "Smart Home",
+      description: "System zarządzania inteligentnym domem",
+      status: "connected",
+    },
+    {
+      type: "energyManagement" as const,
+      icon: Zap,
+      name: "Zarządzanie energią",
+      description: "Optymalizacja zużycia energii",
+      status: "warning",
+    },
+    {
+      type: "zapier" as const,
+      icon: Globe,
+      name: "Zapier",
+      description: "Automatyzacja z innymi platformami",
+      status: "disconnected",
+    },
+    {
+      type: "googleHome" as const,
+      icon: MicIcon,
+      name: "Google Home",
+      description: "Sterowanie głosowe przez Google",
+      status: "disconnected",
+    },
+    {
+      type: "alexa" as const,
+      icon: SmartphoneIcon,
+      name: "Amazon Alexa",
+      description: "Integracja z Alexa",
+      status: "disconnected",
+    },
+    {
+      type: "cloudServices" as const,
+      icon: Cloud,
+      name: "Usługi chmurowe",
+      description: "Integracja z AWS/Google Cloud/Azure",
+      status: "disconnected",
+    },
+    {
+      type: "alarmSystems" as const,
+      icon: Bell,
+      name: "Systemy alarmowe",
+      description: "Powiadomienia o zdarzeniach alarmowych",
+      status: "disconnected",
+    },
+    {
+      type: "irrigation" as const,
+      icon: Droplet,
+      name: "System nawadniania",
+      description: "Automatyczne podlewanie",
+      status: "disconnected",
+    }
+  ];
+
   const handleConfigSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Simulate API call
+      // Symulacja wywołania API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
-        title: t("connected"),
-        description: `${t(selectedIntegration || "")} ${t("configureWebhook")}`,
+        title: "Połączono pomyślnie",
+        description: `Konfiguracja ${selectedIntegration} została zaktualizowana`,
       });
     } catch (error) {
       toast({
-        title: t("error"),
+        title: "Błąd",
         description: String(error),
         variant: "destructive",
       });
@@ -45,27 +109,57 @@ export const IntegrationsPanel = () => {
     }
   };
 
-  const integrations = [
-    {
-      type: "smartHome" as const,
-      icon: Home,
-      status: "connected",
-    },
-    {
-      type: "energyManagement" as const,
-      icon: Zap,
-      status: "warning",
-    },
-    {
-      type: "zapier" as const,
-      icon: Globe,
-      status: "disconnected",
-    },
-  ];
+  const getConfigFields = (type: IntegrationType) => {
+    switch (type) {
+      case "smartHome":
+      case "zapier":
+        return (
+          <Input
+            placeholder="URL webhooka"
+            value={config.webhook || ""}
+            onChange={(e) => setConfig({ ...config, webhook: e.target.value })}
+          />
+        );
+      case "googleHome":
+      case "alexa":
+      case "homeKit":
+        return (
+          <Input
+            placeholder="ID urządzenia"
+            value={config.deviceId || ""}
+            onChange={(e) => setConfig({ ...config, deviceId: e.target.value })}
+          />
+        );
+      case "cloudServices":
+        return (
+          <>
+            <Input
+              placeholder="Klucz API"
+              value={config.apiKey || ""}
+              onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
+              className="mb-2"
+            />
+            <Input
+              placeholder="Endpoint"
+              value={config.endpoint || ""}
+              onChange={(e) => setConfig({ ...config, endpoint: e.target.value })}
+            />
+          </>
+        );
+      default:
+        return (
+          <Input
+            placeholder="URL webhooka"
+            value={config.webhook || ""}
+            onChange={(e) => setConfig({ ...config, webhook: e.target.value })}
+          />
+        );
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {integrations.map((integration) => (
           <motion.div
             key={integration.type}
@@ -81,9 +175,9 @@ export const IntegrationsPanel = () => {
                 <div className="flex items-center gap-3">
                   <integration.icon className="h-6 w-6 text-primary" />
                   <div>
-                    <h3 className="font-semibold">{t(integration.type)}</h3>
+                    <h3 className="font-semibold">{integration.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {t("integrationStatus")}: {t(integration.status)}
+                      {integration.description}
                     </p>
                   </div>
                 </div>
@@ -105,27 +199,23 @@ export const IntegrationsPanel = () => {
       {selectedIntegration && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">
-            {t("configure")} {t(selectedIntegration)}
+            Konfiguracja: {integrations.find(i => i.type === selectedIntegration)?.name}
           </h3>
           <form onSubmit={handleConfigSubmit} className="space-y-4">
-            <div>
-              <Input
-                placeholder={t("webhookUrl")}
-                value={config.webhook || ""}
-                onChange={(e) => setConfig({ ...config, webhook: e.target.value })}
-              />
+            <div className="space-y-4">
+              {getConfigFields(selectedIntegration)}
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("save")}
+                Zapisz
               </Button>
               <Button 
                 type="button" 
                 variant="outline"
                 onClick={() => setSelectedIntegration(null)}
               >
-                {t("cancel")}
+                Anuluj
               </Button>
             </div>
           </form>

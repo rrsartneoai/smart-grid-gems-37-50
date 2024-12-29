@@ -41,20 +41,27 @@ export const pl = {
     "smartHome": "Smart Home",
     "energyManagement": "Zarządzanie energią",
     "zapier": "Zapier",
+    "googleHome": "Google Home",
+    "alexa": "Amazon Alexa",
+    "homeKit": "Apple HomeKit",
+    "cloudServices": "Usługi chmurowe",
+    "alarmSystems": "Systemy alarmowe",
+    "irrigation": "System nawadniania",
     "configureWebhook": "Konfiguruj webhook",
     "webhookUrl": "URL webhooka",
+    "deviceId": "ID urządzenia",
+    "apiKey": "Klucz API",
+    "endpoint": "Endpoint",
     "save": "Zapisz",
     "cancel": "Anuluj",
     "connected": "Połączono",
     "disconnected": "Rozłączono",
+    "warning": "Ostrzeżenie",
     "configure": "Konfiguruj",
     "integrationStatus": "Status integracji",
     "integrationDescription": "Opis integracji",
-    
-    // Energy optimization
-    "energyOptimization": "Optymalizacja zużycia",
-    "suggestions": "Sugestie",
-    "scheduleChanges": "Zmiany harmonogramu",
-    "deviceSettings": "Ustawienia urządzeń"
+    "connectionSuccessful": "Połączono pomyślnie",
+    "configurationUpdated": "Konfiguracja została zaktualizowana",
+    "error": "Błąd"
   }
 };
