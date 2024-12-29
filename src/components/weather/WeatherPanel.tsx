@@ -10,12 +10,33 @@ import { WeatherDetails } from "./WeatherDetails";
 import { WeatherForecast } from "./WeatherForecast";
 import { WeatherSettings } from "./WeatherSettings";
 import { getWeatherIcon } from "./weatherUtils";
+import { AirQuality } from "./AirQuality";
 
 const cities = [
-  { id: "gdansk", name: "Gdańsk", lat: 54.352, lon: 18.6466 },
-  { id: "gdynia", name: "Gdynia", lat: 54.5189, lon: 18.5305 },
-  { id: "sopot", name: "Sopot", lat: 54.4418, lon: 18.5601 },
-  { id: "slupsk", name: "Słupsk", lat: 54.4641, lon: 17.0285 },
+  {
+    id: "gdansk",
+    name: "Gdańsk",
+    lat: 54.352,
+    lon: 18.6466
+  },
+  {
+    id: "gdynia",
+    name: "Gdynia",
+    lat: 54.5189,
+    lon: 18.5305
+  },
+  {
+    id: "sopot",
+    name: "Sopot",
+    lat: 54.4418,
+    lon: 18.5601
+  },
+  {
+    id: "slupsk",
+    name: "Słupsk",
+    lat: 54.4641,
+    lon: 17.0285
+  }
 ];
 
 export const WeatherPanel = () => {
@@ -26,8 +47,8 @@ export const WeatherPanel = () => {
   const [displayOptions, setDisplayOptions] = useState({
     details: true,
     forecast: true,
-    airQuality: false,
-    map: false,
+    airQuality: true,
+    map: true
   });
 
   const { data: weatherData, isLoading, error, refetch } = useQuery({
@@ -56,6 +77,21 @@ export const WeatherPanel = () => {
       return response.json();
     },
     refetchInterval: 300000,
+  });
+
+  const { data: airQualityData } = useQuery({
+    queryKey: ['airQuality', selectedCity.id],
+    queryFn: async () => {
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`
+      );
+      if (!response.ok) {
+        throw new Error(t("airQualityError"));
+      }
+      return response.json();
+    },
+    enabled: displayOptions.airQuality,
+    refetchInterval: 300000
   });
 
   const handleRefresh = () => {
@@ -131,6 +167,10 @@ export const WeatherPanel = () => {
                 hourlyForecast={forecastData.list.slice(0, 6)}
                 dailyForecast={forecastData.list.filter((item: any, index: number) => index % 8 === 0)}
               />
+            )}
+
+            {displayOptions.airQuality && airQualityData && (
+              <AirQuality data={airQualityData} />
             )}
 
             <WeatherSettings
