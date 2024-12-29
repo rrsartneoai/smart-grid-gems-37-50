@@ -20,6 +20,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { IntegrationType, IntegrationConfig } from "@/types/integrations";
 import { SmartHomeFunctionalities } from "./SmartHomeFunctionalities";
+import { EnergyManagementFunctionalities } from "./EnergyManagementFunctionalities";
+import { AdditionalFunctionalities } from "./AdditionalFunctionalities";
 
 export const IntegrationsPanel = () => {
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationType | null>(null);
@@ -224,6 +226,8 @@ export const IntegrationsPanel = () => {
       )}
 
       <SmartHomeFunctionalities />
+      <EnergyManagementFunctionalities />
+      <AdditionalFunctionalities />
     </div>
   );
 };
