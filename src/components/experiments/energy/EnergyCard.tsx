@@ -91,6 +91,9 @@ export function EnergyCard() {
     );
   }
 
+  console.log('Production Forecast:', productionForecast);
+  console.log('Consumption Forecast:', consumptionForecast);
+
   return (
     <Card className="w-full">
       <CardHeader>
