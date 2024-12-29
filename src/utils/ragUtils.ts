@@ -1,78 +1,89 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { getGeminiResponse } from '@/lib/gemini';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_API_KEY || "");
 
-const MAX_CHUNK_LENGTH = 25000;
+let documentChunks: { text: string; metadata?: Record<string, any> }[] = [];
 
-function chunkText(text: string): string[] {
-  const chunks: string[] = [];
-  let currentChunk = '';
-  
-  const sentences = text.split(/(?<=[.!?])\s+/);
-  
-  for (const sentence of sentences) {
-    if ((currentChunk + sentence).length <= MAX_CHUNK_LENGTH) {
-      currentChunk += sentence + ' ';
-    } else {
-      if (currentChunk) {
-        chunks.push(currentChunk.trim());
-      }
-      currentChunk = sentence + ' ';
-    }
-  }
-  
-  if (currentChunk) {
-    chunks.push(currentChunk.trim());
-  }
-  
-  return chunks;
-}
-
-export async function generateRAGResponse(input: string): Promise<string> {
+export const processDocumentForRAG = async (text: string) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const chunks = chunkText(input);
-    const processableInput = chunks[0];
-    
-    console.log('Przetwarzanie fragmentu tekstu o długości:', processableInput.length);
-    
-    const prompt = 
-      "Jesteś asystentem AI specjalizującym się w zarządzaniu siecią energetyczną i systemami energetycznymi.\n" +
-      `Odpowiedz na następujące zapytanie w języku polskim: ${processableInput}\n\n` +
-      "Odpowiadaj w profesjonalny ale przyjazny sposób, skupiając się na informacjach związanych z siecią energetyczną.\n" +
-      "Zachowaj zwięzłość i trzymaj się tematu.";
+    console.log('Rozpoczynam przetwarzanie dokumentu dla RAG, długość tekstu:', text.length);
+    console.log('Przykład tekstu:', text.substring(0, 200) + '...');
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    return response.text();
-  } catch (error) {
-    console.error('Błąd generowania odpowiedzi:', error);
-    if (error instanceof Error && error.message.includes('tokens')) {
-      return "Przepraszam, zapytanie jest zbyt długie. Proszę spróbować z krótszym tekstem lub podzielić go na mniejsze części.";
-    }
-    return "Przepraszam, wystąpił błąd podczas generowania odpowiedzi. Proszę spróbować ponownie.";
-  }
-}
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+      chunkOverlap: 200,
+    });
 
-export async function processDocumentForRAG(text: string): Promise<string> {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const chunks = chunkText(text);
-    
-    let summary = '';
-    for (const chunk of chunks) {
-      const prompt = 
-        "Przeanalizuj poniższy fragment tekstu i wyodrębnij najważniejsze informacje związane z energetyką,\n" +
-        "sieciami energetycznymi lub zarządzaniem energią. Przedstaw wyniki w zwięzłej formie po polsku:\n\n" +
-        `${chunk}`;
-      
-      const result = await model.generateContent(prompt);
-      summary += result.response.text() + '\n\n';
-    }
-    
-    return summary.trim();
+    const chunks = await splitter.createDocuments([text]);
+    documentChunks = chunks.map(chunk => ({
+      text: chunk.pageContent,
+      metadata: chunk.metadata,
+    }));
+
+    console.log(`Dokument przetworzony na ${documentChunks.length} fragmentów`);
+    console.log('Przykładowy fragment:', documentChunks[0]?.text.substring(0, 100) + '...');
+    return `Dokument został przetworzony na ${documentChunks.length} fragmentów`;
   } catch (error) {
-    console.error('Błąd przetwarzania dokumentu:', error);
-    return "Przepraszam, wystąpił błąd podczas przetwarzania dokumentu. Proszę spróbować ponownie.";
+    console.error("Błąd podczas przetwarzania dokumentu:", error);
+    throw new Error("Wystąpił błąd podczas przetwarzania dokumentu");
   }
-}
+};
+
+export const searchRelevantChunks = (query: string): string[] => {
+  console.log('Szukam fragmentów dla zapytania:', query);
+  console.log('Liczba dostępnych fragmentów:', documentChunks.length);
+
+  if (documentChunks.length === 0) {
+    console.log("Brak przetworzonych dokumentów w pamięci");
+    return [];
+  }
+
+  // Dla zapytania "podsumuj" zwracamy wszystkie fragmenty
+  if (query.toLowerCase() === 'podsumuj') {
+    console.log('Zapytanie o podsumowanie - zwracam wszystkie fragmenty');
+    return documentChunks.map(chunk => chunk.text);
+  }
+
+  // Dla innych zapytań szukamy po słowach kluczowych
+  const keywords = query.toLowerCase().split(' ');
+  const relevantChunks = documentChunks.filter(chunk => {
+    const text = chunk.text.toLowerCase();
+    return keywords.some(keyword => text.includes(keyword));
+  });
+
+  console.log(`Znaleziono ${relevantChunks.length} pasujących fragmentów`);
+  if (relevantChunks.length > 0) {
+    console.log('Przykładowy znaleziony fragment:', relevantChunks[0].text.substring(0, 100) + '...');
+  }
+  return relevantChunks.map(chunk => chunk.text);
+};
+
+
+export const generateRAGResponse = async (query: string): Promise<string> => {
+  console.log('Generuję odpowiedź dla zapytania:', query);
+
+  if (documentChunks.length === 0) {
+    console.log('Brak dokumentów w pamięci');
+    return "Nie wgrano jeszcze żadnego dokumentu. Proszę najpierw wgrać dokument, aby móc zadawać pytania.";
+  }
+
+  const relevantChunks = searchRelevantChunks(query);
+  
+  if (relevantChunks.length === 0) {
+    console.log('Nie znaleziono pasujących fragmentów');
+    return "Nie znalazłem odpowiednich informacji w wgranym dokumencie, które pomogłyby odpowiedzieć na to pytanie.";
+  }
+
+  const context = relevantChunks.join('\n\n');
+  const prompt = `Na podstawie poniższego kontekstu, ${query === 'podsumuj' ? 'przedstaw krótkie podsumowanie głównych punktów dokumentu' : 'odpowiedz na pytanie'}. Jeśli odpowiedź nie znajduje się w kontekście, powiedz o tym.
+
+Kontekst:
+${context}
+
+${query === 'podsumuj' ? 'Podsumuj najważniejsze informacje z dokumentu.' : `Pytanie: ${query}`}`;
+
+  console.log('Wysyłam zapytanie do Gemini z kontekstem długości:', context.length);
+  return getGeminiResponse(prompt);
+};
