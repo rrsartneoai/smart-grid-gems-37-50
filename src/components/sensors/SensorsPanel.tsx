@@ -7,11 +7,51 @@ import { AlertsConfig } from "./AlertsConfig";
 import { DataComparison } from "./DataComparison";
 import { ExportData } from "./ExportData";
 import { Search } from "lucide-react";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
   
+  const handleExport = async (format: 'jpg' | 'pdf') => {
+    try {
+      const element = document.getElementById('sensors-panel');
+      if (!element) return;
+
+      const canvas = await html2canvas(element);
+
+      if (format === 'jpg') {
+        const link = document.createElement('a');
+        link.download = 'czujniki.jpg';
+        link.href = canvas.toDataURL('image/jpeg');
+        link.click();
+      } else if (format === 'pdf') {
+        const imgData = canvas.toDataURL('image/jpeg');
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('czujniki.pdf');
+      }
+
+      toast({
+        title: "Eksport zakończony",
+        description: `Plik został wyeksportowany w formacie ${format.toUpperCase()}`
+      });
+    } catch (error) {
+      toast({
+        title: "Błąd eksportu",
+        description: "Wystąpił błąd podczas eksportu pliku",
+        variant: "destructive"
+      });
+    }
+  };
+
   const cities = Object.keys(sensorsData).map(key => 
     key.charAt(0).toUpperCase() + key.slice(1)
   );
@@ -28,15 +68,12 @@ const SensorsPanel = () => {
   );
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto px-4">
+    <div className="w-full max-w-[1400px] mx-auto px-4" id="sensors-panel">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold">Czujniki</h2>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-          <span>Last synced in an hour</span>
-          <span className="hidden sm:inline">•</span>
-          <span>100% est. battery</span>
-          <span className="hidden sm:inline">•</span>
-          <span>-71 dBm</span>
+        <div className="flex gap-2">
+          <Button onClick={() => handleExport('jpg')}>Eksportuj do JPG</Button>
+          <Button onClick={() => handleExport('pdf')}>Eksportuj do PDF</Button>
         </div>
       </div>
 
