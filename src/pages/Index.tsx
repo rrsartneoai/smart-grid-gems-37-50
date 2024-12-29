@@ -30,6 +30,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
+import { ExperimentsPanel } from "@/components/experiments/ExperimentsPanel";
 import '../i18n/config';
 
 const Index = () => {
@@ -157,8 +158,9 @@ const Index = () => {
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
                     <TabsTrigger value="integrations">Integracje</TabsTrigger>
+                    <TabsTrigger value="experiments">Eksperymenty</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="spaces" className="space-y-6">
                     <div className="flex justify-end gap-2 mb-4">
                       <Button
@@ -231,12 +233,16 @@ const Index = () => {
                   <TabsContent value="integrations">
                     <IntegrationsPanel />
                   </TabsContent>
+
+                  <TabsContent value="experiments">
+                    <ExperimentsPanel />
+                  </TabsContent>
                 </Tabs>
               </motion.div>
             </main>
           </div>
         </SidebarProvider>
-<FloatingChatbot />
+        <FloatingChatbot />
       </div>
     </div>
   );
