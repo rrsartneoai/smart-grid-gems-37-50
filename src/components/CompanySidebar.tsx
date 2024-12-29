@@ -179,7 +179,7 @@ function SidebarContent({
           </Button>
           <Button
             variant="outline"
-            className={`${collapsed ? "w-10 p-2" : "w-full"} mt-2 bg-green-40 rounded`}
+            className={`${collapsed ? "w-10 p-2" : "w-full"} mt-2 bg-green-100 rounded`}
             onClick={() => navigate('/assistant')}
           >
             <MessageSquare className="w-4 h-4" />
