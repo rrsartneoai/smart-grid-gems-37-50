@@ -1,10 +1,18 @@
-export default {
-  "integrations": "Integracje",
-  "smartHome": "Inteligentny Dom",
-  "energyManagement": "Zarządzanie Energią",
-  "zapierIntegration": "Integracja z Zapier",
-  "configureWebhook": "Konfiguracja Webhooka",
-  "connected": "Połączono",
-  "disconnected": "Rozłączono",
-  "warning": "Ostrzeżenie",
-} as const;
+export const pl = {
+  translation: {
+    "exportToPDF": "Eksportuj do PDF",
+    "exportToJPG": "Eksportuj do JPG",
+    "exportToExcel": "Eksportuj do Excel",
+    "exportToCSV": "Eksportuj do CSV",
+    "searchSensors": "Szukaj czujników...",
+    "lastSync": "Ostatnia synchronizacja",
+    "batteryStatus": "Stan baterii",
+    "signalStrength": "Siła sygnału",
+    
+    // Energy optimization
+    "energyOptimization": "Optymalizacja zużycia",
+    "suggestions": "Sugestie",
+    "scheduleChanges": "Zmiany harmonogramu",
+    "deviceSettings": "Ustawienia urządzeń"
+  }
+};
