@@ -46,7 +46,7 @@ export const AdditionalFunctionalities = () => {
   };
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 mb-12"> {/* Added margin-bottom class here */}
       <h2 className="text-xl font-semibold mb-4">Funkcjonalności dodatkowe</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {features.map((feature, index) => (
