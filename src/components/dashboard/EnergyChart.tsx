@@ -155,6 +155,9 @@ export function EnergyChart() {
           angle={-45}
           textAnchor="end"
           domain={isZoomed && zoomLeft && zoomRight ? [zoomLeft, zoomRight] : ['auto', 'auto']}
+          allowDataOverflow={true}
+          scale="band"
+          xAxisId={0}
         >
           <Label value="Czas" position="bottom" offset={50} className="text-sm fill-muted-foreground" />
         </XAxis>
@@ -162,6 +165,9 @@ export function EnergyChart() {
           tick={{ fontSize: 12 }} 
           tickMargin={10}
           width={80}
+          allowDataOverflow={true}
+          scale="auto"
+          yAxisId={0}
         >
           <Label 
             value="Wartość (MW / %)" 
