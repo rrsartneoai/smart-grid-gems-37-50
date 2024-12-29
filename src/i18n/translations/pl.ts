@@ -12,6 +12,12 @@ export const pl = {
     "batteryStatus": "Stan baterii",
     "signalStrength": "Siła sygnału",
     
+    // Tabs
+    "spaces": "Przestrzenie",
+    "analysis": "Analiza",
+    "status": "Status",
+    "sensors": "Czujniki",
+    
     // IoT Status
     "iotStatus": "Status IoT",
     "deviceStatus": "Status urządzeń",

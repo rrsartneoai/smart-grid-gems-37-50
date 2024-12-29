@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IntegrationType, IntegrationConfig } from "@/types/integrations";
+import { SmartHomeFunctionalities } from "./SmartHomeFunctionalities";
 
 export const IntegrationsPanel = () => {
   const [selectedIntegration, setSelectedIntegration] = useState<IntegrationType | null>(null);
@@ -221,6 +222,8 @@ export const IntegrationsPanel = () => {
           </form>
         </Card>
       )}
+
+      <SmartHomeFunctionalities />
     </div>
   );
 };
