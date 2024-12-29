@@ -24,9 +24,8 @@ export function CompanySidebar() {
   const { toast } = useToast();
   const location = useLocation();
 
-  const isAIAssistantVisible = location.hash === '#insights' || 
-                              location.hash === '#status' || 
-                              location.hash === '#sensors';
+  const currentHash = location.hash.slice(1); // Remove the # from the hash
+  const isAIAssistantVisible = ['insights', 'status', 'sensors'].includes(currentHash);
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -40,6 +39,9 @@ export function CompanySidebar() {
   };
 
   const handleOpenAssistant = () => {
+    console.log('Current hash:', currentHash);
+    console.log('Is AI Assistant visible:', isAIAssistantVisible);
+    
     if (!isAIAssistantVisible) {
       toast({
         title: "Asystent AI",
@@ -55,6 +57,8 @@ export function CompanySidebar() {
   const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // ... keep existing code (Sheet and SidebarContent components)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
