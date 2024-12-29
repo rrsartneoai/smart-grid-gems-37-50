@@ -7,13 +7,13 @@ import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
   Legend, Area, AreaChart, ComposedChart, Scatter,
 } from "recharts";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { UploadOptions } from "./UploadOptions";
+import { ExportButtons } from "./ExportButtons";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -91,21 +91,11 @@ export function CompanyAnalysis() {
           <h2 className="text-2xl font-bold">
             Analiza - {selectedCompany?.name}
           </h2>
-          <div className="flex gap-2 items-center">
-            <Button onClick={() => handleExport('pdf')}>PDF</Button>
-            <Button onClick={() => handleExport('xlsx')}>Excel</Button>
-            <Button onClick={() => handleExport('jpg')}>JPG</Button>
-            <Button onClick={() => handleExport('csv')}>CSV</Button>
-            <Button onClick={() => {
-              setShowForecast(true);
-              toast({
-                title: "Prognoza wygenerowana",
-                description: "Wyświetlono przewidywane wartości na podstawie danych historycznych",
-              });
-            }} disabled={showForecast}>
-              Generuj prognozę
-            </Button>
-          </div>
+          <ExportButtons 
+            onExport={handleExport}
+            onGenerateForecast={() => setShowForecast(true)}
+            showForecast={showForecast}
+          />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
