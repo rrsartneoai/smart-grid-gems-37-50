@@ -8,7 +8,7 @@ if (!API_KEY) {
 
 const genAI = new GoogleGenerativeAI(API_KEY || "");
 
-export const getGeminiResponse = async (prompt: string) => {
+export const generateGeminiResponse = async (prompt: string) => {
   if (!API_KEY) {
     return "Przepraszam, ale brak skonfigurowanego klucza API dla Gemini. Proszę skontaktować się z administratorem.";
   }
@@ -23,3 +23,6 @@ export const getGeminiResponse = async (prompt: string) => {
     return "Przepraszam, wystąpił błąd podczas przetwarzania zapytania. Proszę spróbować ponownie.";
   }
 };
+
+// Alias for backward compatibility
+export const getGeminiResponse = generateGeminiResponse;
