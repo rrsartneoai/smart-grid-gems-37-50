@@ -236,7 +236,7 @@ const Index = () => {
             </main>
           </div>
         </SidebarProvider>
-        {location.hash !== '#spaces' && <FloatingChatbot />}
+<FloatingChatbot />
       </div>
     </div>
   );
