@@ -20,6 +20,7 @@ import { useState } from "react";
 import { DeviceStatusDetail } from "./DeviceStatusDetail";
 import { SystemPerformanceDetail } from "./SystemPerformanceDetail";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const StatusIndicator = ({ value }: { value: number }) => {
   const getColor = (value: number) => {
@@ -42,18 +43,20 @@ const ProgressItem = ({
   value, 
   icon: Icon, 
   description,
-  onClick
+  onClick,
+  className = ""
 }: { 
   label: string; 
   value: number; 
   icon: any;
   description: string;
   onClick?: () => void;
+  className?: string;
 }) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="space-y-2 cursor-pointer" onClick={onClick}>
+        <div className={`space-y-2 cursor-pointer ${className}`} onClick={onClick}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Icon className="w-4 h-4 text-muted-foreground" />
@@ -70,13 +73,14 @@ const ProgressItem = ({
               value={value} 
               className="h-2"
               style={{
-                background: 'hsl(var(--secondary))',
+                background: 'rgba(255, 255, 255, 0.1)',
               }}
             />
             <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-primary-foreground">
               {value}%
             </span>
           </div>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
       </TooltipTrigger>
       <TooltipContent>
@@ -87,6 +91,7 @@ const ProgressItem = ({
 );
 
 export function IoTStatus() {
+  const { t } = useTranslation();
   const { selectedCompanyId } = useCompanyStore();
   const selectedCompany = companiesData.find(
     (company) => company.id === selectedCompanyId
@@ -95,9 +100,9 @@ export function IoTStatus() {
 
   const getOverallStatus = (values: number[]) => {
     const average = values.reduce((a, b) => a + b, 0) / values.length;
-    if (average >= 80) return "Optimal";
-    if (average >= 50) return "Needs Attention";
-    return "Critical";
+    if (average >= 80) return t("optimal");
+    if (average >= 50) return t("requiresAttention");
+    return t("critical");
   };
 
   const deviceStatus = [85, 92, 78];
@@ -117,7 +122,7 @@ export function IoTStatus() {
             onClick={() => setActiveView('overview')}
             className="mb-4"
           >
-            ← Back to Overview
+            ← {t('back')}
           </Button>
         </div>
         <DeviceStatusDetail />
@@ -138,7 +143,7 @@ export function IoTStatus() {
             onClick={() => setActiveView('overview')}
             className="mb-4"
           >
-            ← Back to Overview
+            ← {t('back')}
           </Button>
         </div>
         <SystemPerformanceDetail />
@@ -156,79 +161,79 @@ export function IoTStatus() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold mb-1">
-            IoT Status - {selectedCompany?.name}
+            {t('iotStatus')} - {selectedCompany?.name}
           </h2>
           <div className="flex items-center gap-2">
             <StatusIndicator value={deviceStatus[0]} />
             <span className="text-sm text-muted-foreground">
-              Overall Status: {overallStatus}
+              {t('overallStatus')}: {overallStatus}
             </span>
           </div>
         </div>
         <div className="text-right flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="w-4 h-4" />
           <span>
-            Last update: 5 min ago
+            {t('lastUpdate')}: 5 {t('minutesAgo')}
           </span>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="p-6 bg-card hover:shadow-lg transition-shadow">
+        <Card className="p-6 bg-[#0A0F1C] border-[#1F2937] hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-2 mb-6">
             <Activity className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Device Status</h3>
+            <h3 className="text-lg font-semibold">{t('deviceStatus')}</h3>
           </div>
           <div className="space-y-6">
             <ProgressItem
-              label="Active Devices"
+              label={t('activeDevices')}
               value={85}
               icon={Cpu}
-              description="Number of devices currently online"
+              description={t('devicesOnline')}
               onClick={() => setActiveView('devices')}
             />
             <ProgressItem
-              label="Network Connection"
+              label={t('networkConnection')}
               value={92}
               icon={Network}
-              description="Network connection stability"
+              description={t('networkStability')}
               onClick={() => setActiveView('devices')}
             />
             <ProgressItem
-              label="Signal Quality"
+              label={t('signalQuality')}
               value={78}
               icon={Signal}
-              description="IoT signal strength and quality"
+              description={t('signalStrength')}
               onClick={() => setActiveView('devices')}
             />
           </div>
         </Card>
 
-        <Card className="p-6 bg-card hover:shadow-lg transition-shadow">
+        <Card className="p-6 bg-[#0A0F1C] border-[#1F2937] hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-2 mb-6">
             <Activity className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">System Performance</h3>
+            <h3 className="text-lg font-semibold">{t('systemPerformance')}</h3>
           </div>
           <div className="space-y-6">
             <ProgressItem
-              label="CPU Usage"
+              label={t('cpuUsage')}
               value={45}
               icon={Cpu}
-              description="Current CPU load"
+              description={t('processorLoad')}
               onClick={() => setActiveView('system')}
             />
             <ProgressItem
-              label="Memory Usage"
+              label={t('memoryUsage')}
               value={60}
               icon={Database}
-              description="RAM memory usage"
+              description={t('ramUsage')}
               onClick={() => setActiveView('system')}
             />
             <ProgressItem
-              label="Network Latency"
+              label={t('networkLatency')}
               value={25}
               icon={Network}
-              description="Network connection latency"
+              description={t('connectionLatency')}
               onClick={() => setActiveView('system')}
             />
           </div>

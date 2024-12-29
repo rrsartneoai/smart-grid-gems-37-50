@@ -43,7 +43,8 @@ const resources = {
       "compareData": "Compare data between cities"
     }
   },
-  pl: {
+
+"pl": {
     translation: {
       // General UI
       "monitoringPanel": "Panel Monitoringu",
@@ -82,8 +83,33 @@ const resources = {
       "clickForDetails": "Kliknij po szczegóły",
       "scrollForMore": "Przewiń, aby zobaczyć więcej",
       "compareData": "Porównaj dane między miastami"
+      
+      // IoT Status
+      "iotStatus": "Status IoT",
+      "overallStatus": "Status ogólny",
+      "requiresAttention": "Wymaga uwagi",
+      "lastUpdate": "Ostatnia aktualizacja",
+      "minutesAgo": "min temu",
+      "deviceStatus": "Status Urządzeń",
+      "systemPerformance": "Wydajność Systemu",
+      "activeDevices": "Aktywne urządzenia",
+      "networkConnection": "Połączenie z siecią",
+      "signalQuality": "Jakość sygnału",
+      "devicesOnline": "Liczba urządzeń aktualnie online",
+      "networkStability": "Stabilność połączenia sieciowego",
+      "signalStrength": "Siła i jakość sygnału IoT",
+      "cpuUsage": "Wykorzystanie CPU",
+      "memoryUsage": "Wykorzystanie pamięci",
+      "networkLatency": "Opóźnienie sieci",
+      "processorLoad": "Aktualne obciążenie procesora",
+      "ramUsage": "Zużycie pamięci RAM",
+      "connectionLatency": "Latencja połączenia sieciowego",
+      "exportToPDF": "Eksportuj do PDF",
+      "exportToJPG": "Eksportuj do JPG",
+      "back": "Powrót"
     }
   },
+
   de: {
     translation: {
       // General UI
