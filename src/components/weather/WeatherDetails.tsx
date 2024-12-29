@@ -11,38 +11,14 @@ import {
   Droplet,
   CloudRain,
   Snowflake,
-  Navigation
+  Navigation,
+  Waves,
+  Mountain
 } from "lucide-react";
+import { CurrentWeather } from "@/types/weather";
 
 interface WeatherDetailsProps {
-  data: {
-    main: {
-      feels_like: number;
-      pressure: number;
-      humidity: number;
-    };
-    visibility: number;
-    clouds: {
-      all: number;
-    };
-    sys: {
-      sunrise: number;
-      sunset: number;
-    };
-    wind: {
-      speed: number;
-      deg: number;
-      gust?: number;
-    };
-    rain?: {
-      "1h"?: number;
-      "3h"?: number;
-    };
-    snow?: {
-      "1h"?: number;
-      "3h"?: number;
-    };
-  };
+  data: CurrentWeather;
 }
 
 const getWindDirection = (deg: number): string => {
@@ -66,12 +42,39 @@ export const WeatherDetails = ({ data }: WeatherDetailsProps) => {
       <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
         <div className="flex items-center gap-2">
           <ThermometerSun className="h-5 w-5 text-blue-500" />
+          <div className="flex flex-col">
+            <span>{t("temperature")}</span>
+            <span className="text-sm text-muted-foreground">
+              Min: {Math.round(data.main.temp_min)}°C / Max: {Math.round(data.main.temp_max)}°C
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ThermometerSun className="h-5 w-5 text-orange-500" />
           <span>{t("feelsLike")}: {Math.round(data.main.feels_like)}°C</span>
         </div>
 
         <div className="flex items-center gap-2">
           <Gauge className="h-5 w-5 text-blue-500" />
-          <span>{t("pressure")}: {data.main.pressure} hPa</span>
+          <div className="flex flex-col">
+            <span>{t("pressure")}: {data.main.pressure} hPa</span>
+            {data.main.sea_level && (
+              <span className="text-sm text-muted-foreground">
+                {t("seaLevel")}: {data.main.sea_level} hPa
+              </span>
+            )}
+            {data.main.grnd_level && (
+              <span className="text-sm text-muted-foreground">
+                {t("groundLevel")}: {data.main.grnd_level} hPa
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Droplet className="h-5 w-5 text-blue-500" />
+          <span>{t("humidity")}: {data.main.humidity}%</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -95,9 +98,16 @@ export const WeatherDetails = ({ data }: WeatherDetailsProps) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Navigation className="h-5 w-5 text-blue-500" 
-            style={{ transform: `rotate(${data.wind.deg}deg)` }} />
+          <Navigation 
+            className="h-5 w-5 text-blue-500" 
+            style={{ transform: `rotate(${data.wind.deg}deg)` }}
+          />
           <span>{t("windDirection")}: {getWindDirection(data.wind.deg)} ({data.wind.deg}°)</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Wind className="h-5 w-5 text-blue-500" />
+          <span>{t("windSpeed")}: {Math.round(data.wind.speed * 3.6)} km/h</span>
         </div>
 
         {data.wind.gust && (
@@ -110,20 +120,32 @@ export const WeatherDetails = ({ data }: WeatherDetailsProps) => {
         {data.rain && (
           <div className="flex items-center gap-2">
             <CloudRain className="h-5 w-5 text-blue-500" />
-            <span>
-              {t("rain1h")}: {data.rain["1h"] || 0} mm
-              {data.rain["3h"] && ` (3h: ${data.rain["3h"]} mm)`}
-            </span>
+            <div className="flex flex-col">
+              {data.rain["1h"] !== undefined && (
+                <span>{t("rain1h")}: {data.rain["1h"]} mm</span>
+              )}
+              {data.rain["3h"] !== undefined && (
+                <span className="text-sm text-muted-foreground">
+                  {t("rain3h")}: {data.rain["3h"]} mm
+                </span>
+              )}
+            </div>
           </div>
         )}
 
         {data.snow && (
           <div className="flex items-center gap-2">
             <Snowflake className="h-5 w-5 text-blue-500" />
-            <span>
-              {t("snow1h")}: {data.snow["1h"] || 0} mm
-              {data.snow["3h"] && ` (3h: ${data.snow["3h"]} mm)`}
-            </span>
+            <div className="flex flex-col">
+              {data.snow["1h"] !== undefined && (
+                <span>{t("snow1h")}: {data.snow["1h"]} mm</span>
+              )}
+              {data.snow["3h"] !== undefined && (
+                <span className="text-sm text-muted-foreground">
+                  {t("snow3h")}: {data.snow["3h"]} mm
+                </span>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
