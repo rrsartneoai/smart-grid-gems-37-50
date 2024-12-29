@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { generateStreamingResponse, formatDashboardResponse, processContextWindow } from "@/utils/chatUtils";
+import { generateRAGResponse } from "@/utils/ragUtils";
+import { companiesData } from "@/data/companies";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,6 +13,45 @@ interface Message {
     title: string;
   }>;
 }
+
+const getDashboardValue = (query: string): { text: string; visualizations?: Message["dataVisualizations"] } => {
+  const lowercaseQuery = query.toLowerCase();
+  
+  // Check for visualization requests
+  if (lowercaseQuery.includes("zużycie") || lowercaseQuery.includes("zuzycie")) {
+    return {
+      text: "Oto wykres zużycia energii w czasie:",
+      visualizations: [{ type: "consumption", title: "Zużycie energii" }]
+    };
+  }
+  
+  if (lowercaseQuery.includes("produkcja")) {
+    return {
+      text: "Oto wykres produkcji energii w czasie:",
+      visualizations: [{ type: "production", title: "Produkcja energii" }]
+    };
+  }
+  
+  if (lowercaseQuery.includes("wydajność") || lowercaseQuery.includes("wydajnosc")) {
+    return {
+      text: "Oto wykres wydajności w czasie:",
+      visualizations: [{ type: "efficiency", title: "Wydajność" }]
+    };
+  }
+
+  const matchingStat = companiesData[0]?.stats.find(stat => {
+    const title = stat.title.toLowerCase();
+    return lowercaseQuery.includes(title);
+  });
+
+  if (matchingStat) {
+    return {
+      text: `${matchingStat.title}: ${matchingStat.value}${matchingStat.unit ? ' ' + matchingStat.unit : ''} (${matchingStat.description})`
+    };
+  }
+
+  return { text: "Nie znalazłem tej informacji w panelu." };
+};
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -40,28 +80,12 @@ export const useChat = () => {
 
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (input: string) => {
-      // First check for dashboard-related queries
-      const dashboardResponse = formatDashboardResponse(input);
-      if (dashboardResponse.visualizations || dashboardResponse.text !== "Nie znalazłem tej informacji w panelu.") {
-        return dashboardResponse;
+      const dashboardValue = getDashboardValue(input);
+      if (dashboardValue.text !== "Nie znalazłem tej informacji w panelu.") {
+        return dashboardValue;
       }
-
-      // If not a dashboard query, generate streaming response
-      let fullResponse = "";
-      const response = await generateStreamingResponse(input, (chunk) => {
-        fullResponse += chunk;
-        // Update message in real-time as chunks arrive
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastMessage = newMessages[newMessages.length - 1];
-          if (lastMessage.role === "assistant") {
-            lastMessage.content = fullResponse;
-          }
-          return newMessages;
-        });
-      });
-
-      return response;
+      const response = await generateRAGResponse(input);
+      return { text: response };
     },
     onSuccess: (response) => {
       const newMessage = {
@@ -70,18 +94,13 @@ export const useChat = () => {
         timestamp: new Date(),
         dataVisualizations: response.visualizations,
       };
-      
-      // Update messages and maintain context window
-      setMessages(prev => {
-        const updatedMessages = [...prev, newMessage];
-        return processContextWindow(updatedMessages);
-      });
+      setMessages((prev) => [...prev, newMessage]);
     },
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Błąd",
-        description: "Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.",
+        title: "Error",
+        description: "Failed to get a response. Please try again.",
       });
     },
   });
