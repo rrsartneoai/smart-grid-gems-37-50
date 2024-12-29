@@ -14,35 +14,35 @@ export function ExportButtons({ onExport, onGenerateForecast, showForecast }: Ex
     <div className="flex gap-2 items-center flex-wrap">
       <Button 
         variant="outline"
-        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="bg-primary hover:bg-primary/40 text-primary-foreground"
         onClick={() => onExport('pdf')}
       >
         Eksportuj do PDF
       </Button>
       <Button 
         variant="outline"
-        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="bg-primary hover:bg-primary/40 text-primary-foreground"
         onClick={() => onExport('xlsx')}
       >
         Eksportuj do Excel
       </Button>
       <Button 
         variant="outline"
-        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="bg-primary hover:bg-primary/40 text-primary-foreground"
         onClick={() => onExport('jpg')}
       >
         Eksportuj do JPG
       </Button>
       <Button 
         variant="outline"
-        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="bg-primary hover:bg-primary/40 text-primary-foreground"
         onClick={() => onExport('csv')}
       >
         Eksportuj do CSV
       </Button>
       <Button 
         variant="outline"
-        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="bg-primary hover:bg-primary/40 text-primary-foreground"
         onClick={() => {
           onGenerateForecast();
           toast({
