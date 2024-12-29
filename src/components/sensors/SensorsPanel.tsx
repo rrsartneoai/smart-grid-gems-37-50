@@ -60,9 +60,31 @@ const SensorsPanel = () => {
     <div className="w-full max-w-[1400px] mx-auto px-4" id="sensors-panel">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold">Czujniki</h2>
-        <div className="flex gap-2">
-          <Button onClick={() => handleExport('jpg')}>Eksportuj do JPG</Button>
-          <Button onClick={() => handleExport('pdf')}>Eksportuj do PDF</Button>
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="relative min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Szukaj czujników..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <ExportData />
+          <Button
+            onClick={() => handleExport('jpg')}
+            variant="outline"
+            className="bg-primary/10 hover:bg-primary/20 text-primary"
+          >
+            Eksportuj JPG
+          </Button>
+          <Button
+            onClick={() => handleExport('pdf')}
+            variant="outline"
+            className="bg-primary/10 hover:bg-primary/20 text-primary"
+          >
+            Eksportuj PDF
+          </Button>
         </div>
       </div>
 
@@ -72,22 +94,6 @@ const SensorsPanel = () => {
           selectedCity={selectedCity}
           onCitySelect={handleCitySelect}
         />
-      </div>
-
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Szukaj czujników..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <ExportData />
       </div>
 
       {currentCityData && (

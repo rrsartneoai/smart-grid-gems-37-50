@@ -17,7 +17,7 @@ export const pl = {
     
     // Failure Analysis
     "failureAnalysis": "Analiza Awarii",
-    "deviceStatus": "Status Urządzeń",
+    "deviceStatusTitle": "Status Urządzeń",
     "criticalStatus": "Krytyczny",
     "warningStatus": "Ostrzeżenie",
     "possibleCauses": "Możliwe Przyczyny",
