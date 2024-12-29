@@ -21,9 +21,6 @@ export function CompanySidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
-  const location = window.location.hash;
-
-  const isAIAssistantVisible = ['#insights', '#status', '#sensors'].includes(location);
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -37,6 +34,7 @@ export function CompanySidebar() {
   };
 
   const handleOpenAssistant = () => {
+    // This will trigger the FloatingChatbot to open
     const event = new CustomEvent('openAssistant');
     window.dispatchEvent(event);
   };
@@ -63,7 +61,6 @@ export function CompanySidebar() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
-          isAIAssistantVisible={isAIAssistantVisible}
         />
       </SheetContent>
       <aside className={`fixed left-0 top-0 z-30 h-screen transition-all duration-300 bg-background border-r ${collapsed ? "w-[60px]" : "w-[300px]"} hidden lg:block`}>
@@ -91,7 +88,6 @@ export function CompanySidebar() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
-          isAIAssistantVisible={isAIAssistantVisible}
         />
       </aside>
     </Sheet>
@@ -105,7 +101,6 @@ interface SidebarContentProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filteredCompanies: typeof companiesData;
-  isAIAssistantVisible: boolean;
 }
 
 function SidebarContent({ 
@@ -114,8 +109,7 @@ function SidebarContent({
   handleOpenAssistant,
   searchQuery,
   setSearchQuery,
-  filteredCompanies,
-  isAIAssistantVisible
+  filteredCompanies
 }: SidebarContentProps) {
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
 
@@ -166,16 +160,14 @@ function SidebarContent({
             <Plus className="h-4 w-4 mr-2" />
             {!collapsed && <span>Dodaj firmę</span>}
           </Button>
-          {isAIAssistantVisible && (
-            <Button
-              variant="outline"
-              className={`w-full justify-start ${collapsed ? "px-2" : ""}`}
-              onClick={handleOpenAssistant}
-            >
-              <Bot className="h-4 w-4 mr-2" />
-              {!collapsed && <span>Asystent AI</span>}
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            className={`w-full justify-start ${collapsed ? "px-2" : ""}`}
+            onClick={handleOpenAssistant}
+          >
+            <Bot className="h-4 w-4 mr-2" />
+            {!collapsed && <span>Asystent AI</span>}
+          </Button>
         </div>
       </ScrollArea>
       {!collapsed && (
