@@ -1,6 +1,7 @@
 import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
   Legend, Area, AreaChart, ComposedChart, Scatter,
+  XAxis, YAxis, Tooltip
 } from "recharts";
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { UploadOptions } from "./UploadOptions";
 import { ExportButtons } from "./ExportButtons";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
