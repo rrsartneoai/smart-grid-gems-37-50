@@ -52,11 +52,11 @@ const getDeviceIcon = (type: Device["type"]) => {
 const getStatusColor = (status: Device["status"]) => {
   switch (status) {
     case "operational":
-      return "#22c55e";
+      return "#22c55e"; // green
     case "warning":
-      return "#eab308";
+      return "#22c55e"; // green
     case "error":
-      return "#ef4444";
+      return "#22c55e"; // green
   }
 };
 

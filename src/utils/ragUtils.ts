@@ -1,53 +1,55 @@
+```typescript
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_API_KEY || "");
 
-const MAX_CHUNK_LENGTH = 25000; // Safe limit below the 30720 token limit
+const MAX_CHUNK_LENGTH = 25000;
 
 function chunkText(text: string): string[] {
-  const words = text.split(' ');
   const chunks: string[] = [];
   let currentChunk = '';
-
-  for (const word of words) {
-    if ((currentChunk + word).length < MAX_CHUNK_LENGTH) {
-      currentChunk += (currentChunk ? ' ' : '') + word;
+  
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  
+  for (const sentence of sentences) {
+    if ((currentChunk + sentence).length <= MAX_CHUNK_LENGTH) {
+      currentChunk += sentence + ' ';
     } else {
-      chunks.push(currentChunk);
-      currentChunk = word;
+      if (currentChunk) {
+        chunks.push(currentChunk.trim());
+      }
+      currentChunk = sentence + ' ';
     }
   }
   
   if (currentChunk) {
-    chunks.push(currentChunk);
+    chunks.push(currentChunk.trim());
   }
-
+  
   return chunks;
 }
 
 export async function generateRAGResponse(input: string): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
-    // If input is too long, chunk it and process first chunk only
     const chunks = chunkText(input);
-    const processableInput = chunks[0]; // Take first chunk only
+    const processableInput = chunks[0];
     
-    console.log('Processing input chunk length:', processableInput.length);
+    console.log('Przetwarzanie fragmentu tekstu o długości:', processableInput.length);
     
     const prompt = `
-      You are an AI assistant specializing in power grid management and energy systems.
-      Please provide a response to the following query: ${processableInput}
+      Jesteś asystentem AI specjalizującym się w zarządzaniu siecią energetyczną i systemami energetycznymi.
+      Odpowiedz na następujące zapytanie w języku polskim: ${processableInput}
       
-      Respond in a professional but friendly manner, focusing on power grid related information.
-      Keep the response concise and relevant.
+      Odpowiadaj w profesjonalny ale przyjazny sposób, skupiając się na informacjach związanych z siecią energetyczną.
+      Zachowaj zwięzłość i trzymaj się tematu.
     `;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     return response.text();
   } catch (error) {
-    console.error('Error generating response:', error);
+    console.error('Błąd generowania odpowiedzi:', error);
     if (error instanceof Error && error.message.includes('tokens')) {
       return "Przepraszam, zapytanie jest zbyt długie. Proszę spróbować z krótszym tekstem lub podzielić go na mniejsze części.";
     }
@@ -58,37 +60,25 @@ export async function generateRAGResponse(input: string): Promise<string> {
 export async function processDocumentForRAG(text: string): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
-    // Chunk the text and process only the first chunk
     const chunks = chunkText(text);
-    const processableText = chunks[0];
     
-    console.log('Processing document chunk length:', processableText.length);
-    
-    const prompt = `
-      Przeanalizuj poniższy tekst i wypisz 5 najważniejszych zagadnień lub tematów z tego dokumentu:
-      ${processableText}
-      
-      Odpowiedź sformatuj jako prostą listę 5 najważniejszych zagadnień, po jednym w linii.
-      Zwróć TYLKO te 5 zagadnień, nic więcej.
-    `;
+    let summary = '';
+    for (const chunk of chunks) {
+      const prompt = `
+        Przeanalizuj poniższy fragment tekstu i wyodrębnij najważniejsze informacje związane z energetyką, 
+        sieciami energetycznymi lub zarządzaniem energią. Przedstaw wyniki w zwięzłej formie po polsku:
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error('Error processing document:', error);
-    if (error instanceof Error && error.message.includes('tokens')) {
-      return `1. Dokument jest zbyt długi do przetworzenia w całości
-2. Została przeanalizowana tylko część dokumentu
-3. Dla lepszych wyników podziel dokument na mniejsze części
-4. Maksymalny rozmiar to około 25000 znaków
-5. Spróbuj wysłać krótszy fragment tekstu`;
+        ${chunk}
+      `;
+      
+      const result = await model.generateContent(prompt);
+      summary += result.response.text() + '\n\n';
     }
-    return `1. Nie udało się przetworzyć dokumentu
-2. Spróbuj ponownie później
-3. Sprawdź czy dokument zawiera tekst
-4. Upewnij się, że dokument jest czytelny
-5. Skontaktuj się z administratorem systemu`;
+    
+    return summary.trim();
+  } catch (error) {
+    console.error('Błąd przetwarzania dokumentu:', error);
+    return "Przepraszam, wystąpił błąd podczas przetwarzania dokumentu. Proszę spróbować ponownie.";
   }
 }
+```

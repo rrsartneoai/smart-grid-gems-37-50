@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
+import { useLocation } from "react-router-dom";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompanyId: "1",
@@ -21,6 +22,11 @@ export function CompanySidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
+  const location = useLocation();
+
+  const isAIAssistantVisible = location.hash === '#insights' || 
+                              location.hash === '#status' || 
+                              location.hash === '#sensors';
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -34,7 +40,6 @@ export function CompanySidebar() {
   };
 
   const handleOpenAssistant = () => {
-    // This will trigger the FloatingChatbot to open
     const event = new CustomEvent('openAssistant');
     window.dispatchEvent(event);
   };
@@ -89,6 +94,16 @@ export function CompanySidebar() {
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
         />
+        {isAIAssistantVisible && (
+          <Button
+            variant="outline"
+            className={`w-full justify-start ${collapsed ? "px-2" : ""}`}
+            onClick={handleOpenAssistant}
+          >
+            <Bot className="h-4 w-4 mr-2" />
+            {!collapsed && <span>Asystent AI</span>}
+          </Button>
+        )}
       </aside>
     </Sheet>
   );
@@ -159,14 +174,6 @@ function SidebarContent({
           >
             <Plus className="h-4 w-4 mr-2" />
             {!collapsed && <span>Dodaj firmę</span>}
-          </Button>
-          <Button
-            variant="outline"
-            className={`w-full justify-start ${collapsed ? "px-2" : ""}`}
-            onClick={handleOpenAssistant}
-          >
-            <Bot className="h-4 w-4 mr-2" />
-            {!collapsed && <span>Asystent AI</span>}
           </Button>
         </div>
       </ScrollArea>

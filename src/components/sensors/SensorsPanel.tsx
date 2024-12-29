@@ -7,6 +7,9 @@ import { AlertsConfig } from "./AlertsConfig";
 import { DataComparison } from "./DataComparison";
 import { ExportData } from "./ExportData";
 import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
@@ -27,16 +30,39 @@ const SensorsPanel = () => {
     sensor.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleExport = async (format: 'jpg' | 'pdf') => {
+    try {
+      const element = document.getElementById('sensors-panel');
+      if (!element) return;
+
+      if (format === 'jpg') {
+        const canvas = await html2canvas(element);
+        const link = document.createElement('a');
+        link.download = 'czujniki.jpg';
+        link.href = canvas.toDataURL('image/jpeg');
+        link.click();
+      } else if (format === 'pdf') {
+        const canvas = await html2canvas(element);
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('czujniki.pdf');
+      }
+    } catch (error) {
+      console.error("Błąd eksportu:", error);
+    }
+  };
+
   return (
-    <div className="w-full max-w-[1400px] mx-auto px-4">
+    <div className="w-full max-w-[1400px] mx-auto px-4" id="sensors-panel">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold">Czujniki</h2>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-          <span>Last synced in an hour</span>
-          <span className="hidden sm:inline">•</span>
-          <span>100% est. battery</span>
-          <span className="hidden sm:inline">•</span>
-          <span>-71 dBm</span>
+        <div className="flex gap-2">
+          <Button onClick={() => handleExport('jpg')}>Eksportuj do JPG</Button>
+          <Button onClick={() => handleExport('pdf')}>Eksportuj do PDF</Button>
         </div>
       </div>
 
