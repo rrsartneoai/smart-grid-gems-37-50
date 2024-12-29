@@ -38,25 +38,37 @@ export function CompanyAnalysis() {
   const handleExport = async (format: 'pdf' | 'jpg' | 'xlsx' | 'csv') => {
     try {
       const element = document.getElementById('company-analysis');
-      if (!element) return;
+      if (!element) {
+        throw new Error('Export element not found');
+      }
 
       if (format === 'pdf' || format === 'jpg') {
-        const canvas = await html2canvas(element);
+        const canvas = await html2canvas(element, {
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          scale: 2
+        });
         
         if (format === 'jpg') {
           const link = document.createElement('a');
-          link.download = 'company-analysis.jpg';
-          link.href = canvas.toDataURL('image/jpeg');
+          link.download = `company-analysis-${Date.now()}.jpg`;
+          link.href = canvas.toDataURL('image/jpeg', 1.0);
+          document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
         } else {
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF();
+          const imgData = canvas.toDataURL('image/png', 1.0);
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm'
+          });
           const imgProps = pdf.getImageProperties(imgData);
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
           
           pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-          pdf.save('company-analysis.pdf');
+          pdf.save(`company-analysis-${Date.now()}.pdf`);
         }
       } else {
         const data = selectedCompany?.energyData || [];
@@ -65,9 +77,9 @@ export function CompanyAnalysis() {
         XLSX.utils.book_append_sheet(wb, ws, "Analysis Data");
         
         if (format === 'csv') {
-          XLSX.writeFile(wb, 'company-analysis.csv');
+          XLSX.writeFile(wb, `company-analysis-${Date.now()}.csv`);
         } else {
-          XLSX.writeFile(wb, 'company-analysis.xlsx');
+          XLSX.writeFile(wb, `company-analysis-${Date.now()}.xlsx`);
         }
       }
 
@@ -76,9 +88,10 @@ export function CompanyAnalysis() {
         description: `File exported as ${format.toUpperCase()}`,
       });
     } catch (error) {
+      console.error('Export error:', error);
       toast({
         title: "Export failed",
-        description: "An error occurred during export",
+        description: "An error occurred during export. Please try again.",
         variant: "destructive",
       });
     }
