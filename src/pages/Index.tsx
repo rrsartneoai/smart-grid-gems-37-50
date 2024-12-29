@@ -183,23 +183,23 @@ const Index = () => {
                         </SortableContext>
                       </DndContext>
 
-                      <div className="grid gap-6">
+                      <div className="grid gap-6 p-8">
                         <EnergyChart />
                       </div>
 
-                      <div className="grid gap-6">
+                      <div className="grid gap-6 p-8">
                         <DeviceStatus />
                       </div>
 
-                      <div className="grid gap-6">
+                      <div className="grid gap-6 p-8">
                         <NetworkMap />
                       </div>
 
-                      <div className="grid gap-6">
+                      <div className="grid gap-6 p-8">
                         <FailureAnalysis />
                       </div>
 
-                      <div className="grid gap-6">
+                      <div className="grid gap-6 p-8">
                         <EnergyMap />
                       </div>
 
