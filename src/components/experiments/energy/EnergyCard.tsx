@@ -1,6 +1,4 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -8,6 +6,10 @@ import { EUROPEAN_COUNTRIES } from "./constants";
 import { ProductionChart } from "./ProductionChart";
 import { ForecastChart } from "./ForecastChart";
 import { fetchPowerData, fetchPowerForecast, fetchConsumptionForecast } from "@/utils/electricityApi";
+import { Header } from "./components/Header";
+import { LoadingState } from "./components/LoadingState";
+import { ForecastSummary } from "./components/ForecastSummary";
+import { ApiKeyPrompt } from "./components/ApiKeyPrompt";
 
 export function EnergyCard() {
   const [selectedCountry, setSelectedCountry] = useState(EUROPEAN_COUNTRIES[0]);
@@ -67,12 +69,7 @@ export function EnergyCard() {
   if (!localStorage.getItem('ELECTRICITY_MAPS_API_KEY')) {
     return (
       <Card className="w-full">
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <p>Please set your Electricity Maps API key to view energy data.</p>
-            <Button onClick={handleApiKeySet}>Set API Key</Button>
-          </div>
-        </CardContent>
+        <ApiKeyPrompt onSetApiKey={handleApiKeySet} />
       </Card>
     );
   }
@@ -97,40 +94,18 @@ export function EnergyCard() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <Select
-            value={selectedCountry.id}
-            onValueChange={(value) => {
-              const country = EUROPEAN_COUNTRIES.find(c => c.id === value);
-              if (country) setSelectedCountry(country);
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select country" />
-            </SelectTrigger>
-            <SelectContent>
-              {EUROPEAN_COUNTRIES.map((country) => (
-                <SelectItem key={country.id} value={country.id}>
-                  {country.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {powerData && (
-            <div className="text-sm font-normal">
-              <span className="text-green-500">{powerData.fossilFreePercentage}% Fossil-Free</span>
-              {" | "}
-              <span className="text-emerald-500">{powerData.renewablePercentage}% Renewable</span>
-            </div>
-          )}
-        </div>
+        <Header 
+          powerData={powerData}
+          selectedCountry={selectedCountry}
+          onCountrySelect={(value) => {
+            const country = EUROPEAN_COUNTRIES.find(c => c.id === value);
+            if (country) setSelectedCountry(country);
+          }}
+        />
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>
+          <LoadingState />
         ) : (
           <div className="space-y-6">
             {powerData && (
@@ -146,20 +121,10 @@ export function EnergyCard() {
                   productionForecast={productionForecast}
                   consumptionForecast={consumptionForecast}
                 />
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg border bg-card">
-                    <h4 className="text-sm font-medium mb-2">Production Total</h4>
-                    <p className="text-2xl font-semibold">
-                      {productionForecast.forecast[0]?.powerProductionTotal.toLocaleString()} MW
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg border bg-card">
-                    <h4 className="text-sm font-medium mb-2">Consumption Total</h4>
-                    <p className="text-2xl font-semibold">
-                      {consumptionForecast.forecast[0]?.powerConsumptionTotal.toLocaleString()} MW
-                    </p>
-                  </div>
-                </div>
+                <ForecastSummary 
+                  productionForecast={productionForecast}
+                  consumptionForecast={consumptionForecast}
+                />
               </div>
             )}
           </div>
