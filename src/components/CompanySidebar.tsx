@@ -2,14 +2,14 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search } from "lucide-react";
 import { companiesData } from "@/data/companies";
 import { create } from "zustand";
 import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
-import { SidebarButtons } from "./sidebar/SidebarButtons";
+import { useLocation } from "react-router-dom";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompanyId: "1",
@@ -22,6 +22,10 @@ export function CompanySidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
+  const location = useLocation();
+
+  const currentHash = location.hash.slice(1); // Remove the # from the hash
+  const isAIAssistantVisible = ['insights', 'status', 'sensors'].includes(currentHash);
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -34,9 +38,27 @@ export function CompanySidebar() {
     });
   };
 
+  const handleOpenAssistant = () => {
+    console.log('Current hash:', currentHash);
+    console.log('Is AI Assistant visible:', isAIAssistantVisible);
+    
+    if (!isAIAssistantVisible) {
+      toast({
+        title: "Asystent AI",
+        description: "Asystent AI jest dostępny tylko w sekcjach Analiza, Status i Czujniki.",
+        variant: "destructive"
+      });
+      return;
+    }
+    const event = new CustomEvent('openAssistant');
+    window.dispatchEvent(event);
+  };
+
   const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // ... keep existing code (Sheet and SidebarContent components)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -44,17 +66,19 @@ export function CompanySidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden fixed top-4 left-4 z-50"
+          className="lg:hidden"
         >
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px] p-0">
         <SidebarContent 
-          handleAddCompany={handleAddCompany}
+          handleAddCompany={handleAddCompany} 
+          handleOpenAssistant={handleOpenAssistant}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
+          isAIAssistantVisible={isAIAssistantVisible}
         />
       </SheetContent>
       <aside className={`fixed left-0 top-0 z-30 h-screen transition-all duration-300 bg-background border-r ${collapsed ? "w-[60px]" : "w-[300px]"} hidden lg:block`}>
@@ -77,10 +101,12 @@ export function CompanySidebar() {
         </Button>
         <SidebarContent 
           collapsed={collapsed} 
-          handleAddCompany={handleAddCompany}
+          handleAddCompany={handleAddCompany} 
+          handleOpenAssistant={handleOpenAssistant}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
+          isAIAssistantVisible={isAIAssistantVisible}
         />
       </aside>
     </Sheet>
@@ -90,17 +116,21 @@ export function CompanySidebar() {
 interface SidebarContentProps {
   collapsed?: boolean;
   handleAddCompany: () => void;
+  handleOpenAssistant: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filteredCompanies: typeof companiesData;
+  isAIAssistantVisible: boolean;
 }
 
 function SidebarContent({ 
   collapsed = false, 
   handleAddCompany,
+  handleOpenAssistant,
   searchQuery,
   setSearchQuery,
   filteredCompanies,
+  isAIAssistantVisible
 }: SidebarContentProps) {
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
 
@@ -127,26 +157,15 @@ function SidebarContent({
         <div className="space-y-4 p-4">
           {filteredCompanies.map((company) => (
             <div key={company.id} className="space-y-4">
-              <Button
-                variant={selectedCompanyId === company.id ? "secondary" : "ghost"}
-                className={`w-full justify-start ${collapsed ? "px-2" : ""} transition-colors hover:bg-secondary`}
-                onClick={() => setSelectedCompanyId(company.id)}
-                title={collapsed ? company.name : undefined}
-              >
-                <div className="flex items-center">
-                  {collapsed ? (
-                    <span>{company.name.charAt(0)}</span>
-                  ) : (
-                    <span className="ml-2">{company.name}</span>
-                  )}
-                </div>
-              </Button>
-            </div>
-          ))}
-          <SidebarButtons 
-            collapsed={collapsed}
-            handleAddCompany={handleAddCompany}
-          />
+             <Button
+                    variant="outline"
+                    className={`${collapsed ? "w-10 p-2" : "w-full"} mt-2`}
+                    onClick={() => navigate('/assistant')}
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    {!collapsed && <span className="ml-2">Asystent</span>}
+                  </Button>
+          </div>
         </div>
       </ScrollArea>
       {!collapsed && (
