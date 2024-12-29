@@ -26,7 +26,7 @@ export const SystemPerformanceDetail = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">System Performance Details</h2>
+        <h2 className="text-2xl font-bold">Szczegóły wydajności systemu</h2>
         <div className="space-x-2">
           <Button onClick={() => handleExport('pdf')}>Export PDF</Button>
           <Button onClick={() => handleExport('csv')}>Export CSV</Button>
@@ -34,7 +34,7 @@ export const SystemPerformanceDetail = () => {
       </div>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Historical Data</h3>
+        <h3 className="text-lg font-semibold mb-4">Dane historyczne</h3>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={mockHistoricalData}>
