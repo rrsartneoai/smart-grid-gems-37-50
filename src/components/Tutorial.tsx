@@ -10,13 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 
 const tutorialSteps = [
+   {
+    title: "Witaj w Panelu Monitorowania",
+    description: "Poznaj podstawowe funkcje Asystenta Sieci Energetycznej. Kliknij w przycisk Asysten AI w menu firmy i zadaj pytanie lub wgraj plik",
+  },
   {
     title: "Witaj w Panelu Monitorowania",
     description: "Poznaj podstawowe funkcje systemu monitorowania sieci energetycznej. Użyj ciemnego motywu dla lepszej czytelności w nocy.",
   },
   {
     title: "Personalizacja i Nawigacja",
-    description: "Możesz przeciągać kafelki, aby dostosować układ do swoich potrzeb. Użyj zakładek na górze, aby przełączać się między różnymi widokami.",
+    description: "Możesz rozwiać kafelki, aby dostosować układ do swoich potrzeb. Użyj zakładek na górze, aby przełączać się między różnymi widokami.",
   },
   {
     title: "Szczegółowe Informacje",
