@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
+import { useLocation } from "react-router-dom";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompanyId: "1",
@@ -21,6 +22,7 @@ export function CompanySidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
+  const location = useLocation();
 
   const toggleCollapse = () => {
     setCollapsed(!collapsed);
@@ -34,7 +36,16 @@ export function CompanySidebar() {
   };
 
   const handleOpenAssistant = () => {
-    // This will trigger the FloatingChatbot to open
+    // Only show assistant button in specific sections
+    if (location.pathname === "/" && !location.hash.includes("#insights") && 
+        !location.hash.includes("#status") && !location.hash.includes("#sensors")) {
+      toast({
+        title: "Asystent niedostępny",
+        description: "Asystent AI jest dostępny tylko w sekcjach Analiza, Status i Czujniki.",
+        variant: "destructive"
+      });
+      return;
+    }
     const event = new CustomEvent('openAssistant');
     window.dispatchEvent(event);
   };

@@ -18,42 +18,43 @@ const mockHistoricalData = Array.from({ length: 24 }, (_, i) => ({
 export const DeviceStatusDetail = () => {
   const { toast } = useToast();
 
-  const handleExport = async (format: 'pdf' | 'csv' | 'xlsx') => {
+  const handleExport = async (format: 'pdf' | 'csv' | 'jpg') => {
     try {
-      if (format === 'pdf') {
-        const element = document.getElementById('device-status-detail');
-        if (!element) return;
-        
+      const element = document.getElementById('device-status-detail');
+      if (!element) return;
+
+      if (format === 'jpg' || format === 'pdf') {
         const canvas = await html2canvas(element);
-        const imgData = canvas.toDataURL('image/png');
         
-        const pdf = new jsPDF();
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('device-status.pdf');
-      } else if (format === 'csv' || format === 'xlsx') {
+        if (format === 'jpg') {
+          const link = document.createElement('a');
+          link.download = 'status-urządzeń.jpg';
+          link.href = canvas.toDataURL('image/jpeg');
+          link.click();
+        } else {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF();
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          pdf.save('status-urządzeń.pdf');
+        }
+      } else if (format === 'csv') {
         const ws = XLSX.utils.json_to_sheet(mockHistoricalData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Device Status");
-        
-        if (format === 'csv') {
-          XLSX.writeFile(wb, 'device-status.csv');
-        } else {
-          XLSX.writeFile(wb, 'device-status.xlsx');
-        }
+        XLSX.utils.book_append_sheet(wb, ws, "Status Urządzeń");
+        XLSX.writeFile(wb, 'status-urządzeń.csv');
       }
 
       toast({
-        title: "Export completed",
-        description: `File exported as ${format.toUpperCase()}`,
+        title: "Eksport zakończony",
+        description: `Plik wyeksportowano jako ${format.toUpperCase()}`,
       });
     } catch (error) {
       toast({
-        title: "Export failed",
-        description: "An error occurred during export",
+        title: "Błąd eksportu",
+        description: "Wystąpił błąd podczas eksportu",
         variant: "destructive",
       });
     }
@@ -62,16 +63,16 @@ export const DeviceStatusDetail = () => {
   return (
     <div className="space-y-6" id="device-status-detail">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Device Status Details</h2>
+        <h2 className="text-2xl font-bold">Szczegóły statusu urządzeń</h2>
         <div className="space-x-2">
-          <Button onClick={() => handleExport('pdf')}>Export PDF</Button>
-          <Button onClick={() => handleExport('xlsx')}>Export Excel</Button>
-          <Button onClick={() => handleExport('csv')}>Export CSV</Button>
+          <Button onClick={() => handleExport('pdf')}>Eksportuj PDF</Button>
+          <Button onClick={() => handleExport('jpg')}>Eksportuj JPG</Button>
+          <Button onClick={() => handleExport('csv')}>Eksportuj CSV</Button>
         </div>
       </div>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Historical Data</h3>
+        <h3 className="text-lg font-semibold mb-4">Dane historyczne</h3>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={mockHistoricalData}>
@@ -82,21 +83,21 @@ export const DeviceStatusDetail = () => {
               <Line 
                 type="monotone" 
                 dataKey="activeDevices" 
-                name="Active Devices" 
+                name="Aktywne urządzenia" 
                 stroke="#ef4444" 
                 strokeWidth={2}
               />
               <Line 
                 type="monotone" 
                 dataKey="networkConnection" 
-                name="Network Connection" 
+                name="Połączenie sieciowe" 
                 stroke="#34d399" 
                 strokeWidth={2}
               />
               <Line 
                 type="monotone" 
                 dataKey="signalQuality" 
-                name="Signal Quality" 
+                name="Jakość sygnału" 
                 stroke="#60a5fa" 
                 strokeWidth={2}
               />
@@ -107,9 +108,9 @@ export const DeviceStatusDetail = () => {
 
       <div className="grid md:grid-cols-3 gap-6">
         {[
-          { icon: Cpu, label: "Active Devices", value: 85 },
-          { icon: Network, label: "Network Connection", value: 92 },
-          { icon: Signal, label: "Signal Quality", value: 78 }
+          { icon: Cpu, label: "Aktywne urządzenia", value: 85 },
+          { icon: Network, label: "Połączenie sieciowe", value: 92 },
+          { icon: Signal, label: "Jakość sygnału", value: 78 }
         ].map((item, index) => (
           <Card key={index} className="p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -118,7 +119,7 @@ export const DeviceStatusDetail = () => {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Current</span>
+                <span className="text-sm text-muted-foreground">Aktualnie</span>
                 <span className="font-medium">{item.value}%</span>
               </div>
               <Progress value={item.value} className="h-2" />
