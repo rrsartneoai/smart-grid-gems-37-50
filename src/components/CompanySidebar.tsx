@@ -2,14 +2,14 @@ import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search } from "lucide-react";
+import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search, MessageSquare } from "lucide-react";
 import { companiesData } from "@/data/companies";
 import { create } from "zustand";
 import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompanyId: "1",
@@ -23,8 +23,9 @@ export function CompanySidebar() {
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const currentHash = location.hash.slice(1); // Remove the # from the hash
+  const currentHash = location.hash.slice(1);
   const isAIAssistantVisible = ['insights', 'status', 'sensors'].includes(currentHash);
 
   const toggleCollapse = () => {
@@ -58,8 +59,6 @@ export function CompanySidebar() {
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // ... keep existing code (Sheet and SidebarContent components)
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -79,6 +78,7 @@ export function CompanySidebar() {
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
           isAIAssistantVisible={isAIAssistantVisible}
+          navigate={navigate}
         />
       </SheetContent>
       <aside className={`fixed left-0 top-0 z-30 h-screen transition-all duration-300 bg-background border-r ${collapsed ? "w-[60px]" : "w-[300px]"} hidden lg:block`}>
@@ -107,6 +107,7 @@ export function CompanySidebar() {
           setSearchQuery={setSearchQuery}
           filteredCompanies={filteredCompanies}
           isAIAssistantVisible={isAIAssistantVisible}
+          navigate={navigate}
         />
       </aside>
     </Sheet>
@@ -121,6 +122,7 @@ interface SidebarContentProps {
   setSearchQuery: (query: string) => void;
   filteredCompanies: typeof companiesData;
   isAIAssistantVisible: boolean;
+  navigate: (path: string) => void;
 }
 
 function SidebarContent({ 
@@ -130,7 +132,8 @@ function SidebarContent({
   searchQuery,
   setSearchQuery,
   filteredCompanies,
-  isAIAssistantVisible
+  isAIAssistantVisible,
+  navigate
 }: SidebarContentProps) {
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
 
@@ -157,15 +160,31 @@ function SidebarContent({
         <div className="space-y-4 p-4">
           {filteredCompanies.map((company) => (
             <div key={company.id} className="space-y-4">
-             <Button
-                    variant="outline"
-                    className={`${collapsed ? "w-10 p-2" : "w-full"} mt-2`}
-                    onClick={() => navigate('/assistant')}
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    {!collapsed && <span className="ml-2">Asystent</span>}
-                  </Button>
-          </div>
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-between"
+                onClick={() => setSelectedCompanyId(company.id)}
+              >
+                <span>{company.name}</span>
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            className={`${collapsed ? "w-10 p-2" : "w-full"} mt-2`}
+            onClick={handleAddCompany}
+          >
+            <Plus className="h-4 w-4" />
+            {!collapsed && <span className="ml-2">Dodaj firmę</span>}
+          </Button>
+          <Button
+            variant="outline"
+            className={`${collapsed ? "w-10 p-2" : "w-full"} mt-2`}
+            onClick={() => navigate('/assistant')}
+          >
+            <MessageSquare className="w-4 h-4" />
+            {!collapsed && <span className="ml-2">Asystent</span>}
+          </Button>
         </div>
       </ScrollArea>
       {!collapsed && (
