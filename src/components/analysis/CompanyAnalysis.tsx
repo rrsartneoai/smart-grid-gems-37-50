@@ -13,6 +13,7 @@ import { useState } from "react";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
+import { UploadOptions } from "./UploadOptions";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -214,6 +215,8 @@ export function CompanyAnalysis() {
             </div>
           </Card>
         </div>
+
+        <UploadOptions />
       </div>
       <FloatingChatbot />
     </div>
