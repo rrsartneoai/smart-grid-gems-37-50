@@ -5,7 +5,6 @@ import { useConversation } from "@11labs/react";
 import { ChatMessage } from "./chat/ChatMessage";
 import { ChatInput } from "./chat/ChatInput";
 import { ChatHeader } from "./chat/ChatHeader";
-import { ChatSuggestions } from "./chat/ChatSuggestions";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { useChat } from "@/hooks/useChat";
