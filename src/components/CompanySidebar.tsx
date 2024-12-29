@@ -44,6 +44,7 @@ export function CompanySidebar() {
       toast({
         title: "Asystent AI",
         description: "Asystent AI jest dostępny tylko w sekcjach Analiza, Status i Czujniki.",
+        variant: "destructive"
       });
       return;
     }
@@ -179,8 +180,9 @@ function SidebarContent({
             </Button>
             <Button
               variant="outline"
-              className={`w-full justify-start ${collapsed ? "px-2" : ""}`}
+              className={`w-full justify-start ${collapsed ? "px-2" : ""} ${!isAIAssistantVisible ? 'opacity-50' : ''}`}
               onClick={handleOpenAssistant}
+              disabled={!isAIAssistantVisible}
             >
               <Bot className="h-4 w-4 mr-2" />
               {!collapsed && <span>Asystent AI</span>}
