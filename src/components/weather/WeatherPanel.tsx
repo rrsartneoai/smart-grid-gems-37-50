@@ -35,7 +35,7 @@ export const WeatherPanel = () => {
     queryKey: ['weather', selectedCity.id],
     queryFn: async () => {
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${import.meta.env.VITE_GOOGLE_API_KEY}&units=metric&lang=pl`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}&units=metric&lang=pl`
       );
       if (!response.ok) {
         throw new Error('Błąd pobierania danych pogodowych');
