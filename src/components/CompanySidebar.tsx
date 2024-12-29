@@ -40,6 +40,13 @@ export function CompanySidebar() {
   };
 
   const handleOpenAssistant = () => {
+    if (!isAIAssistantVisible) {
+      toast({
+        title: "Asystent AI",
+        description: "Asystent AI jest dostępny tylko w sekcjach Analiza, Status i Czujniki.",
+      });
+      return;
+    }
     const event = new CustomEvent('openAssistant');
     window.dispatchEvent(event);
   };

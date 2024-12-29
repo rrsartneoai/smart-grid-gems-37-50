@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CircuitBoard, Gauge, Signal } from "lucide-react";
 import { createElement } from "react";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface Device {
   id: string;
@@ -50,14 +52,8 @@ const getDeviceIcon = (type: Device["type"]) => {
 };
 
 const getStatusColor = (status: Device["status"]) => {
-  switch (status) {
-    case "operational":
-      return "#22c55e"; // green
-    case "warning":
-      return "#22c55e"; // green
-    case "error":
-      return "#22c55e"; // green
-  }
+  // Always return green as requested
+  return "#22c55e";
 };
 
 export function NetworkMap() {
@@ -145,15 +141,15 @@ export function NetworkMap() {
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="gap-1">
-            <CircuitBoard className="w-4 h-4" />
+            <CircuitBoard className="w-4 h-4 text-success" />
             <span>Transformatory</span>
           </Badge>
           <Badge variant="outline" className="gap-1">
-            <Gauge className="w-4 h-4" />
+            <Gauge className="w-4 h-4 text-success" />
             <span>Liczniki</span>
           </Badge>
           <Badge variant="outline" className="gap-1">
-            <Signal className="w-4 h-4" />
+            <Signal className="w-4 h-4 text-success" />
             <span>Czujniki</span>
           </Badge>
         </div>
