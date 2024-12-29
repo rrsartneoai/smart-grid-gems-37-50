@@ -5,7 +5,8 @@ import {
   Settings,
   Bell,
   Mic,
-  ChartBar,
+  BarChart,
+  Plus,
 } from "lucide-react";
 
 interface AdditionalFeature {
@@ -32,7 +33,7 @@ export const AdditionalFunctionalities = () => {
       description: "Sterowanie funkcjami za pomocą komend głosowych",
     },
     {
-      icon: ChartBar,
+      icon: BarChart,
       name: "Analityka danych",
       description: "Analiza danych użytkowania systemu",
     },
@@ -46,8 +47,11 @@ export const AdditionalFunctionalities = () => {
   };
 
   return (
-    <div className="mt-8 mb-12"> {/* Added margin-bottom class here */}
-      <h2 className="text-xl font-semibold mb-4">Funkcjonalności dodatkowe</h2>
+    <div className="mt-8 mb-12">
+      <div className="flex items-center gap-2 mb-4">
+        <Plus className="h-6 w-6 text-primary" />
+        <h2 className="text-xl font-semibold">Funkcjonalności dodatkowe</h2>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {features.map((feature, index) => (
           <motion.div
