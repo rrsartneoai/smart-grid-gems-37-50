@@ -9,7 +9,8 @@ import { useLocation } from 'react-router-dom';
 export function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const isSpacesTab = location.hash === '#spaces' || !location.hash;
+  const currentHash = location.hash.slice(1);
+  const isAllowedSection = ['insights', 'status', 'sensors'].includes(currentHash);
 
   useEffect(() => {
     const handleOpenAssistant = () => setIsOpen(true);
@@ -17,7 +18,7 @@ export function FloatingChatbot() {
     return () => window.removeEventListener('openAssistant', handleOpenAssistant);
   }, []);
 
-  if (isSpacesTab) return null;
+  if (!isAllowedSection) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50">

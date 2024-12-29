@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { EnergyChart } from "@/components/dashboard/EnergyChart";
 import { PowerStats } from "@/components/dashboard/PowerStats";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
@@ -15,7 +15,6 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useEffect, useRef } from "react";
 import { FloatingChatbot } from "@/components/FloatingChatbot";
-import { Chatbot } from "@/components/Chatbot";
 import { NotificationCenter } from "@/components/ui/notifications/NotificationCenter";
 import { Tutorial } from "@/components/Tutorial";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -35,6 +34,9 @@ const Index = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const spacesRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const headerOpacity = useTransform(scrollY, [0, 100], [1, 0]);
+  const headerTranslateY = useTransform(scrollY, [0, 100], [0, -100]);
 
   const handleExport = async (format: 'pdf' | 'jpg') => {
     if (!spacesRef.current) return;
@@ -99,7 +101,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Tutorial />
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <motion.div 
+        className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        style={{
+          opacity: headerOpacity,
+          y: headerTranslateY
+        }}
+      >
         <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-b">
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
             <ApiKeySettings />
@@ -127,7 +135,7 @@ const Index = () => {
             <DarkModeToggle />
           </div>
         </div>
-      </div>
+      </motion.div>
       
       <div className="pt-28">
         <SidebarProvider>
@@ -221,7 +229,8 @@ const Index = () => {
             </main>
           </div>
         </SidebarProvider>
-        <FloatingChatbot />
+        {/* Only show FloatingChatbot in specific sections */}
+        {location.hash !== '#spaces' && <FloatingChatbot />}
       </div>
     </div>
   );

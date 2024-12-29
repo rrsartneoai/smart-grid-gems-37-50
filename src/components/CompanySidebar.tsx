@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompanyId: "1",
@@ -23,8 +23,9 @@ export function CompanySidebar() {
   const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
   const { toast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const currentHash = location.hash.slice(1); // Remove the # from the hash
+  const currentHash = location.hash.slice(1);
   const isAIAssistantVisible = ['insights', 'status', 'sensors'].includes(currentHash);
 
   const toggleCollapse = () => {
@@ -39,9 +40,6 @@ export function CompanySidebar() {
   };
 
   const handleOpenAssistant = () => {
-    console.log('Current hash:', currentHash);
-    console.log('Is AI Assistant visible:', isAIAssistantVisible);
-    
     if (!isAIAssistantVisible) {
       toast({
         title: "Asystent AI",
@@ -50,15 +48,12 @@ export function CompanySidebar() {
       });
       return;
     }
-    const event = new CustomEvent('openAssistant');
-    window.dispatchEvent(event);
+    navigate('/assistant');
   };
 
   const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // ... keep existing code (Sheet and SidebarContent components)
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
