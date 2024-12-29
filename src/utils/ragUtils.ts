@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { getGeminiResponse } from '@/lib/gemini';
+import { calculateTFIDF } from './searchUtils';
 
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_API_KEY || "");
 
@@ -8,8 +9,6 @@ let documentChunks: { text: string; metadata?: Record<string, any> }[] = [];
 
 export const generateRAGResponse = async (query: string): Promise<string> => {
   console.log('Generuję odpowiedź dla zapytania:', query);
-
-  
 
   if (documentChunks.length === 0) {
     console.log('Brak dokumentów w pamięci');
@@ -33,6 +32,28 @@ ${query === 'podsumuj' ? 'Podsumuj najważniejsze informacje z dokumentu.' : `Py
 
   console.log('Wysyłam zapytanie do Gemini z kontekstem długości:', context.length);
   return getGeminiResponse(prompt);
+};
+
+export const searchRelevantChunks = (query: string): string[] => {
+  console.log('Szukam fragmentów dla zapytania:', query);
+  
+  if (documentChunks.length === 0) {
+    console.log("Brak przetworzonych dokumentów w pamięci");
+    return [];
+  }
+
+  if (query.toLowerCase() === 'podsumuj') {
+    console.log('Zapytanie o podsumowanie - zwracam wszystkie fragmenty');
+    return documentChunks.map(chunk => chunk.text);
+  }
+
+  const results = calculateTFIDF(
+    query,
+    documentChunks.map(chunk => chunk.text)
+  );
+
+  // Return top 3 most relevant chunks
+  return results.slice(0, 3).map(result => result.text);
 };
 
 async function extractMainTopics(text: string): Promise<string[]> {
@@ -103,33 +124,4 @@ export const processDocumentForRAG = async (text: string) => {
         console.error("Błąd podczas przetwarzania dokumentu:", error);
         throw new Error("Wystąpił błąd podczas przetwarzania dokumentu");
     }
-};
-
-export const searchRelevantChunks = (query: string): string[] => {
-    console.log('Szukam fragmentów dla zapytania:', query);
-    console.log('Liczba dostępnych fragmentów:', documentChunks.length);
-
-    if (documentChunks.length === 0) {
-        console.log("Brak przetworzonych dokumentów w pamięci");
-        return [];
-    }
-
-    // Dla zapytania "podsumuj" zwracamy wszystkie fragmenty
-    if (query.toLowerCase() === 'podsumuj') {
-        console.log('Zapytanie o podsumowanie - zwracam wszystkie fragmenty');
-        return documentChunks.map(chunk => chunk.text);
-    }
-
-    // Dla innych zapytań szukamy po słowach kluczowych
-    const keywords = query.toLowerCase().split(' ');
-    const relevantChunks = documentChunks.filter(chunk => {
-        const text = chunk.text.toLowerCase();
-        return keywords.some(keyword => text.includes(keyword));
-    });
-
-    console.log(`Znaleziono ${relevantChunks.length} pasujących fragmentów`);
-    if (relevantChunks.length > 0) {
-        console.log('Przykładowy znaleziony fragment:', relevantChunks[0].text.substring(0, 100) + '...');
-    }
-    return relevantChunks.map(chunk => chunk.text);
 };

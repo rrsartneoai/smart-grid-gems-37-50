@@ -78,6 +78,18 @@ export function Chatbot() {
     URL.revokeObjectURL(url);
   };
 
+  useEffect(() => {
+    const handleInitialQuery = (event: CustomEvent<string>) => {
+      setInput(event.detail);
+      handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+    };
+
+    window.addEventListener('setInitialQuery', handleInitialQuery as EventListener);
+    return () => {
+      window.removeEventListener('setInitialQuery', handleInitialQuery as EventListener);
+    };
+  }, [setInput, handleSubmit]);
+
   return (
     <Card className="w-full max-w-2xl mx-auto h-[600px] md:h-[700px] flex flex-col bg-background shadow-lg rounded-xl">
       <ChatHeader

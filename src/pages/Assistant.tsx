@@ -2,10 +2,21 @@ import { Chatbot } from "@/components/Chatbot";
 import { FileUpload } from "@/components/FileUpload";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 const Assistant = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialQuery = location.state?.initialQuery;
+
+  useEffect(() => {
+    if (initialQuery) {
+      // Dispatch a custom event to set the initial query in the chat
+      const event = new CustomEvent('setInitialQuery', { detail: initialQuery });
+      window.dispatchEvent(event);
+    }
+  }, [initialQuery]);
 
   return (
     <div className="container mx-auto p-8">

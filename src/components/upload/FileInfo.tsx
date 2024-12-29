@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { FileText, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface FileInfoProps {
   file: File;
@@ -7,12 +9,18 @@ interface FileInfoProps {
 }
 
 export function FileInfo({ file, topics = [] }: FileInfoProps) {
+  const navigate = useNavigate();
+  
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 B";
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  };
+
+  const handleTopicClick = (topic: string) => {
+    navigate('/assistant', { state: { initialQuery: `Opowiedz mi więcej o: ${topic}` } });
   };
 
   return (
@@ -34,13 +42,19 @@ export function FileInfo({ file, topics = [] }: FileInfoProps) {
                 <List className="h-4 w-4" />
                 Główne zagadnienia:
               </h4>
-              <ul className="mt-2 space-y-1">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {topics.map((topic, index) => (
-                  <li key={index} className="text-sm text-muted-foreground pl-6">
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    className="text-sm"
+                    onClick={() => handleTopicClick(topic.trim())}
+                  >
                     {topic.trim()}
-                  </li>
+                  </Button>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
