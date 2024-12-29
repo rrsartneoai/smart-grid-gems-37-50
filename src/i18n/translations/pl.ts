@@ -68,6 +68,36 @@ export const pl = {
     "integrationDescription": "Opis integracji",
     "connectionSuccessful": "Połączono pomyślnie",
     "configurationUpdated": "Konfiguracja została zaktualizowana",
-    "error": "Błąd"
+    "error": "Błąd",
+
+    // Weather Panel
+    "weatherInPomerania": "Pogoda w województwie pomorskim",
+    "weatherDataError": "Błąd pobierania danych pogodowych",
+    "forecastDataError": "Błąd pobierania prognozy pogody",
+    "refreshing": "Odświeżanie",
+    "weatherDataUpdated": "Dane pogodowe zostały zaktualizowane",
+    "coordinates": "Współrzędne",
+    "feelsLike": "Temperatura odczuwalna",
+    "pressure": "Ciśnienie",
+    "visibility": "Widoczność",
+    "cloudiness": "Zachmurzenie",
+    "sunrise": "Wschód słońca",
+    "sunset": "Zachód słońca",
+    "windDirection": "Kierunek wiatru",
+    "windGusts": "Podmuchy wiatru",
+    "rain1h": "Opady deszczu (1h)",
+    "snow1h": "Opady śniegu (1h)",
+    "forecast": "Prognoza",
+    "hourlyForecast": "Prognoza godzinowa",
+    "dailyForecast": "Prognoza dzienna",
+    "settings": "Ustawienia",
+    "units": "Jednostki",
+    "selectUnits": "Wybierz jednostki",
+    "metric": "Metryczne",
+    "imperial": "Imperialne",
+    "displayOptions": "Opcje wyświetlania",
+    "details": "Szczegóły",
+    "airQuality": "Jakość powietrza",
+    "map": "Mapa"
   }
 };
