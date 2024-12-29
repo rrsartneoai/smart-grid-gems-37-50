@@ -60,7 +60,6 @@ export const searchRelevantChunks = (query: string): string[] => {
   return relevantChunks.map(chunk => chunk.text);
 };
 
-
 export const generateRAGResponse = async (query: string): Promise<string> => {
   console.log('Generuję odpowiedź dla zapytania:', query);
 

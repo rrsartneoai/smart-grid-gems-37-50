@@ -15,3 +15,6 @@ export async function generateGeminiResponse(prompt: string) {
     throw new Error('Failed to generate response');
   }
 }
+
+// Alias for backward compatibility
+export const getGeminiResponse = generateGeminiResponse;
