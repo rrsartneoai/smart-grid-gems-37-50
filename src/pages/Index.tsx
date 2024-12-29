@@ -205,11 +205,11 @@ const Index = () => {
 
                       <div className="mt-8 grid gap-8 md:grid-cols-2">
                         <div className="w-full">
-                          <h2 className="text-2xl font-bold mb-4">{t('uploadFile')}</h2>
+                          <h2 className="text-2xl font-bold mb-4">{t('Wgraj pliki')}</h2>
                           <FileUpload />
                         </div>
                         <div className="w-full">
-                          <h2 className="text-2xl font-bold mb-4">{t('aiAssistant')}</h2>
+                          <h2 className="text-2xl font-bold mb-4">{t('Asystent AI')}</h2>
                           <Chatbot />
                         </div>
                       </div>
