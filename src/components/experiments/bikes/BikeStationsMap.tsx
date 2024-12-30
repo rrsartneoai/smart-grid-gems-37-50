@@ -48,33 +48,19 @@ export const BikeStationsMap = ({ stations }: Props) => {
         </div>`,
       });
 
-      const marker = L.marker(
+      L.marker(
         [station.lat, station.lon],
         { icon: markerIcon }
-      );
-
-      // Add tooltip with basic info
-      marker.bindTooltip(`
-        <div class="font-semibold">${station.name}</div>
-        <div class="text-sm">${station.address}</div>
-      `, {
-        direction: 'top',
-        offset: [0, -10],
-        className: 'custom-tooltip'
-      });
-
-      // Add popup with detailed info
-      marker.bindPopup(`
-        <div class="p-2">
-          <h3 class="font-bold">${station.name}</h3>
-          <p>${station.address}</p>
-          <p>Dostępne rowery: ${station.num_bikes_available}</p>
-          <p>Wolne miejsca: ${station.num_docks_available}</p>
-          <p>Pojemność: ${station.capacity}</p>
-        </div>
-      `);
-
-      marker.addTo(map.current);
+      )
+        .bindPopup(`
+          <div class="p-2">
+            <h3 class="font-bold">${station.name}</h3>
+            <p>${station.address}</p>
+            <p>Dostępne rowery: ${station.num_bikes_available}</p>
+            <p>Wolne miejsca: ${station.num_docks_available}</p>
+          </div>
+        `)
+        .addTo(map.current);
     });
 
     // Cleanup
