@@ -3,7 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CircuitBoard, Gauge, Signal } from "lucide-react";
+import { CircuitBoard, Gauge, Signal, Globe } from "lucide-react";
 import { createElement } from "react";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -52,7 +52,6 @@ const getDeviceIcon = (type: Device["type"]) => {
 };
 
 const getStatusColor = (status: Device["status"]) => {
-  // Always return green as requested
   return "#22c55e";
 };
 
@@ -64,22 +63,18 @@ export function NetworkMap() {
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    // Initialize map
     map.current = L.map(mapContainer.current).setView([54.372158, 18.638306], 14);
 
-    // Add OpenStreetMap tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors",
     }).addTo(map.current);
 
-    // Add device markers
     mockDevices.forEach((device) => {
       if (!map.current) return;
 
       const IconComponent = getDeviceIcon(device.type);
       const color = getStatusColor(device.status);
 
-      // Create icon HTML string using SVG path data
       const iconHtml = `
         <div class="relative">
           <div class="absolute -top-4 -left-4 bg-background p-2 rounded-full shadow-lg">
@@ -105,7 +100,6 @@ export function NetworkMap() {
         .addTo(map.current);
     });
 
-    // Draw connections between devices
     mockDevices.forEach((device, index) => {
       if (!map.current || index === mockDevices.length - 1) return;
 
@@ -123,7 +117,6 @@ export function NetworkMap() {
       connections.current.push(connection);
     });
 
-    // Cleanup
     return () => {
       map.current?.remove();
       connections.current = [];
@@ -133,11 +126,9 @@ export function NetworkMap() {
   return (
     <div className="grid gap-6">
       <div className="flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-2">
           <h2 className="text-2xl font-bold">Mapa sieci</h2>
-          <p className="text-muted-foreground">
-            Wizualizacja połączeń między urządzeniami
-          </p>
+          <Globe className="w-6 h-6 text-primary animate-spin" style={{ animationDuration: '3s' }} />
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="gap-1">

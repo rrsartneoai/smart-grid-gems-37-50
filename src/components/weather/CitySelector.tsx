@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useTranslation } from "react-i18next";
 
 interface CitySelectorProps {
-  cities: string[];
+  cities: { id: string; name: string; lat: number; lon: number; }[];
   selectedCity: string;
   onCitySelect: (cityId: string) => void;
 }
@@ -18,8 +18,8 @@ export const CitySelector = ({ cities, selectedCity, onCitySelect }: CitySelecto
         </SelectTrigger>
         <SelectContent>
           {cities.map((city) => (
-            <SelectItem key={city.toLowerCase()} value={city.toLowerCase()}>
-              {city}
+            <SelectItem key={city.id} value={city.id}>
+              {city.name}
             </SelectItem>
           ))}
         </SelectContent>

@@ -129,7 +129,7 @@ export const WeatherPanel = () => {
       </CardHeader>
       <CardContent>
         <CitySelector
-          cities={cities.map(c => c.name)}
+          cities={cities}
           selectedCity={selectedCity.id}
           onCitySelect={(cityId) => 
             setSelectedCity(cities.find(c => c.id === cityId) || cities[0])
