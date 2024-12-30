@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BikeStationsMap } from "./BikeStationsMap";
 import { Bike, AlertTriangle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Station {
   station_id: string;
@@ -16,9 +17,16 @@ interface Station {
   last_reported: number;
 }
 
+const CITIES = [
+  { id: "gdansk", name: "Gdańsk" },
+  { id: "gdynia", name: "Gdynia" },
+  { id: "sopot", name: "Sopot" }
+];
+
 export const BikeStationsCard = () => {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCity, setSelectedCity] = useState("gdansk");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,8 +50,14 @@ export const BikeStationsCard = () => {
           };
         });
 
-        setStations(combinedStations);
-        console.log("Fetched MEVO stations:", combinedStations);
+        // Filter stations based on selected city
+        const filteredStations = combinedStations.filter((station: Station) => {
+          const address = station.address.toLowerCase();
+          return address.includes(selectedCity);
+        });
+
+        setStations(filteredStations);
+        console.log(`Fetched MEVO stations for ${selectedCity}:`, filteredStations);
       } catch (error) {
         console.error("Error fetching MEVO stations:", error);
         toast({
@@ -60,7 +74,7 @@ export const BikeStationsCard = () => {
     const interval = setInterval(fetchStations, 300000); // Update every 5 minutes
 
     return () => clearInterval(interval);
-  }, [toast]);
+  }, [toast, selectedCity]);
 
   return (
     <Card>
@@ -68,7 +82,7 @@ export const BikeStationsCard = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bike className="h-6 w-6 text-primary" />
-            <CardTitle>Stacje MEVO w Gdańsku</CardTitle>
+            <CardTitle>Stacje MEVO</CardTitle>
           </div>
           {loading && (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -76,6 +90,20 @@ export const BikeStationsCard = () => {
               <span>Ładowanie danych...</span>
             </div>
           )}
+        </div>
+        <div className="mt-4">
+          <Select value={selectedCity} onValueChange={setSelectedCity}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Wybierz miasto" />
+            </SelectTrigger>
+            <SelectContent>
+              {CITIES.map((city) => (
+                <SelectItem key={city.id} value={city.id}>
+                  {city.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
       <CardContent>
