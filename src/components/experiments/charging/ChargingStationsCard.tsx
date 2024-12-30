@@ -43,7 +43,7 @@ export const ChargingStationsCard = () => {
     queryKey: ['charging-stations'],
     queryFn: async () => {
       const response = await fetch(
-        `https://api.openchargemap.io/v3/poi?key=${API_KEY}&countrycode=PL&maxresults=100`,
+        `https://api.openchargemap.io/v3/poi?key=${API_KEY}&countrycode=PL&maxresults=20`,
         {
           headers: {
             'Accept': 'application/json'
@@ -55,11 +55,7 @@ export const ChargingStationsCard = () => {
         throw new Error('Failed to fetch charging stations');
       }
 
-      const data = await response.json() as ChargingStation[];
-      // Filter stations from Pomorskie voivodeship
-      return data.filter(station => 
-        station.AddressInfo.StateOrProvince?.toLowerCase().includes('pomorskie')
-      );
+      return response.json() as Promise<ChargingStation[]>;
     },
   });
 
@@ -84,7 +80,7 @@ export const ChargingStationsCard = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Stacje ładowania w województwie pomorskim</CardTitle>
+        <CardTitle className="text-xl font-bold">Stacje ładowania w Polsce</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
