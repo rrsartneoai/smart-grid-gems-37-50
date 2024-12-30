@@ -48,7 +48,7 @@ export function ChatInput({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Napisz wiadomość... (Enter aby wysłać, Shift + Enter dla nowej linii)"
-          className="flex-1 min-h-[44px] max-h-[200px] resize-none text-base"
+          className="flex-1 min-h-[88px] max-h-[400px] resize-none text-base"
           disabled={isPending}
         />
         

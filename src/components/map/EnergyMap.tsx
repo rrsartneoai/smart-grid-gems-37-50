@@ -75,22 +75,28 @@ const EnergyMap = () => {
   };
 
   return (
-    <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
-      <div ref={mapContainer} className="absolute inset-0" />
-      <div className="absolute bottom-4 left-4 bg-background/80 p-4 rounded-lg shadow-lg">
-        <h3 className="font-semibold mb-2">Legenda</h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-green-500" />
-            <span>Wysoka efektywność (≥80%)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-yellow-500" />
-            <span>Średnia efektywność (60-79%)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-red-500" />
-            <span>Niska efektywność (&lt;60%)</span>
+    <div className="grid gap-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-bold">Panel mapy energii</h2>
+        <p className="text-muted-foreground">Wizualizacja rozmieszczenia punktów energetycznych</p>
+      </div>
+      <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
+        <div ref={mapContainer} className="absolute inset-0" />
+        <div className="absolute bottom-4 left-4 bg-background/80 p-4 rounded-lg shadow-lg">
+          <h3 className="font-semibold mb-2">Legenda</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-green-500" />
+              <span>Wysoka efektywność (≥80%)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-yellow-500" />
+              <span>Średnia efektywność (60-79%)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-red-500" />
+              <span>Niska efektywność (&lt;60%)</span>
+            </div>
           </div>
         </div>
       </div>
