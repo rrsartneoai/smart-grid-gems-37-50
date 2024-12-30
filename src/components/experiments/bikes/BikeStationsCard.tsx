@@ -1,99 +1,100 @@
-import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { CitySelector } from "./CitySelector";
 import { BikeStationsMap } from "./BikeStationsMap";
-import { Bike, AlertTriangle } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 
-interface Station {
-  station_id: string;
-  name: string;
-  address: string;
-  lat: number;
-  lon: number;
-  capacity: number;
-  num_bikes_available: number;
-  num_docks_available: number;
-  last_reported: number;
-}
+const cities = ["Gdańsk", "Gdynia", "Sopot"];
 
 export const BikeStationsCard = () => {
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [selectedCity, setSelectedCity] = useState<string>("gdansk");
 
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        // Fetch station information
-        const infoResponse = await fetch('https://gbfs.urbansharing.com/rowermevo.pl/station_information.json');
-        const statusResponse = await fetch('https://gbfs.urbansharing.com/rowermevo.pl/station_status.json');
-        
-        const infoData = await infoResponse.json();
-        const statusData = await statusResponse.json();
+  const { data: stations, isLoading } = useQuery({
+    queryKey: ['bike-stations', selectedCity],
+    queryFn: async () => {
+      console.log('Fetching bike stations for city:', selectedCity);
+      
+      // First, get the station information
+      const infoResponse = await fetch(
+        'https://gbfs.urbansharing.com/rowermevo.pl/station_information.json',
+        {
+          headers: {
+            'Client-Identifier': 'lovable-web-app'
+          }
+        }
+      );
 
-        // Combine station information with status
-        const combinedStations = infoData.data.stations.map((station: any) => {
-          const status = statusData.data.stations.find(
-            (s: any) => s.station_id === station.station_id
-          );
-          return {
-            ...station,
-            ...status,
-          };
-        });
+      const statusResponse = await fetch(
+        'https://gbfs.urbansharing.com/rowermevo.pl/station_status.json',
+        {
+          headers: {
+            'Client-Identifier': 'lovable-web-app'
+          }
+        }
+      );
 
-        setStations(combinedStations);
-        console.log("Fetched MEVO stations:", combinedStations);
-      } catch (error) {
-        console.error("Error fetching MEVO stations:", error);
-        toast({
-          title: "Błąd",
-          description: "Nie udało się pobrać danych o stacjach MEVO",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+      if (!infoResponse.ok || !statusResponse.ok) {
+        throw new Error('Failed to fetch bike stations');
       }
-    };
 
-    fetchStations();
-    const interval = setInterval(fetchStations, 300000); // Update every 5 minutes
+      const infoData = await infoResponse.json();
+      const statusData = await statusResponse.json();
 
-    return () => clearInterval(interval);
-  }, [toast]);
+      // Combine station information with status
+      const stations = infoData.data.stations.map((station: any) => {
+        const status = statusData.data.stations.find(
+          (s: any) => s.station_id === station.station_id
+        );
+        return {
+          ...station,
+          ...status
+        };
+      });
+
+      // Filter stations by city if needed
+      return stations.filter((station: any) => 
+        station.name.toLowerCase().includes(selectedCity.toLowerCase())
+      );
+    },
+    refetchInterval: 300000, // Refresh every 5 minutes
+  });
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bike className="h-6 w-6 text-primary" />
-            <CardTitle>Stacje MEVO w Gdańsku</CardTitle>
-          </div>
-          {loading && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <AlertTriangle className="h-4 w-4" />
-              <span>Ładowanie danych...</span>
-            </div>
-          )}
-        </div>
+        <CardTitle className="text-xl font-bold">Stacje rowerowe MEVO</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <BikeStationsMap stations={stations} />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stations.map((station) => (
-              <Card key={station.station_id} className="p-4">
-                <h3 className="font-semibold mb-2">{station.name}</h3>
-                <p className="text-sm text-muted-foreground mb-2">{station.address}</p>
-                <div className="flex justify-between text-sm">
-                  <span>Dostępne rowery: {station.num_bikes_available}</span>
-                  <span>Wolne miejsca: {station.num_docks_available}</span>
-                </div>
-              </Card>
-            ))}
+        <CitySelector
+          cities={cities}
+          selectedCity={selectedCity}
+          onCitySelect={setSelectedCity}
+        />
+
+        {isLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        </div>
+        ) : stations ? (
+          <>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {stations.map((station: any) => (
+                <Card key={station.station_id} className="p-4">
+                  <h3 className="font-semibold">{station.name}</h3>
+                  <p className="text-sm text-muted-foreground">{station.address}</p>
+                  <div className="mt-2 space-y-1">
+                    <p>Dostępne rowery: {station.num_bikes_available}</p>
+                    <p>Wolne miejsca: {station.num_docks_available}</p>
+                    <p>Pojemność: {station.capacity}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            
+            <BikeStationsMap stations={stations} />
+          </>
+        ) : null}
       </CardContent>
     </Card>
   );
