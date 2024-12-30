@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Zap } from 'lucide-react';
+import { createElement } from 'react';
 
 interface ChargingStation {
   ID: number;
@@ -48,7 +49,7 @@ export const ChargingStationsMap = ({ stations }: Props) => {
         className: 'bg-transparent',
         html: `<div class="w-6 h-6 bg-primary/90 rounded-full flex items-center justify-center">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            ${Zap({}).props.children}
+            ${createElement(Zap).props.children}
           </svg>
         </div>`,
       });
