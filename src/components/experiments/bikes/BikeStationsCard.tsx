@@ -3,6 +3,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BikeStationsMap } from "./BikeStationsMap";
 import { Bike, AlertTriangle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Station {
   station_id: string;
@@ -16,22 +24,23 @@ interface Station {
   last_reported: number;
 }
 
+const ITEMS_PER_PAGE = 15;
+
 export const BikeStationsCard = () => {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        // Fetch station information
         const infoResponse = await fetch('https://gbfs.urbansharing.com/rowermevo.pl/station_information.json');
         const statusResponse = await fetch('https://gbfs.urbansharing.com/rowermevo.pl/station_status.json');
         
         const infoData = await infoResponse.json();
         const statusData = await statusResponse.json();
 
-        // Combine station information with status
         const combinedStations = infoData.data.stations.map((station: any) => {
           const status = statusData.data.stations.find(
             (s: any) => s.station_id === station.station_id
@@ -62,6 +71,29 @@ export const BikeStationsCard = () => {
     return () => clearInterval(interval);
   }, [toast]);
 
+  // Calculate pagination values
+  const totalPages = Math.ceil(stations.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentStations = stations.slice(startIndex, endIndex);
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (i === currentPage - 2 || i === currentPage + 2) {
+        pages.push('...');
+      }
+    }
+    return pages;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -82,7 +114,7 @@ export const BikeStationsCard = () => {
         <div className="grid gap-4">
           <BikeStationsMap stations={stations} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stations.map((station) => (
+            {currentStations.map((station) => (
               <Card key={station.station_id} className="p-4">
                 <h3 className="font-semibold mb-2">{station.name}</h3>
                 <p className="text-sm text-muted-foreground mb-2">{station.address}</p>
@@ -93,6 +125,39 @@ export const BikeStationsCard = () => {
               </Card>
             ))}
           </div>
+          {totalPages > 1 && (
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                {getPageNumbers().map((pageNum, index) => (
+                  <PaginationItem key={index}>
+                    {pageNum === '...' ? (
+                      <span className="px-4 py-2">...</span>
+                    ) : (
+                      <PaginationLink
+                        onClick={() => setCurrentPage(Number(pageNum))}
+                        isActive={currentPage === pageNum}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </CardContent>
     </Card>
