@@ -1,6 +1,7 @@
 import { WeatherPanel } from "@/components/weather/WeatherPanel";
 import { EnergyCard } from "./EnergyCard";
 import { ChargingStationsCard } from "./charging/ChargingStationsCard";
+import { BikeStationsCard } from "./bikes/BikeStationsCard";
 
 export const ExperimentsPanel = () => {
   return (
@@ -8,6 +9,7 @@ export const ExperimentsPanel = () => {
       <WeatherPanel />
       <EnergyCard />
       <ChargingStationsCard />
+      <BikeStationsCard />
     </div>
   );
 };
