@@ -6,6 +6,9 @@ codzienne aktualizacje:
 
 (https://smart-grid-gems-95.lovable.app/)
 
+![Screenshot from 2025-01-06 15-06-25](https://github.com/user-attachments/assets/cdab627f-12a7-49d9-9c94-80640b304584)
+
+
 ---
 
 
