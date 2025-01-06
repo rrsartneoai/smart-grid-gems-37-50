@@ -10,22 +10,34 @@ import {
 import { Button } from "@/components/ui/button";
 
 const tutorialSteps = [
-   {
-    title: "Witaj w Panelu Monitorowania",
-    description: "Poznaj podstawowe funkcje Asystenta Sieci Energetycznej. Kliknij w przycisk Asysten AI w menu firmy i zadaj pytanie lub wgraj plik",
+  {
+    title: "Witaj w Panelu Monitorowania Sieci Energetycznej",
+    description: "Ten panel pomoże Ci monitorować i analizować dane z inteligentnej sieci energetycznej. Przeprowadzimy Cię przez najważniejsze funkcje systemu."
   },
   {
-    title: "Witaj w Panelu Monitorowania",
-    description: "Poznaj podstawowe funkcje systemu monitorowania sieci energetycznej. Użyj ciemnego motywu dla lepszej czytelności w nocy.",
+    title: "Asystent AI i Analiza Danych",
+    description: "Kliknij w przycisk 'Asystent AI' w menu, aby zadać pytania dotyczące sieci lub przeanalizować dane. Możesz również wgrać pliki do analizy poprzez przeciągnięcie ich do wskazanego obszaru."
   },
   {
     title: "Personalizacja i Nawigacja",
-    description: "Możesz rozwiać kafelki, aby dostosować układ do swoich potrzeb. Użyj zakładek na górze, aby przełączać się między różnymi widokami.",
+    description: "Użyj zakładek na górze, aby przełączać się między różnymi widokami: Przestrzenie, Analiza, Status, Czujniki. Możesz dostosować układ kafelków do swoich potrzeb poprzez ich przeciąganie."
   },
   {
-    title: "Szczegółowe Informacje",
-    description: "Kliknij na kafelek, aby zobaczyć więcej szczegółów. Mini-wykresy pokazują trendy w czasie rzeczywistym.",
+    title: "Monitorowanie w Czasie Rzeczywistym",
+    description: "Kafelki pokazują aktualne dane o zużyciu energii i statusie sieci. Kliknij w kafelek, aby zobaczyć szczegółowe statystyki i wykresy."
   },
+  {
+    title: "Mapa i Lokalizacje",
+    description: "Mapa pokazuje rozmieszczenie elementów sieci. Możesz przybliżać i oddalać widok oraz klikać w znaczniki, aby zobaczyć szczegóły każdej lokalizacji."
+  },
+  {
+    title: "Eksperymenty i Integracje",
+    description: "Sprawdź zakładki 'Eksperymenty' i 'Integracje', aby odkryć dodatkowe funkcje, takie jak monitoring stacji rowerowych czy analiza pogody."
+  },
+  {
+    title: "Dostosowanie Wyglądu",
+    description: "W prawym górnym rogu znajdziesz przełącznik trybu ciemnego/jasnego oraz wybór języka. Dostosuj interfejs do swoich preferencji."
+  }
 ];
 
 export function Tutorial() {
@@ -53,24 +65,47 @@ export function Tutorial() {
     localStorage.setItem("hasSeenTutorial", "true");
   };
 
+  const handleRestart = () => {
+    setCurrentStep(0);
+    setIsOpen(true);
+    localStorage.removeItem("hasSeenTutorial");
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{tutorialSteps[currentStep].title}</DialogTitle>
-          <DialogDescription className="mt-4 text-base leading-relaxed">
-            {tutorialSteps[currentStep].description}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="flex justify-between mt-8">
-          <Button variant="ghost" onClick={handleSkip} className="hover:bg-secondary">
-            Pomiń
-          </Button>
-          <Button onClick={handleNext} className="bg-primary hover:bg-primary/90">
-            {currentStep === tutorialSteps.length - 1 ? "Zakończ" : "Dalej"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {tutorialSteps[currentStep].title}
+            </DialogTitle>
+            <DialogDescription className="mt-4 text-base leading-relaxed">
+              {tutorialSteps[currentStep].description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-between mt-8">
+            <Button variant="ghost" onClick={handleSkip} className="hover:bg-secondary">
+              Pomiń
+            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {currentStep + 1} z {tutorialSteps.length}
+              </span>
+              <Button onClick={handleNext} className="bg-primary hover:bg-primary/90">
+                {currentStep === tutorialSteps.length - 1 ? "Zakończ" : "Dalej"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      <Button
+        variant="outline"
+        onClick={handleRestart}
+        className="fixed bottom-4 right-4 z-50"
+      >
+        Pokaż samouczek
+      </Button>
+    </>
   );
 }
