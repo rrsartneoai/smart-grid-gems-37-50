@@ -36,6 +36,12 @@ const cities = [
     name: "Słupsk",
     lat: 54.4641,
     lon: 17.0285
+  },
+  {
+    id: "ustka",
+    name: "Ustka",
+    lat: 54.5805,
+    lon: 16.8614
   }
 ];
 
