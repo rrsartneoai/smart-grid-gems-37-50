@@ -45,6 +45,7 @@ export function Tutorial() {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
+    // Sprawdź, czy samouczek był już wyświetlony
     const hasSeenTutorial = localStorage.getItem("hasSeenTutorial");
     if (!hasSeenTutorial) {
       setIsOpen(true);
@@ -68,7 +69,6 @@ export function Tutorial() {
   const handleRestart = () => {
     setCurrentStep(0);
     setIsOpen(true);
-    localStorage.removeItem("hasSeenTutorial");
   };
 
   return (
