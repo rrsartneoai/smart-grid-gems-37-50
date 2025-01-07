@@ -1,75 +1,94 @@
-# System Architecture Documentation
+# System Architecture Documentation - Dashboard
 
 ## Overview
-The system implements a PDF and document processing service with AI-powered chat capabilities, built using React and various cloud services.
+System implementuje zaawansowany dashboard do monitorowania zużycia energii i zarządzania infrastrukturą energetyczną w czasie rzeczywistym.
 
-## Core Components
+## Główne Komponenty
 
-### File Processing
-- **Upload Handler** (`src/components/FileUpload.tsx`)
-  - Accepts PDF, DOCX, and image files
-  - Processes files using PDF.js, Mammoth, and Tesseract.js
-  - Extracts text content for further processing
+### Monitoring Energii
+- **Energy Chart** (`src/components/dashboard/EnergyChart.tsx`)
+  - Wizualizacja zużycia energii w czasie rzeczywistym
+  - Różne typy wykresów (liniowy, słupkowy, złożony)
+  - Możliwość eksportu danych do PDF/JPG
+  - Funkcje przybliżania i przewijania
 
-### Text Processing & Vectorization
-- **RAG Utils** (`src/utils/ragUtils.ts`)
-  - Implements Retrieval-Augmented Generation (RAG)
-  - Splits documents into manageable chunks
-  - Generates embeddings for semantic search
-  - Uses TF-IDF for relevance scoring
+### Statystyki Mocy
+- **Power Stats** (`src/components/dashboard/PowerStats.tsx`)
+  - Karty z kluczowymi wskaźnikami wydajności
+  - Animowane wskaźniki statusu
+  - Interaktywne wykresy trendów
+  - Szczegółowe statystyki po rozwinięciu
 
-### Chat Interface
-- **Chat Component** (`src/components/Chatbot.tsx`)
-  - Real-time chat interface
-  - Voice input support
-  - Message history management
-  - Response streaming
+### Status Urządzeń
+- **Device Status** (`src/components/network/DeviceStatus.tsx`)
+  - Monitoring stanu transformatorów
+  - Status liczników energii
+  - Parametry czujników
+  - Wskaźniki wydajności
 
-### AI Integration
-- **Gemini Integration** (`src/lib/gemini.ts`)
-  - Handles communication with Google's Gemini API
-  - Processes natural language queries
-  - Generates contextual responses
+### Analiza Awarii
+- **Failure Analysis** (`src/components/network/FailureAnalysis.tsx`)
+  - Identyfikacja potencjalnych problemów
+  - Rekomendacje działań naprawczych
+  - Historia awarii
+  - Priorytety alertów
 
-## Data Flow
+## Przepływ Danych
 
-1. **Document Upload**
+1. **Monitoring w czasie rzeczywistym**
    ```mermaid
    graph TD
-     A[User Uploads File] --> B[File Processing]
-     B --> C[Text Extraction]
-     C --> D[Document Chunking]
-     D --> E[Vector Storage]
+     A[Czujniki] --> B[Agregacja Danych]
+     B --> C[Przetwarzanie]
+     C --> D[Wizualizacja]
+     D --> E[Dashboard]
    ```
 
-2. **Query Processing**
+2. **Analiza Wydajności**
    ```mermaid
    graph TD
-     A[User Query] --> B[Query Vectorization]
-     B --> C[Vector Search]
-     C --> D[Context Retrieval]
-     D --> E[AI Response Generation]
-     E --> F[User Interface]
+     A[Dane Wejściowe] --> B[Obliczenia Statystyk]
+     B --> C[Analiza Trendów]
+     C --> D[Generowanie Raportów]
+     D --> E[Interfejs Użytkownika]
    ```
 
-## Key Technologies
+## Kluczowe Technologie
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **Document Processing**: PDF.js, Mammoth, Tesseract.js
-- **AI/ML**: Google Gemini API
-- **Vector Search**: TF-IDF implementation
-- **UI Components**: shadcn/ui library
+- **Wizualizacja**: Recharts
+- **UI**: React, TypeScript, Tailwind CSS
+- **Komponenty**: shadcn/ui
+- **Animacje**: Framer Motion
+- **Eksport Danych**: html2canvas, jsPDF
 
-## Storage Architecture
+## Architektura Danych
 
-- Document chunks stored in memory (current implementation)
-- Vector embeddings generated on-the-fly
-- Chat history maintained in local storage
+- Dane czujników aktualizowane w czasie rzeczywistym
+- Statystyki generowane na podstawie historycznych pomiarów
+- Wskaźniki wydajności obliczane w locie
+- Historia alertów przechowywana lokalnie
 
-## Future Improvements
+## Planowane Ulepszenia
 
-1. Implement persistent vector storage
-2. Add support for more file formats
-3. Enhance search relevance with better embedding models
-4. Implement user authentication and document permissions
-5. Add support for concurrent document processing
+1. Implementacja zaawansowanych algorytmów predykcyjnych
+2. Rozszerzenie możliwości eksportu danych
+3. Dodanie więcej typów wizualizacji
+4. Integracja z systemami zewnętrznymi
+5. Optymalizacja wydajności dla dużych zbiorów danych
+
+## Struktura Komponentów
+```mermaid
+graph TD
+  A[Dashboard] --> B[EnergyChart]
+  A --> C[PowerStats]
+  A --> D[DeviceStatus]
+  A --> E[FailureAnalysis]
+  B --> F[ChartControls]
+  B --> G[ExportOptions]
+  C --> H[StatCards]
+  C --> I[TrendGraphs]
+  D --> J[DeviceList]
+  D --> K[StatusIndicators]
+  E --> L[AlertSystem]
+  E --> M[RecommendationEngine]
+```
