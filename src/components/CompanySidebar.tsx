@@ -131,17 +131,6 @@ function SidebarContent({
       )}
       <ScrollArea className="flex-1">
         <div className="space-y-4 p-4">
-          {filteredCompanies.map((company) => (
-            <div key={company.id} className="space-y-4">
-              <Button
-                variant="outline"
-                className="w-full flex items-center justify-between"
-                onClick={() => setSelectedCompanyId(company.id)}
-              >
-                <span>{company.name}</span>
-              </Button>
-            </div>
-          ))}
           <Button
             variant="outline"
             className={`mt-2 rounded ${
