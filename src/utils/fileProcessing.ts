@@ -3,7 +3,12 @@ import mammoth from 'mammoth';
 import Tesseract from 'tesseract.js';
 
 // Initialize PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+const pdfjsWorkerPath = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url
+).toString();
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerPath;
 
 export const processImageFile = async (file: File): Promise<string> => {
   try {
