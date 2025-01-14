@@ -29,6 +29,9 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: ['react-dropzone']
   },
+  worker: {
+    format: 'es'
+  },
   test: {
     globals: true,
     environment: 'jsdom',
