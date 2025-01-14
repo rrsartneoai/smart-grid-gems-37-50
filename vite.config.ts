@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => ({
         }
         
         // Copy PDF.js worker to public directory during build
-        const workerPath = path.resolve(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.min.js');
+        const workerPath = path.resolve(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.mjs');
         if (fs.existsSync(workerPath)) {
-          fs.copyFileSync(workerPath, 'public/pdf.worker.min.js');
+          fs.copyFileSync(workerPath, 'public/pdf.worker.mjs');
         } else {
           console.warn('PDF worker file not found at:', workerPath);
         }
