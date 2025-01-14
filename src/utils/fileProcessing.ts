@@ -2,7 +2,7 @@ import * as pdfjs from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import Tesseract from 'tesseract.js';
 
-// Initialize PDF.js worker
+// Initialize PDF.js worker with secure configuration
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 export const processImageFile = async (file: File): Promise<string> => {
@@ -21,7 +21,16 @@ export const processPdfFile = async (file: File): Promise<string> => {
   try {
     console.log('Rozpoczynam przetwarzanie PDF:', file.name);
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    
+    // Add secure configuration
+    const loadingTask = pdfjs.getDocument({
+      data: arrayBuffer,
+      isEvalSupported: false, // Disable eval support for security
+      useSystemFonts: true, // Use system fonts instead of embedded ones
+      disableFontFace: true // Disable custom font loading
+    });
+    
+    const pdf = await loadingTask.promise;
     let fullText = '';
     
     console.log(`PDF ma ${pdf.numPages} stron`);
