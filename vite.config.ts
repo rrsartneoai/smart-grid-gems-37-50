@@ -11,6 +11,16 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
+    {
+      name: 'pdf-worker-plugin',
+      writeBundle() {
+        // Copy PDF.js worker to public directory during build
+        require('fs').copyFileSync(
+          require.resolve('pdfjs-dist/build/pdf.worker.min.js'),
+          'public/pdf.worker.min.js'
+        );
+      },
+    },
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -25,9 +35,6 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['react-dropzone', 'pdfjs-dist']
-  },
-  worker: {
-    format: 'iife'
   },
   test: {
     globals: true,
