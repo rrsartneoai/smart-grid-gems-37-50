@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
     }
   },
   optimizeDeps: {
-    include: ['react-dropzone', 'pdfjs-dist/build/pdf.worker.mjs']
+    include: ['react-dropzone']
   },
   test: {
     globals: true,
