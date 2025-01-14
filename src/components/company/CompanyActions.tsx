@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, MinusCircle, RotateCcw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { companiesData } from "@/data/companies";
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
+import { Separator } from "@/components/ui/separator";
 
 export function CompanyActions() {
   const [isTestListOpen, setIsTestListOpen] = useState(false);
@@ -20,6 +21,7 @@ export function CompanyActions() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { setSelectedCompanyId } = useCompanyStore();
+  const [archivedCompanies, setArchivedCompanies] = useState<typeof companiesData>([]);
 
   const handleAddCompany = () => {
     if (!newCompanyName.trim()) {
@@ -155,6 +157,35 @@ export function CompanyActions() {
     setIsTestListOpen(false);
   };
 
+  const handleArchiveCompany = (company: (typeof companiesData)[0]) => {
+    const index = companiesData.findIndex(c => c.id === company.id);
+    if (index !== -1) {
+      const [removedCompany] = companiesData.splice(index, 1);
+      setArchivedCompanies(prev => [...prev, removedCompany]);
+      toast({
+        title: "Zarchiwizowano",
+        description: `Firma "${company.name}" została zarchiwizowana`,
+      });
+    }
+  };
+
+  const handleRestoreCompany = (company: (typeof companiesData)[0]) => {
+    const index = archivedCompanies.findIndex(c => c.id === company.id);
+    if (index !== -1) {
+      const [restoredCompany] = archivedCompanies.splice(index, 1);
+      companiesData.push(restoredCompany);
+      setArchivedCompanies([...archivedCompanies]);
+      toast({
+        title: "Przywrócono",
+        description: `Firma "${company.name}" została przywrócona`,
+      });
+    }
+  };
+
+  const getNewCompanies = () => {
+    return companiesData.slice(5);
+  };
+
   return (
     <div className="space-y-4 w-full">
       <div className="flex flex-col sm:flex-row gap-2">
@@ -184,10 +215,21 @@ export function CompanyActions() {
                   {companiesData.map((company) => (
                     <li
                       key={company.id}
-                      className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="flex items-center justify-between text-sm text-muted-foreground hover:text-foreground cursor-pointer"
                       onClick={() => handleCompanySelect(company.id)}
                     >
-                      {company.name}
+                      <span>{company.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleArchiveCompany(company);
+                        }}
+                      >
+                        <MinusCircle className="h-4 w-4 text-red-500" />
+                      </Button>
                     </li>
                   ))}
                 </ul>
@@ -222,6 +264,59 @@ export function CompanyActions() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {getNewCompanies().length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Nowe firmy</h3>
+          <ul className="space-y-2">
+            {getNewCompanies().map((company) => (
+              <li
+                key={company.id}
+                className="flex items-center justify-between text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                onClick={() => handleCompanySelect(company.id)}
+              >
+                <span>{company.name}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleArchiveCompany(company);
+                  }}
+                >
+                  <MinusCircle className="h-4 w-4 text-red-500" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {archivedCompanies.length > 0 && (
+        <div className="mt-4">
+          <Separator className="my-4" />
+          <h3 className="text-sm font-medium mb-2">Zarchiwizowane firmy</h3>
+          <ul className="space-y-2">
+            {archivedCompanies.map((company) => (
+              <li
+                key={company.id}
+                className="flex items-center justify-between text-sm text-muted-foreground"
+              >
+                <span>{company.name}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => handleRestoreCompany(company)}
+                >
+                  <RotateCcw className="h-4 w-4 text-green-500" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
