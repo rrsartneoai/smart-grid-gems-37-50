@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -13,12 +15,15 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
     {
       name: 'pdf-worker-plugin',
-      writeBundle() {
+      buildStart() {
+        // Ensure public directory exists
+        if (!fs.existsSync('public')) {
+          fs.mkdirSync('public');
+        }
+        
         // Copy PDF.js worker to public directory during build
-        require('fs').copyFileSync(
-          require.resolve('pdfjs-dist/build/pdf.worker.min.js'),
-          'public/pdf.worker.min.js'
-        );
+        const workerPath = fileURLToPath(new URL('./node_modules/pdfjs-dist/build/pdf.worker.min.js', import.meta.url));
+        fs.copyFileSync(workerPath, 'public/pdf.worker.min.js');
       },
     },
   ].filter(Boolean),
