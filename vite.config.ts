@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       external: []
     },
-    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    target: 'es2020',
     commonjsOptions: {
       include: [/node_modules/]
     }

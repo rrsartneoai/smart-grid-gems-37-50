@@ -3,8 +3,7 @@ import mammoth from 'mammoth';
 import Tesseract from 'tesseract.js';
 
 // Initialize PDF.js worker
-const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.mjs');
-pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export const processImageFile = async (file: File): Promise<string> => {
   try {
@@ -65,12 +64,3 @@ export const processDocxFile = async (file: File): Promise<string> => {
     throw error;
   }
 };
-
-export const ALLOWED_FILE_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "image/png",
-  "image/jpeg",
-];
-
-export const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
