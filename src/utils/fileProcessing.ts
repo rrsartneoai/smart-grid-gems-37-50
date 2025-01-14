@@ -4,7 +4,10 @@ import Tesseract from 'tesseract.js';
 
 // Initialize PDF.js worker
 if (typeof window !== 'undefined') {
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.js',
+    import.meta.url
+  ).toString();
 }
 
 export const processImageFile = async (file: File): Promise<string> => {
@@ -26,9 +29,9 @@ export const processPdfFile = async (file: File): Promise<string> => {
     
     const loadingTask = pdfjs.getDocument({
       data: arrayBuffer,
-      isEvalSupported: false, // Disable eval for security
-      useSystemFonts: true, // Use system fonts
-      disableFontFace: true // Disable custom font loading
+      isEvalSupported: false,
+      useSystemFonts: true,
+      disableFontFace: true
     });
     
     const pdf = await loadingTask.promise;

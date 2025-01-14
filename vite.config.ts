@@ -22,12 +22,12 @@ export default defineConfig(({ mode }) => ({
       external: []
     },
     target: 'es2020',
-    commonjsOptions: {
-      include: [/node_modules/]
-    }
   },
   optimizeDeps: {
-    include: ['react-dropzone']
+    include: ['react-dropzone', 'pdfjs-dist']
+  },
+  worker: {
+    format: 'iife'
   },
   test: {
     globals: true,
