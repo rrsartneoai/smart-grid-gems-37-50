@@ -127,6 +127,19 @@ function SidebarContent({
           <div className="mt-4">
             <CompanyActions />
           </div>
+          <div className="mt-4">
+            {filteredCompanies.map((company) => (
+              <div key={company.id} className="space-y-4">
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-between"
+                  onClick={() => setSelectedCompanyId(company.id)}
+                >
+                  <span>{company.name}</span>
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
       <ScrollArea className="flex-1">

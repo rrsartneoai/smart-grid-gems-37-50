@@ -29,7 +29,32 @@ export function CompanyActions() {
       return;
     }
 
-    // Add company logic here (in a real app, this would be an API call)
+    const newCompany = {
+      id: (companiesData.length + 1).toString(),
+      name: newCompanyName,
+      stats: [
+        {
+          title: "Ladunek",
+          value: "10,000",
+          unit: "MW",
+          icon: companiesData[0].stats[0].icon,
+          description: "Nowa firma",
+          details: [
+            { label: "Szczyt dzienny", value: "11,000 MW" },
+            { label: "Minimum", value: "9,000 MW" },
+            { label: "Średnia", value: "10,000 MW" },
+          ],
+        },
+      ],
+      energyData: [
+        { name: "00:00", consumption: 350, production: 320, efficiency: 91 },
+        { name: "12:00", consumption: 650, production: 600, efficiency: 92 },
+        { name: "23:59", consumption: 350, production: 320, efficiency: 91 },
+      ],
+    };
+
+    companiesData.push(newCompany);
+
     toast({
       title: "Sukces",
       description: `Firma "${newCompanyName}" została dodana`,
