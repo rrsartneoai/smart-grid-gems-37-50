@@ -4,10 +4,7 @@ import Tesseract from 'tesseract.js';
 
 // Initialize PDF.js worker
 if (typeof window !== 'undefined') {
-  const pdfjsWorker = new Worker(
-    new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url)
-  );
-  pdfjs.GlobalWorkerOptions.workerPort = pdfjsWorker;
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 }
 
 export const processImageFile = async (file: File): Promise<string> => {
