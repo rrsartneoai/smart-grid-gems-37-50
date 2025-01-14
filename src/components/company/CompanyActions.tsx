@@ -12,12 +12,14 @@ import { Input } from "@/components/ui/input";
 import { companiesData } from "@/data/companies";
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCompanyStore } from "@/components/CompanySidebar";
 
 export function CompanyActions() {
   const [isTestListOpen, setIsTestListOpen] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { setSelectedCompanyId } = useCompanyStore();
 
   const handleAddCompany = () => {
     if (!newCompanyName.trim()) {
@@ -35,14 +37,97 @@ export function CompanyActions() {
       stats: [
         {
           title: "Ladunek",
-          value: "10,000",
+          value: "12,500",
           unit: "MW",
           icon: companiesData[0].stats[0].icon,
-          description: "Nowa firma",
+          description: "↗️ +5.2% od ostatniego dnia",
           details: [
-            { label: "Szczyt dzienny", value: "11,000 MW" },
-            { label: "Minimum", value: "9,000 MW" },
-            { label: "Średnia", value: "10,000 MW" },
+            { label: "Szczyt dzienny", value: "13,000 MW" },
+            { label: "Minimum", value: "11,000 MW" },
+            { label: "Średnia", value: "12,000 MW" },
+          ],
+        },
+        {
+          title: "Obciążenie netto",
+          value: "11,800",
+          unit: "MW",
+          icon: companiesData[0].stats[1].icon,
+          description: "↘️ -0.8% od ostatniej godziny",
+          details: [
+            { label: "Szczyt", value: "12,500 MW" },
+            { label: "Minimum dzienne", value: "11,000 MW" },
+            { label: "Prognoza", value: "11,500 MW" },
+          ],
+        },
+        {
+          title: "Cena",
+          value: "29.75",
+          unit: "/MWh",
+          icon: companiesData[0].stats[2].icon,
+          description: "↗️ +0.9% od ostatniego odczytu",
+          details: [
+            { label: "Maksymalna", value: "31.00 /MWh" },
+            { label: "Minimalna", value: "28.50 /MWh" },
+            { label: "Średnia dzienna", value: "29.25 /MWh" },
+          ],
+        },
+        {
+          title: "Główne źródło",
+          value: "Energia odnawialna",
+          icon: companiesData[0].stats[3].icon,
+          description: "70% udziału w miksie",
+          details: [
+            { label: "Wydajność", value: "88%" },
+            { label: "Emisja CO2", value: "150 g/kWh" },
+            { label: "Moc nominalna", value: "15,000 MW" },
+          ],
+        },
+        {
+          title: "Częstotliwość sieci",
+          value: "50.01",
+          unit: "Hz",
+          icon: companiesData[0].stats[4].icon,
+          description: "Stabilna częstotliwość w normie",
+          details: [
+            { label: "Min", value: "49.97 Hz" },
+            { label: "Max", value: "50.03 Hz" },
+            { label: "Średnia", value: "50.00 Hz" },
+          ],
+        },
+        {
+          title: "Napięcie fazowe",
+          value: "230.2",
+          unit: "V",
+          icon: companiesData[0].stats[5].icon,
+          description: "Optymalne napięcie w sieci",
+          details: [
+            { label: "Min", value: "228.5 V" },
+            { label: "Max", value: "231.5 V" },
+            { label: "Średnia", value: "230.0 V" },
+          ],
+        },
+        {
+          title: "Jakość sygnału",
+          value: "97.5",
+          unit: "%",
+          icon: companiesData[0].stats[6].icon,
+          description: "Wysoka jakość transmisji danych",
+          details: [
+            { label: "Utracone pakiety", value: "0.03%" },
+            { label: "Opóźnienie", value: "18ms" },
+            { label: "Stabilność", value: "99.8%" },
+          ],
+        },
+        {
+          title: "Czas odpowiedzi",
+          value: "15",
+          unit: "ms",
+          icon: companiesData[0].stats[7].icon,
+          description: "Szybka komunikacja z urządzeniami",
+          details: [
+            { label: "Min", value: "10 ms" },
+            { label: "Max", value: "22 ms" },
+            { label: "Średnia", value: "16 ms" },
           ],
         },
       ],
@@ -62,6 +147,11 @@ export function CompanyActions() {
 
     setNewCompanyName("");
     setIsDialogOpen(false);
+  };
+
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    setIsTestListOpen(false);
   };
 
   return (
@@ -94,6 +184,7 @@ export function CompanyActions() {
                     <li
                       key={company.id}
                       className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                      onClick={() => handleCompanySelect(company.id)}
                     >
                       {company.name}
                     </li>

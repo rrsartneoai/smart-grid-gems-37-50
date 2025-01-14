@@ -101,12 +101,9 @@ function SidebarContent({
   collapsed = false,
   searchQuery,
   setSearchQuery,
-  filteredCompanies,
   isAIAssistantVisible,
   navigate
 }: SidebarContentProps) {
-  const { selectedCompanyId, setSelectedCompanyId } = useCompanyStore();
-
   return (
     <div className="flex h-full flex-col gap-4">
       {!collapsed && (
@@ -126,19 +123,6 @@ function SidebarContent({
           </div>
           <div className="mt-4">
             <CompanyActions />
-          </div>
-          <div className="mt-4">
-            {filteredCompanies.map((company) => (
-              <div key={company.id} className="space-y-4">
-                <Button
-                  variant="outline"
-                  className="w-full flex items-center justify-between"
-                  onClick={() => setSelectedCompanyId(company.id)}
-                >
-                  <span>{company.name}</span>
-                </Button>
-              </div>
-            ))}
           </div>
         </div>
       )}
