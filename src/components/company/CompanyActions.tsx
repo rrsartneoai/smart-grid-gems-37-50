@@ -37,7 +37,7 @@ export function CompanyActions() {
       stats: [
         {
           title: "Ladunek",
-          value: "12,500",
+          value: (Math.random() * 20000).toFixed(0),
           unit: "MW",
           icon: companiesData[0].stats[0].icon,
           description: "↗️ +5.2% od ostatniego dnia",
@@ -49,7 +49,7 @@ export function CompanyActions() {
         },
         {
           title: "Obciążenie netto",
-          value: "11,800",
+          value: (Math.random() * 15000).toFixed(0),
           unit: "MW",
           icon: companiesData[0].stats[1].icon,
           description: "↘️ -0.8% od ostatniej godziny",
@@ -61,7 +61,7 @@ export function CompanyActions() {
         },
         {
           title: "Cena",
-          value: "29.75",
+          value: (25 + Math.random() * 10).toFixed(2),
           unit: "/MWh",
           icon: companiesData[0].stats[2].icon,
           description: "↗️ +0.9% od ostatniego odczytu",
@@ -84,7 +84,7 @@ export function CompanyActions() {
         },
         {
           title: "Częstotliwość sieci",
-          value: "50.01",
+          value: (50 + Math.random() * 0.1).toFixed(2),
           unit: "Hz",
           icon: companiesData[0].stats[4].icon,
           description: "Stabilna częstotliwość w normie",
@@ -96,7 +96,7 @@ export function CompanyActions() {
         },
         {
           title: "Napięcie fazowe",
-          value: "230.2",
+          value: (230 + Math.random() * 1).toFixed(1),
           unit: "V",
           icon: companiesData[0].stats[5].icon,
           description: "Optymalne napięcie w sieci",
@@ -108,7 +108,7 @@ export function CompanyActions() {
         },
         {
           title: "Jakość sygnału",
-          value: "97.5",
+          value: (90 + Math.random() * 10).toFixed(1),
           unit: "%",
           icon: companiesData[0].stats[6].icon,
           description: "Wysoka jakość transmisji danych",
@@ -120,7 +120,7 @@ export function CompanyActions() {
         },
         {
           title: "Czas odpowiedzi",
-          value: "15",
+          value: (10 + Math.random() * 10).toFixed(0),
           unit: "ms",
           icon: companiesData[0].stats[7].icon,
           description: "Szybka komunikacja z urządzeniami",
@@ -139,6 +139,7 @@ export function CompanyActions() {
     };
 
     companiesData.push(newCompany);
+    setSelectedCompanyId(newCompany.id);
 
     toast({
       title: "Sukces",
@@ -180,7 +181,7 @@ export function CompanyActions() {
                 className="absolute z-50 mt-2 w-64 rounded-md bg-popover shadow-lg ring-1 ring-black ring-opacity-5"
               >
                 <ul className="py-2 px-4 space-y-2">
-                  {companiesData.slice(0, 5).map((company) => (
+                  {companiesData.map((company) => (
                     <li
                       key={company.id}
                       className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
