@@ -8,7 +8,12 @@ if (!API_KEY) {
 
 const genAI = new GoogleGenerativeAI(API_KEY || "");
 
-export const generateGeminiResponse = async (prompt: string) => {
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const MAX_RETRIES = 3;
+const BASE_DELAY = 1000; // 1 second
+
+export const generateGeminiResponse = async (prompt: string, retryCount = 0): Promise<string> => {
   if (!API_KEY) {
     return "Przepraszam, ale brak skonfigurowanego klucza API dla Gemini. Proszę skontaktować się z administratorem.";
   }
@@ -18,9 +23,18 @@ export const generateGeminiResponse = async (prompt: string) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
-  } catch (error) {
-    console.error("Błąd podczas komunikacji z Gemini:", error);
-    return "Przepraszam, wystąpił błąd podczas przetwarzania zapytania. Proszę spróbować ponownie.";
+  } catch (error: any) {
+    console.error("Error with Gemini API:", error);
+
+    // Check if it's a rate limit error (429)
+    if (error?.status === 429 && retryCount < MAX_RETRIES) {
+      const waitTime = BASE_DELAY * Math.pow(2, retryCount); // Exponential backoff
+      console.log(`Rate limited. Retrying in ${waitTime}ms...`);
+      await delay(waitTime);
+      return generateGeminiResponse(prompt, retryCount + 1);
+    }
+
+    return "Przepraszam, wystąpił błąd podczas przetwarzania zapytania. Proszę spróbować ponownie za chwilę.";
   }
 };
 
