@@ -197,7 +197,7 @@ export function CompanyActions() {
             onClick={() => setIsTestListOpen(!isTestListOpen)}
             className="w-full sm:w-auto"
           >
-            Testowe
+            
             {isTestListOpen ? (
               <ChevronUp className="ml-2 h-4 w-4" />
             ) : (
