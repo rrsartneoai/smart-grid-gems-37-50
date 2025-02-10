@@ -1,6 +1,7 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -8,9 +9,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { SensorIcon, SensorIconType } from "./SensorIcon";
 
 interface SensorCardProps {
-  icon: ReactNode;
+  iconType: SensorIconType;
   name: string;
   value: string;
   unit: string;
@@ -18,7 +20,7 @@ interface SensorCardProps {
   description: string;
 }
 
-export const SensorCard = ({ icon, name, value, unit, status, description }: SensorCardProps) => {
+export const SensorCard = ({ iconType, name, value, unit, status, description }: SensorCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -32,7 +34,9 @@ export const SensorCard = ({ icon, name, value, unit, status, description }: Sen
               className="w-full space-y-2"
             >
               <div className="flex items-center gap-3">
-                <div className="text-muted-foreground">{icon}</div>
+                <div className="text-muted-foreground">
+                  <SensorIcon type={iconType} />
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">{name}</span>
