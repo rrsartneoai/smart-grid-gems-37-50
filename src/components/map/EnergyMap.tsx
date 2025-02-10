@@ -90,7 +90,7 @@ const AirQualityMap = () => {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-green-500" />
-              <span>Dobra jakość powietrza (AQI ≤ 50)</span>
+              <span>Dobra jakość powietrza (AQI {'≤'} 50)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-yellow-500" />
@@ -98,7 +98,7 @@ const AirQualityMap = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-red-500" />
-              <span>Zła jakość powietrza (AQI > 100)</span>
+              <span>Zła jakość powietrza (AQI {'>'} 100)</span>
             </div>
           </div>
         </div>
@@ -108,3 +108,4 @@ const AirQualityMap = () => {
 };
 
 export default AirQualityMap;
+
