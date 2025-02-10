@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 
 const tutorialSteps = [
   {
-    title: "Witaj w panelu monitorowania. stanu jakości powietrza.",
+    title: "Witaj w panelu monitorowania stanu jakości powietrza.",
     description: "Ten panel pomoże Ci monitorować i analizować dane z inteligentnej sieci smart grid oraz inteligentnych czujników jakości powietrza. Przeprowadzimy Cię przez najważniejsze funkcje systemu."
   },
   {
