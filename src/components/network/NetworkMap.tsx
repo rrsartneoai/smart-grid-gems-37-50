@@ -19,7 +19,7 @@ interface Device {
 const mockDevices: Device[] = [
   {
     id: "tr-001",
-    name: "Transformator T1",
+    name: "Airthings A1",
     type: "transformer",
     status: "operational",
     position: [54.372158, 18.638306],
@@ -127,13 +127,13 @@ export function NetworkMap() {
     <div className="grid gap-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold">Mapa sieci</h2>
+          <h2 className="text-2xl font-bold">Mapa sieci czujników</h2>
           <Globe className="w-6 h-6 text-primary animate-spin" style={{ animationDuration: '3s' }} />
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="gap-1">
             <CircuitBoard className="w-4 h-4 text-success" />
-            <span>Transformatory</span>
+            <span>Airthings</span>
           </Badge>
           <Badge variant="outline" className="gap-1">
             <Gauge className="w-4 h-4 text-success" />
