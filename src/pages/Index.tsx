@@ -1,3 +1,4 @@
+
 import { motion, useScroll, useTransform } from "framer-motion";
 import { PowerStats } from "@/components/dashboard/PowerStats";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
@@ -29,9 +30,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
-import { ExperimentsPanel } from "@/components/experiments/ExperimentsPanel";
 import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
-import { PomeranianAirQuality } from "@/components/dashboard/PomeranianAirQuality";
+import { PomeranianAirQuality } from "@/components/pomerania/PomeranianAirQuality";
 import '../i18n/config';
 
 const Index = () => {
