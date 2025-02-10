@@ -19,24 +19,24 @@ export const EnergyManagementFunctionalities = () => {
   const features: EnergyFeature[] = [
     {
       icon: LineChart,
-      name: "Monitorowanie zużycia energii",
-      description: "Szczegółowe informacje o zużyciu energii przez urządzenia",
-    },
-    {
-      icon: Lightbulb,
-      name: "Optymalizacja zużycia energii",
-      description: "Sugestie zmniejszenia zużycia energii",
-    },
-    {
-      icon: Sun,
-      name: "Integracja z panelami fotowoltaicznymi",
-      description: "Informacje o produkcji i zużyciu energii",
-    },
-    {
-      icon: Car,
-      name: "Zarządzanie ładowaniem pojazdów",
-      description: "Automatyczne ładowanie w optymalnych godzinach",
-    },
+      name: "Monitorowanie stanu klimatyzatorów i urządzen badających jakość powietrza",
+    //   description: "Szczegółowe informacje o zużyciu energii przez urządzenia",
+    }
+    // {
+    //   icon: Lightbulb,
+    //   name: "Optymalizacja zużycia energii",
+    //   description: "Sugestie zmniejszenia zużycia energii",
+    // },
+    // {
+    //   icon: Sun,
+    //   name: "Integracja z panelami fotowoltaicznymi",
+    //   description: "Informacje o produkcji i zużyciu energii",
+    // },
+    // {
+    //   icon: Car,
+    //   name: "Zarządzanie ładowaniem pojazdów",
+    //   description: "Automatyczne ładowanie w optymalnych godzinach",
+    // },
   ];
 
   const handleFeatureClick = () => {
