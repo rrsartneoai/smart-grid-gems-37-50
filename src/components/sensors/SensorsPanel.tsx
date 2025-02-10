@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { SensorCard } from "./SensorCard";
 import { CityTabs } from "./CityTabs";
@@ -13,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AirQualityChart } from "../dashboard/AirQualityChart";
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
@@ -132,7 +132,7 @@ const SensorsPanel = () => {
     <div className="w-full max-w-[1400px] mx-auto px-4" id="sensors-panel">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold">Czujniki</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">Czujniki i jakość powietrza</h2>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
             <span>{t('lastSync')}: 1h</span>
@@ -197,7 +197,7 @@ const SensorsPanel = () => {
 
         {currentCityData && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredSensors.map((sensor, index) => (
                 <SensorCard 
                   key={index}
@@ -214,6 +214,7 @@ const SensorsPanel = () => {
             <div className="mt-8 space-y-8">
               <AlertsConfig />
               <DataComparison />
+              <AirQualityChart />
               
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Dane dla miasta {currentCityData.name}</h3>

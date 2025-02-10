@@ -158,7 +158,6 @@ const Index = () => {
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
                     <TabsTrigger value="integrations">{t('integrations')}</TabsTrigger>
-                    <TabsTrigger value="experiments">{t('Air quality status')}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="spaces" className="space-y-6">
@@ -232,10 +231,6 @@ const Index = () => {
 
                   <TabsContent value="integrations">
                     <IntegrationsPanel />
-                  </TabsContent>
-
-                  <TabsContent value="experiments">
-                    <ExperimentsPanel />
                   </TabsContent>
                 </Tabs>
               </motion.div>
