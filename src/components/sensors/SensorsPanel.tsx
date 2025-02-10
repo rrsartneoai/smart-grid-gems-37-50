@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { SensorCard } from "./SensorCard";
 import { CityTabs } from "./CityTabs";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
@@ -33,7 +35,7 @@ const SensorsPanel = () => {
       }
       return response.json();
     },
-    refetchInterval: 300000, // Refresh every 5 minutes
+    refetchInterval: 300000,
   });
 
   const { data: airQualityData } = useQuery({
@@ -108,10 +110,7 @@ const SensorsPanel = () => {
 
   const handleExport = (format: 'pdf' | 'jpg' | 'xlsx' | 'csv') => {
     console.log(`Exporting in ${format} format`);
-    toast({
-      title: "Eksport",
-      description: `Eksportowanie danych w formacie ${format}`,
-    });
+    toast.info(`Eksportowanie danych w formacie ${format}`);
   };
 
   const filteredSensors = currentCityData.sensors.map(sensor => {
@@ -119,7 +118,6 @@ const SensorsPanel = () => {
     if (realData) {
       return {
         ...sensor,
-        iconType: sensor.iconType,
         value: realData.value,
         description: realData.description,
       };
@@ -228,7 +226,6 @@ const SensorsPanel = () => {
                     {currentCityData.sensors.map((sensor, index) => (
                       <div key={index} className="p-4 rounded-lg bg-background/50 border">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-primary">{sensor.icon}</span>
                           <span className="font-medium">{sensor.name}</span>
                         </div>
                         <div className="flex flex-col gap-1">
