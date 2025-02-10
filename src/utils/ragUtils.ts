@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { getGeminiResponse } from '@/lib/gemini';
@@ -10,8 +11,20 @@ let documentChunks: { text: string; metadata?: Record<string, any> }[] = [];
 export const generateRAGResponse = async (query: string): Promise<string> => {
   console.log('Generuję odpowiedź dla zapytania:', query);
 
+  const isAirQualityRelated = query.toLowerCase().includes('powietrz') || 
+                             query.toLowerCase().includes('pm') ||
+                             query.toLowerCase().includes('zanieczyszcz');
+
   if (documentChunks.length === 0) {
     console.log('Brak dokumentów w pamięci');
+    
+    // If it's an air quality query, use Gemini API even without local documents
+    if (isAirQualityRelated) {
+      const enhancedPrompt = `Odpowiedz na pytanie dotyczące jakości powietrza: ${query}. 
+      Skup się na informacjach dotyczących wpływu na zdrowie i zalecanych działaniach profilaktycznych.`;
+      return getGeminiResponse(enhancedPrompt);
+    }
+    
     return "Nie wgrano jeszcze żadnego dokumentu. Proszę najpierw wgrać dokument, aby móc zadawać pytania.";
   }
 
@@ -19,16 +32,26 @@ export const generateRAGResponse = async (query: string): Promise<string> => {
   
   if (relevantChunks.length === 0) {
     console.log('Nie znaleziono pasujących fragmentów');
+    
+    // For air quality queries, use Gemini API with enhanced prompt
+    if (isAirQualityRelated) {
+      const enhancedPrompt = `Odpowiedz na pytanie dotyczące jakości powietrza: ${query}. 
+      Uwzględnij wpływ na zdrowie i zalecane działania profilaktyczne.`;
+      return getGeminiResponse(enhancedPrompt);
+    }
+    
     return "Nie znalazłem odpowiednich informacji w wgranym dokumencie, które pomogłyby odpowiedzieć na to pytanie.";
   }
 
   const context = relevantChunks.join('\n\n');
-  const prompt = `Na podstawie poniższego kontekstu, ${query === 'podsumuj' ? 'przedstaw krótkie podsumowanie głównych punktów dokumentu' : 'odpowiedz na pytanie'}. Jeśli odpowiedź nie znajduje się w kontekście, powiedz o tym.
+  const prompt = `Na podstawie poniższego kontekstu, ${query === 'podsumuj' ? 'przedstaw krótkie podsumowanie głównych punktów dokumentu' : 'odpowiedz na pytanie'}. 
+  ${isAirQualityRelated ? 'Zwróć szczególną uwagę na informacje dotyczące jakości powietrza i ich wpływu na zdrowie.' : ''}
+  Jeśli odpowiedź nie znajduje się w kontekście, powiedz o tym.
 
-Kontekst:
-${context}
+  Kontekst:
+  ${context}
 
-${query === 'podsumuj' ? 'Podsumuj najważniejsze informacje z dokumentu.' : `Pytanie: ${query}`}`;
+  ${query === 'podsumuj' ? 'Podsumuj najważniejsze informacje z dokumentu.' : `Pytanie: ${query}`}`;
 
   console.log('Wysyłam zapytanie do Gemini z kontekstem długości:', context.length);
   return getGeminiResponse(prompt);

@@ -1,56 +1,84 @@
+
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { generateRAGResponse } from "@/utils/ragUtils";
-import { companiesData } from "@/data/companies";
+import { sensorsData } from "@/components/sensors/SensorsData";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
   dataVisualizations?: Array<{
-    type: "consumption" | "production" | "efficiency";
+    type: "airQuality" | "temperature" | "humidity";
     title: string;
   }>;
 }
 
-const getDashboardValue = (query: string): { text: string; visualizations?: Message["dataVisualizations"] } => {
+const getAirQualityData = (query: string): { text: string; visualizations?: Message["dataVisualizations"] } => {
   const lowercaseQuery = query.toLowerCase();
+  const gdanskData = sensorsData.gdansk;
   
-  // Check for visualization requests
-  if (lowercaseQuery.includes("zużycie") || lowercaseQuery.includes("zuzycie")) {
-    return {
-      text: "Oto wykres zużycia energii w czasie:",
-      visualizations: [{ type: "consumption", title: "Zużycie energii" }]
-    };
+  if (!gdanskData) {
+    return { text: "Przepraszam, ale nie mogę znaleźć danych dla Gdańska." };
   }
-  
-  if (lowercaseQuery.includes("produkcja")) {
-    return {
-      text: "Oto wykres produkcji energii w czasie:",
-      visualizations: [{ type: "production", title: "Produkcja energii" }]
-    };
+
+  // Check for specific air quality parameters
+  if (lowercaseQuery.includes("pm2.5") || lowercaseQuery.includes("pm2,5")) {
+    const pm25Sensor = gdanskData.sensors.find(s => s.name === "PM 2.5");
+    if (pm25Sensor) {
+      return {
+        text: `Aktualny poziom PM2.5 w Gdańsku wynosi ${pm25Sensor.value} ${pm25Sensor.unit}. ${pm25Sensor.description}`,
+        visualizations: [{ type: "airQuality", title: "Poziom PM2.5" }]
+      };
+    }
   }
-  
-  if (lowercaseQuery.includes("wydajność") || lowercaseQuery.includes("wydajnosc")) {
+
+  if (lowercaseQuery.includes("pm10")) {
+    const pm10Sensor = gdanskData.sensors.find(s => s.name === "PM10");
+    if (pm10Sensor) {
+      return {
+        text: `Aktualny poziom PM10 w Gdańsku wynosi ${pm10Sensor.value} ${pm10Sensor.unit}. ${pm10Sensor.description}`,
+        visualizations: [{ type: "airQuality", title: "Poziom PM10" }]
+      };
+    }
+  }
+
+  // General air quality queries
+  if (lowercaseQuery.includes("jakość powietrza") || lowercaseQuery.includes("zanieczyszczenie")) {
+    const airQualityInfo = gdanskData.sensors
+      .filter(s => ["PM 2.5", "PM10"].includes(s.name))
+      .map(s => `${s.name}: ${s.value} ${s.unit} (${s.status})`)
+      .join("\n");
+
     return {
-      text: "Oto wykres wydajności w czasie:",
-      visualizations: [{ type: "efficiency", title: "Wydajność" }]
+      text: `Aktualna jakość powietrza w Gdańsku:\n${airQualityInfo}`,
+      visualizations: [{ type: "airQuality", title: "Jakość powietrza" }]
     };
   }
 
-  const matchingStat = companiesData[0]?.stats.find(stat => {
-    const title = stat.title.toLowerCase();
-    return lowercaseQuery.includes(title);
-  });
-
-  if (matchingStat) {
-    return {
-      text: `${matchingStat.title}: ${matchingStat.value}${matchingStat.unit ? ' ' + matchingStat.unit : ''} (${matchingStat.description})`
-    };
+  // Temperature and humidity as secondary parameters
+  if (lowercaseQuery.includes("temperatura")) {
+    const tempSensor = gdanskData.sensors.find(s => s.name === "Temp");
+    if (tempSensor) {
+      return {
+        text: `Aktualna temperatura w Gdańsku wynosi ${tempSensor.value} ${tempSensor.unit}. ${tempSensor.description}`,
+        visualizations: [{ type: "temperature", title: "Temperatura" }]
+      };
+    }
   }
 
-  return { text: "Nie znalazłem tej informacji w panelu." };
+  if (lowercaseQuery.includes("wilgotność")) {
+    const humiditySensor = gdanskData.sensors.find(s => s.name === "Humidity");
+    if (humiditySensor) {
+      return {
+        text: `Aktualna wilgotność w Gdańsku wynosi ${humiditySensor.value} ${humiditySensor.unit}. ${humiditySensor.description}`,
+        visualizations: [{ type: "humidity", title: "Wilgotność" }]
+      };
+    }
+  }
+
+  return { text: "Nie znalazłem tej informacji w dostępnych danych." };
 };
 
 export const useChat = () => {
@@ -80,10 +108,13 @@ export const useChat = () => {
 
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (input: string) => {
-      const dashboardValue = getDashboardValue(input);
-      if (dashboardValue.text !== "Nie znalazłem tej informacji w panelu.") {
-        return dashboardValue;
+      // First, check local sensor data
+      const localData = getAirQualityData(input);
+      if (localData.text !== "Nie znalazłem tej informacji w dostępnych danych.") {
+        return localData;
       }
+      
+      // If no local data found, try RAG with uploaded documents
       const response = await generateRAGResponse(input);
       return { text: response };
     },
@@ -99,8 +130,8 @@ export const useChat = () => {
     onError: () => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to get a response. Please try again.",
+        title: "Błąd",
+        description: "Nie udało się uzyskać odpowiedzi. Spróbuj ponownie.",
       });
     },
   });
