@@ -8,8 +8,8 @@ export const ExperimentsPanel = () => {
     <div className="space-y-6">
       <WeatherPanel />
       <EnergyCard />
-      <ChargingStationsCard />
-      <BikeStationsCard />
+{/*       <ChargingStationsCard />
+      <BikeStationsCard /> */}
     </div>
   );
 };
