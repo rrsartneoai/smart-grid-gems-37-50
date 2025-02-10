@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { Separator } from "@/components/ui/separator";
+import { CompanyStats } from "@/types/company";
+import { Activity, Battery, Cpu, DollarSign, Flame, Gauge, Power, Timer, Wifi, Zap } from "lucide-react";
 
 export function CompanyActions() {
   const [newProjectName, setNewProjectName] = useState("");
@@ -22,6 +25,105 @@ export function CompanyActions() {
   const { toast } = useToast();
   const { setSelectedCompanyId } = useCompanyStore();
   const [archivedProjects, setArchivedProjects] = useState<typeof companiesData>([]);
+
+  const defaultStats: CompanyStats[] = [
+    {
+      title: "PM2.5",
+      value: "0.6",
+      unit: "µg/m³",
+      icon: Activity,
+      description: "↗️ +2.1% od ostatniego pomiaru",
+      details: [
+        { label: "Norma WHO", value: "10 µg/m³" },
+        { label: "Norma EU", value: "25 µg/m³" },
+        { label: "Średnia 24h", value: "0.6 µg/m³" },
+      ],
+    },
+    {
+      title: "PM10",
+      value: "7.8",
+      unit: "µg/m³",
+      icon: Battery,
+      description: "↘️ -1.2% od ostatniej godziny",
+      details: [
+        { label: "Norma WHO", value: "20 µg/m³" },
+        { label: "Norma EU", value: "50 µg/m³" },
+        { label: "Średnia 24h", value: "7.8 µg/m³" },
+      ],
+    },
+    {
+      title: "O₃ (Ozon)",
+      value: "97.8",
+      unit: "µg/m³",
+      icon: Cpu,
+      description: "↗️ +1.5% od ostatniego odczytu",
+      details: [
+        { label: "Norma WHO", value: "100 µg/m³" },
+        { label: "Norma EU", value: "120 µg/m³" },
+        { label: "Średnia 8h", value: "97.8 µg/m³" },
+      ],
+    },
+    {
+      title: "NO₂",
+      value: "21.1",
+      unit: "µg/m³",
+      icon: Gauge,
+      description: "↘️ -0.8% od ostatniej godziny",
+      details: [
+        { label: "Norma WHO", value: "40 µg/m³" },
+        { label: "Norma EU", value: "40 µg/m³" },
+        { label: "Średnia roczna", value: "21.1 µg/m³" },
+      ],
+    },
+    {
+      title: "SO₂",
+      value: "19.6",
+      unit: "µg/m³",
+      icon: Power,
+      description: "Stabilny poziom",
+      details: [
+        { label: "Norma WHO", value: "20 µg/m³" },
+        { label: "Norma EU", value: "125 µg/m³" },
+        { label: "Średnia 24h", value: "19.6 µg/m³" },
+      ],
+    },
+    {
+      title: "CO",
+      value: "2117",
+      unit: "µg/m³",
+      icon: Zap,
+      description: "Dobry poziom",
+      details: [
+        { label: "Norma EU", value: "10000 µg/m³" },
+        { label: "Średnia 8h", value: "2117 µg/m³" },
+        { label: "Trend", value: "Stabilny" },
+      ],
+    },
+    {
+      title: "Indeks CAQI",
+      value: "27.3",
+      unit: "",
+      icon: DollarSign,
+      description: "Dobra jakość powietrza",
+      details: [
+        { label: "Interpretacja", value: "Dobra" },
+        { label: "Zalecenia", value: "Można przebywać na zewnątrz" },
+        { label: "Trend", value: "Stabilny" },
+      ],
+    },
+    {
+      title: "Wilgotność",
+      value: "54.7",
+      unit: "%",
+      icon: Flame,
+      description: "Optymalna wilgotność",
+      details: [
+        { label: "Min 24h", value: "45%" },
+        { label: "Max 24h", value: "65%" },
+        { label: "Średnia", value: "54.7%" },
+      ],
+    },
+  ];
 
   const handleAddProject = () => {
     if (!newProjectName.trim()) {
@@ -37,104 +139,7 @@ export function CompanyActions() {
       id: (companiesData.length + 1).toString(),
       name: newProjectName,
       energyData: [],
-      stats: [
-        {
-          title: "PM2.5",
-          value: "0.6",
-          unit: "µg/m³",
-          icon: companiesData[0].stats[0].icon,
-          description: "↗️ +2.1% od ostatniego pomiaru",
-          details: [
-            { label: "Norma WHO", value: "10 µg/m³" },
-            { label: "Norma EU", value: "25 µg/m³" },
-            { label: "Średnia 24h", value: "0.6 µg/m³" },
-          ],
-        },
-        {
-          title: "PM10",
-          value: "7.8",
-          unit: "µg/m³",
-          icon: companiesData[0].stats[1].icon,
-          description: "↘️ -1.2% od ostatniej godziny",
-          details: [
-            { label: "Norma WHO", value: "20 µg/m³" },
-            { label: "Norma EU", value: "50 µg/m³" },
-            { label: "Średnia 24h", value: "7.8 µg/m³" },
-          ],
-        },
-        {
-          title: "O₃ (Ozon)",
-          value: "97.8",
-          unit: "µg/m³",
-          icon: companiesData[0].stats[2].icon,
-          description: "↗️ +1.5% od ostatniego odczytu",
-          details: [
-            { label: "Norma WHO", value: "100 µg/m³" },
-            { label: "Norma EU", value: "120 µg/m³" },
-            { label: "Średnia 8h", value: "97.8 µg/m³" },
-          ],
-        },
-        {
-          title: "NO₂",
-          value: "21.1",
-          unit: "µg/m³",
-          icon: companiesData[0].stats[3].icon,
-          description: "↘️ -0.8% od ostatniej godziny",
-          details: [
-            { label: "Norma WHO", value: "40 µg/m³" },
-            { label: "Norma EU", value: "40 µg/m³" },
-            { label: "Średnia roczna", value: "21.1 µg/m³" },
-          ],
-        },
-        {
-          title: "SO₂",
-          value: "19.6",
-          unit: "µg/m³",
-          icon: companiesData[0].stats[4].icon,
-          description: "Stabilny poziom",
-          details: [
-            { label: "Norma WHO", value: "20 µg/m³" },
-            { label: "Norma EU", value: "125 µg/m³" },
-            { label: "Średnia 24h", value: "19.6 µg/m³" },
-          ],
-        },
-        {
-          title: "CO",
-          value: "2117",
-          unit: "µg/m³",
-          icon: companiesData[0].stats[5].icon,
-          description: "Dobry poziom",
-          details: [
-            { label: "Norma EU", value: "10000 µg/m³" },
-            { label: "Średnia 8h", value: "2117 µg/m³" },
-            { label: "Trend", value: "Stabilny" },
-          ],
-        },
-        {
-          title: "Indeks CAQI",
-          value: "27.3",
-          unit: "",
-          icon: companiesData[0].stats[6].icon,
-          description: "Dobra jakość powietrza",
-          details: [
-            { label: "Interpretacja", value: "Dobra" },
-            { label: "Zalecenia", value: "Można przebywać na zewnątrz" },
-            { label: "Trend", value: "Stabilny" },
-          ],
-        },
-        {
-          title: "Wilgotność",
-          value: "54.7",
-          unit: "%",
-          icon: companiesData[0].stats[7].icon,
-          description: "Optymalna wilgotność",
-          details: [
-            { label: "Min 24h", value: "45%" },
-            { label: "Max 24h", value: "65%" },
-            { label: "Średnia", value: "54.7%" },
-          ],
-        },
-      ],
+      stats: defaultStats,
     };
 
     companiesData.push(newProject);
@@ -194,6 +199,9 @@ export function CompanyActions() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Dodaj nowy projekt</DialogTitle>
+              <DialogDescription>
+                Wprowadź nazwę dla nowego projektu monitorowania jakości powietrza.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
