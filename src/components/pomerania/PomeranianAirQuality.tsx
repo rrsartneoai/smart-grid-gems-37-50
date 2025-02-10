@@ -92,6 +92,8 @@ export function PomeranianAirQuality() {
 
     // Add markers for each location
     data.forEach((cityData) => {
+      if (!cityData?.current?.indexes?.[0]) return;
+      
       const { location } = cityData;
       const airQualityIndex = cityData.current.indexes[0];
 
@@ -100,7 +102,7 @@ export function PomeranianAirQuality() {
           <div class="w-4 h-4 rounded-full mb-1" style="background-color: ${airQualityIndex.color}"></div>
           <div class="font-bold">${location.name}</div>
           <div>${airQualityIndex.description}</div>
-          <div>CAQI: ${airQualityIndex.value.toFixed(0)}</div>
+          <div>CAQI: ${airQualityIndex.value?.toFixed(0) || 'N/A'}</div>
         </div>
       `;
 
@@ -146,7 +148,7 @@ export function PomeranianAirQuality() {
           <div className="w-full h-[500px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
           
           <div className="grid gap-4 md:grid-cols-3">
-            {data && data.map((cityData) => (
+            {Array.isArray(data) && data.map((cityData) => (
               <Card key={cityData.location.name}>
                 <CardContent className="pt-6">
                   <h3 className="font-bold text-lg mb-2">{cityData.location.name}</h3>
@@ -154,13 +156,20 @@ export function PomeranianAirQuality() {
                     {cityData.current.values.map((measurement) => (
                       <div key={measurement.name} className="flex justify-between">
                         <span>{measurement.name}:</span>
-                        <span className="font-medium">{measurement.value.toFixed(1)}</span>
+                        <span className="font-medium">
+                          {measurement.value?.toFixed(1) ?? 'N/A'}
+                        </span>
                       </div>
                     ))}
-                    <div className="mt-4 p-3 rounded" style={{ backgroundColor: cityData.current.indexes[0].color + '20' }}>
-                      <div className="font-bold">{cityData.current.indexes[0].description}</div>
-                      <div>CAQI: {cityData.current.indexes[0].value.toFixed(0)}</div>
-                    </div>
+                    {cityData.current.indexes[0] && (
+                      <div 
+                        className="mt-4 p-3 rounded" 
+                        style={{ backgroundColor: cityData.current.indexes[0].color + '20' }}
+                      >
+                        <div className="font-bold">{cityData.current.indexes[0].description}</div>
+                        <div>CAQI: {cityData.current.indexes[0].value?.toFixed(0) ?? 'N/A'}</div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
