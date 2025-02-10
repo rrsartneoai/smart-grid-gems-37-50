@@ -10,7 +10,7 @@ interface ChatMessageProps {
   content: string;
   timestamp: Date;
   dataVisualizations?: Array<{
-    type: "airQuality" | "temperature" | "humidity" | "consumption" | "production" | "efficiency";
+    type: "consumption" | "production" | "efficiency";
     title: string;
   }>;
 }

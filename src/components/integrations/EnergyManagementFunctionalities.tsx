@@ -20,8 +20,8 @@ export const EnergyManagementFunctionalities = () => {
     {
       icon: LineChart,
       name: "Monitorowanie stanu klimatyzatorów i urządzen badających jakość powietrza",
-    //   description: "Szczegółowe informacje o zużyciu energii przez urządzenia",
-    }
+      description: "Szczegółowe informacje o stanie urządzeń i jakości powietrza",
+    },
     // {
     //   icon: Lightbulb,
     //   name: "Optymalizacja zużycia energii",

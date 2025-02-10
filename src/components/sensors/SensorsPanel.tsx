@@ -10,6 +10,7 @@ import { Search, Battery, Signal, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
@@ -105,11 +106,20 @@ const SensorsPanel = () => {
     }
   };
 
+  const handleExport = (format: 'pdf' | 'jpg' | 'xlsx' | 'csv') => {
+    console.log(`Exporting in ${format} format`);
+    toast({
+      title: "Eksport",
+      description: `Eksportowanie danych w formacie ${format}`,
+    });
+  };
+
   const filteredSensors = currentCityData.sensors.map(sensor => {
     const realData = getSensorData(sensor.name);
     if (realData) {
       return {
         ...sensor,
+        iconType: sensor.iconType,
         value: realData.value,
         description: realData.description,
       };
@@ -193,7 +203,7 @@ const SensorsPanel = () => {
               {filteredSensors.map((sensor, index) => (
                 <SensorCard 
                   key={index}
-                  icon={sensor.icon}
+                  iconType={sensor.iconType}
                   name={sensor.name}
                   value={sensor.value}
                   unit={sensor.unit}

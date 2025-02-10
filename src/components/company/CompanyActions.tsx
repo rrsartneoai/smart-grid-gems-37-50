@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, MinusCircle, RotateCcw } from "lucide-react";
@@ -36,6 +35,7 @@ export function CompanyActions() {
     const newProject = {
       id: (companiesData.length + 1).toString(),
       name: newProjectName,
+      energyData: [], // Add this line
       stats: [
         {
           title: "PM2.5",
