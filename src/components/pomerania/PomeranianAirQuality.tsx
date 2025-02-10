@@ -47,6 +47,11 @@ export function PomeranianAirQuality() {
       attribution: '© OpenStreetMap contributors'
     }).addTo(mapInstance.current);
 
+    // Dodaj kontrolki zoom
+    L.control.zoom({
+      position: 'bottomright'
+    }).addTo(mapInstance.current);
+
     return () => {
       if (mapInstance.current) {
         mapInstance.current.remove();
@@ -96,21 +101,37 @@ export function PomeranianAirQuality() {
       
       const { location } = cityData;
       const airQualityIndex = cityData.current.indexes[0];
+      const pm10Value = cityData.current.values.find(v => v.name === 'PM10')?.value;
+      const pm25Value = cityData.current.values.find(v => v.name === 'PM25')?.value;
+      const pm1Value = cityData.current.values.find(v => v.name === 'PM1')?.value;
 
       const markerHtml = `
-        <div class="flex flex-col items-center p-2 bg-white rounded shadow">
-          <div class="w-4 h-4 rounded-full mb-1" style="background-color: ${airQualityIndex.color}"></div>
-          <div class="font-bold">${location.name}</div>
-          <div>${airQualityIndex.description}</div>
-          <div>CAQI: ${airQualityIndex.value?.toFixed(0) || 'N/A'}</div>
+        <div class="bg-[${airQualityIndex.color}] p-4 rounded-lg shadow-lg text-white min-w-[200px]">
+          <div class="font-bold text-lg mb-2">${location.name}</div>
+          <div class="text-3xl mb-2">${airQualityIndex.value?.toFixed(0) || 'N/A'}</div>
+          <div class="mb-2">${airQualityIndex.description}</div>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span>PM10:</span>
+              <span>${pm10Value?.toFixed(0) || 'N/A'} µg/m³</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>PM2.5:</span>
+              <span>${pm25Value?.toFixed(0) || 'N/A'} µg/m³</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>PM1:</span>
+              <span>${pm1Value?.toFixed(0) || 'N/A'} µg/m³</span>
+            </div>
+          </div>
         </div>
       `;
 
       const icon = L.divIcon({
         className: 'custom-div-icon',
         html: markerHtml,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+        iconSize: [200, 120],
+        iconAnchor: [100, 60]
       });
 
       L.marker([location.lat, location.lon], { icon })
@@ -140,16 +161,16 @@ export function PomeranianAirQuality() {
 
   return (
     <div className="grid gap-6">
-      <Card>
+      <Card className="dark:bg-[#1A1F2C]">
         <CardHeader>
-          <CardTitle>Jakość powietrza w Trójmieście</CardTitle>
+          <CardTitle>Mapa jakości powietrza - województwo pomorskie</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-[500px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
+          <div className="w-full h-[600px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
           
           <div className="grid gap-4 md:grid-cols-3">
             {Array.isArray(data) && data.map((cityData) => (
-              <Card key={cityData.location.name}>
+              <Card key={cityData.location.name} className="dark:bg-[#403E43]">
                 <CardContent className="pt-6">
                   <h3 className="font-bold text-lg mb-2">{cityData.location.name}</h3>
                   <div className="space-y-2">
@@ -157,7 +178,7 @@ export function PomeranianAirQuality() {
                       <div key={measurement.name} className="flex justify-between">
                         <span>{measurement.name}:</span>
                         <span className="font-medium">
-                          {measurement.value?.toFixed(1) ?? 'N/A'}
+                          {measurement.value?.toFixed(1) ?? 'N/A'} µg/m³
                         </span>
                       </div>
                     ))}
