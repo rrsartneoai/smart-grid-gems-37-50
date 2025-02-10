@@ -31,6 +31,7 @@ import jsPDF from 'jspdf';
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import { ExperimentsPanel } from "@/components/experiments/ExperimentsPanel";
 import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
+import { PomeranianAirQuality } from "@/components/dashboard/PomeranianAirQuality";
 import '../i18n/config';
 
 const Index = () => {
@@ -154,6 +155,7 @@ const Index = () => {
                 <Tabs defaultValue="spaces" className="w-full">
                   <TabsList className="w-full justify-start overflow-x-auto flex-wrap">
                     <TabsTrigger value="spaces">{t('spaces')}</TabsTrigger>
+                    <TabsTrigger value="pomerania">Dane z Pomorskiego</TabsTrigger>
                     <TabsTrigger value="insights">{t('analysis')}</TabsTrigger>
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
@@ -215,6 +217,10 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="pomerania">
+                    <PomeranianAirQuality />
                   </TabsContent>
 
                   <TabsContent value="insights">
