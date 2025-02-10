@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ export function ChatHeader({ isSpeaking, isTyping, onStopSpeaking, onSaveHistory
           <AvatarFallback><Bot className="h-6 w-6" /></AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="text-lg font-semibold tracking-tight">Asystent Sieci Energetycznej</h3>
+          <h3 className="text-lg font-semibold tracking-tight">Asystent Stanu Jakości Powietrza</h3>
           <p className="text-sm text-muted-foreground">
             {isTyping ? "Pisze..." : "Zawsze online"}
           </p>
