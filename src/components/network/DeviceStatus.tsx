@@ -103,15 +103,15 @@ export function DeviceStatus() {
     <div className="grid gap-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Status urządzeń</h2>
+          <h2 className="text-2xl font-bold">Status urządzeń Internet of Things</h2>
           <p className="text-muted-foreground">
-            Monitorowanie stanu urządzeń w sieci energetycznej
+            Monitorowanie stanu urządzeń w sieci smart grid, oraz jakości powietrza.
           </p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="gap-1">
             <ServerCog className="w-4 h-4" />
-            <span>Transformatory: 1</span>
+            <span>Airthings: 1</span>
           </Badge>
           <Badge variant="outline" className="gap-1">
             <Cpu className="w-4 h-4" />
