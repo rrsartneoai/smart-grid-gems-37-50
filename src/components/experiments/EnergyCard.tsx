@@ -34,7 +34,7 @@ export function EnergyCard() {
   });
 
   const handleApiKeySet = () => {
-    const apiKey = prompt("Please enter your Electricity Maps API key:");
+    const apiKey = prompt("Please enter your API key:");
     if (apiKey) {
       localStorage.setItem('ELECTRICITY_MAPS_API_KEY', apiKey);
       toast({
@@ -50,7 +50,7 @@ export function EnergyCard() {
       <Card className="w-full">
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
-            <p>Please set your Electricity Maps API key to view energy data.</p>
+            <p>Please set your API key to view data.</p>
             <Button onClick={handleApiKeySet}>Set API Key</Button>
           </div>
         </CardContent>
