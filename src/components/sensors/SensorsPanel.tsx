@@ -8,9 +8,8 @@ import { DataComparison } from "./DataComparison";
 import { ExportData } from "./ExportData";
 import { Search, Battery, Signal, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
@@ -20,48 +19,106 @@ const SensorsPanel = () => {
   const cities = Object.keys(sensorsData).map(key => 
     key.charAt(0).toUpperCase() + key.slice(1)
   );
-  
+
+  const { data: weatherData } = useQuery({
+    queryKey: ['weather', selectedCity],
+    queryFn: async () => {
+      const city = sensorsData[selectedCity];
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${city.coordinates.lat}&lon=${city.coordinates.lon}&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}&units=metric&lang=pl`
+      );
+      if (!response.ok) {
+        throw new Error(t("weatherDataError"));
+      }
+      return response.json();
+    },
+    refetchInterval: 300000, // Refresh every 5 minutes
+  });
+
+  const { data: airQualityData } = useQuery({
+    queryKey: ['airQuality', selectedCity],
+    queryFn: async () => {
+      const city = sensorsData[selectedCity];
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${city.coordinates.lat}&lon=${city.coordinates.lon}&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`
+      );
+      if (!response.ok) {
+        throw new Error(t("airQualityError"));
+      }
+      return response.json();
+    },
+    refetchInterval: 300000,
+  });
+
   const currentCityData = sensorsData[selectedCity];
 
   const handleCitySelect = (city: string) => {
     setSelectedCity(city.toLowerCase());
   };
 
-  const filteredSensors = currentCityData.sensors.filter(sensor =>
+  const getSensorData = (sensorName: string) => {
+    if (!weatherData || !airQualityData) return null;
+
+    switch (sensorName) {
+      case "Temp":
+        return {
+          value: weatherData.main.temp.toFixed(1),
+          description: `Temperatura odczuwalna: ${weatherData.main.feels_like.toFixed(1)}°C`,
+        };
+      case "Humidity":
+        return {
+          value: weatherData.main.humidity,
+          description: "Wilgotność względna powietrza",
+        };
+      case "PM 2.5":
+        return {
+          value: airQualityData.list[0].components.pm2_5.toFixed(1),
+          description: "Pył zawieszony PM2.5",
+        };
+      case "PM10":
+        return {
+          value: airQualityData.list[0].components.pm10.toFixed(1),
+          description: "Pył zawieszony PM10",
+        };
+      case "NO₂":
+        return {
+          value: airQualityData.list[0].components.no2.toFixed(1),
+          description: "Dwutlenek azotu",
+        };
+      case "SO₂":
+        return {
+          value: airQualityData.list[0].components.so2.toFixed(1),
+          description: "Dwutlenek siarki",
+        };
+      case "CO":
+        return {
+          value: airQualityData.list[0].components.co.toFixed(0),
+          description: "Tlenek węgla",
+        };
+      case "O₃":
+        return {
+          value: airQualityData.list[0].components.o3.toFixed(1),
+          description: "Ozon",
+        };
+      default:
+        return null;
+    }
+  };
+
+  const filteredSensors = currentCityData.sensors.map(sensor => {
+    const realData = getSensorData(sensor.name);
+    if (realData) {
+      return {
+        ...sensor,
+        value: realData.value,
+        description: realData.description,
+      };
+    }
+    return sensor;
+  }).filter(sensor =>
     sensor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sensor.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleExport = async (format: 'jpg' | 'pdf' | 'xlsx' | 'csv') => {
-    try {
-      const element = document.getElementById('sensors-panel');
-      if (!element) return;
-
-      switch (format) {
-        case 'jpg':
-        case 'pdf':
-          const canvas = await html2canvas(element);
-          if (format === 'jpg') {
-            const link = document.createElement('a');
-            link.download = 'czujniki.jpg';
-            link.href = canvas.toDataURL('image/jpeg');
-            link.click();
-          } else {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF();
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save('czujniki.pdf');
-          }
-          break;
-        // ... keep existing code (xlsx and csv export logic)
-      }
-    } catch (error) {
-      console.error("Błąd eksportu:", error);
-    }
-  };
 
   return (
     <div className="w-full max-w-[1400px] mx-auto px-4" id="sensors-panel">
