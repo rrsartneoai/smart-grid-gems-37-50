@@ -40,8 +40,8 @@ export const SmartHomeFunctionalities = () => {
     },
     {
       icon: WashingMachine,
-      name: "Kontrola urządzeń AGD",
-      description: "Zdalne sterowanie sprzętem AGD",
+      name: "Kontrola urządzeń AGD, IoT i RTV",
+      description: "Zdalne sterowanie sprzętem AGD i RTV oraz IoT",
     },
   ];
 
