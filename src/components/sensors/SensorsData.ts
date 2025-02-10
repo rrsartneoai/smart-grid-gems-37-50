@@ -1,7 +1,7 @@
 import { Thermometer, Cloud, Wind, Atom, Droplet, Volume2, Gauge, Sun } from "lucide-react";
 
 export interface SensorData {
-  icon: React.ReactNode;
+  icon: JSX.Element;
   name: string;
   value: string;
   unit: string;
@@ -41,7 +41,7 @@ export const sensorsData: Record<string, CityData> = {
       {
         icon: <Thermometer className="w-5 h-5" />,
         name: "Temp",
-        value: "21.5",
+        value: "0",
         unit: "°C",
         status: "Good",
         description: sensorDescriptions.temp,
@@ -122,7 +122,7 @@ export const sensorsData: Record<string, CityData> = {
       {
         icon: <Thermometer className="w-5 h-5" />,
         name: "Temp",
-        value: "19.8",
+        value: "0",
         unit: "°C",
         status: "Good",
         description: sensorDescriptions.temp,
@@ -203,7 +203,7 @@ export const sensorsData: Record<string, CityData> = {
       {
         icon: <Thermometer className="w-5 h-5" />,
         name: "Temp",
-        value: "20.2",
+        value: "0",
         unit: "°C",
         status: "Good",
         description: sensorDescriptions.temp,
@@ -284,7 +284,7 @@ export const sensorsData: Record<string, CityData> = {
       {
         icon: <Thermometer className="w-5 h-5" />,
         name: "Temp",
-        value: "19.5",
+        value: "0",
         unit: "°C",
         status: "Good",
         description: sensorDescriptions.temp,
@@ -365,7 +365,7 @@ export const sensorsData: Record<string, CityData> = {
       {
         icon: <Thermometer className="w-5 h-5" />,
         name: "Temp",
-        value: "19.2",
+        value: "0",
         unit: "°C",
         status: "Good",
         description: sensorDescriptions.temp,
