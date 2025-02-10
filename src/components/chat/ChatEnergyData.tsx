@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import {
   LineChart,
@@ -10,9 +11,10 @@ import {
 } from "recharts";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { companiesData } from "@/data/companies";
+import { sensorsData } from "@/components/sensors/SensorsData";
 
 interface ChatEnergyDataProps {
-  dataType: "consumption" | "production" | "efficiency";
+  dataType: "consumption" | "production" | "efficiency" | "airQuality" | "temperature" | "humidity";
   title: string;
 }
 
@@ -30,10 +32,44 @@ export function ChatEnergyData({ dataType, title }: ChatEnergyDataProps) {
         return "#34d399";
       case "efficiency":
         return "#60a5fa";
+      case "airQuality":
+        return "#8b5cf6";
+      case "temperature":
+        return "#f59e0b";
+      case "humidity":
+        return "#3b82f6";
       default:
         return "#60a5fa";
     }
   };
+
+  const getData = () => {
+    if (["consumption", "production", "efficiency"].includes(dataType)) {
+      return selectedCompany?.energyData || [];
+    } else {
+      const gdanskData = sensorsData.gdansk;
+      if (!gdanskData) return [];
+
+      // Convert sensor data to chart format
+      const last24Hours = Array.from({ length: 24 }, (_, i) => {
+        const hour = new Date();
+        hour.setHours(hour.getHours() - (23 - i));
+        return {
+          name: hour.getHours().toString().padStart(2, '0') + ':00',
+          value: gdanskData.sensors.find(s => {
+            if (dataType === "airQuality") return s.name === "PM 2.5";
+            if (dataType === "temperature") return s.name === "Temp";
+            if (dataType === "humidity") return s.name === "Humidity";
+            return false;
+          })?.value || "0"
+        };
+      });
+
+      return last24Hours;
+    }
+  };
+
+  const chartData = getData();
 
   return (
     <Card className="w-full p-4 my-4">
@@ -41,7 +77,7 @@ export function ChatEnergyData({ dataType, title }: ChatEnergyDataProps) {
       <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={selectedCompany?.energyData}
+            data={chartData}
             margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -50,7 +86,7 @@ export function ChatEnergyData({ dataType, title }: ChatEnergyDataProps) {
             <Tooltip />
             <Line
               type="monotone"
-              dataKey={dataType}
+              dataKey={["consumption", "production", "efficiency"].includes(dataType) ? dataType : "value"}
               stroke={getDataColor()}
               strokeWidth={2}
               dot={{ strokeWidth: 2, r: 4 }}
