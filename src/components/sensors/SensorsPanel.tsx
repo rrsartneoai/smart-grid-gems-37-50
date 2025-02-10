@@ -5,7 +5,6 @@ import { sensorsData } from "./SensorsData";
 import { Input } from "@/components/ui/input";
 import { AlertsConfig } from "./AlertsConfig";
 import { DataComparison } from "./DataComparison";
-import { ExportData } from "./ExportData";
 import { Search, Battery, Signal, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -13,6 +12,9 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AirQualityChart } from "../dashboard/AirQualityChart";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 
 const SensorsPanel = () => {
   const [selectedCity, setSelectedCity] = useState<string>("gdansk");
@@ -22,6 +24,63 @@ const SensorsPanel = () => {
   const cities = Object.keys(sensorsData).map(key => 
     key.charAt(0).toUpperCase() + key.slice(1)
   );
+
+  const handleExport = async (format: 'pdf' | 'jpg' | 'xlsx' | 'csv') => {
+    const element = document.getElementById('sensors-panel');
+    if (!element) return;
+
+    try {
+      if (format === 'pdf' || format === 'jpg') {
+        const canvas = await html2canvas(element);
+        if (format === 'pdf') {
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const imgData = canvas.toDataURL('image/png');
+          pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+          pdf.save('sensors-data.pdf');
+        } else {
+          const link = document.createElement('a');
+          link.download = 'sensors-data.jpg';
+          link.href = canvas.toDataURL('image/jpeg');
+          link.click();
+        }
+      } else {
+        const data = Object.entries(sensorsData).map(([city, cityData]) => {
+          const sensorReadings = cityData.sensors.reduce((acc, sensor) => ({
+            ...acc,
+            [`${sensor.name} (${sensor.unit})`]: sensor.value
+          }), {});
+
+          return {
+            City: cityData.name,
+            ...sensorReadings
+          };
+        });
+
+        if (format === 'xlsx') {
+          const ws = XLSX.utils.json_to_sheet(data);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Sensor Data");
+          XLSX.writeFile(wb, "sensor-data.xlsx");
+        } else {
+          const ws = XLSX.utils.json_to_sheet(data);
+          const csv = XLSX.utils.sheet_to_csv(ws);
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", "sensor-data.csv");
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+      
+      toast.success(`Eksport do ${format.toUpperCase()} zakończony sukcesem`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error(`Błąd podczas eksportu do ${format.toUpperCase()}`);
+    }
+  };
 
   const { data: weatherData } = useQuery({
     queryKey: ['weather', selectedCity],
@@ -108,11 +167,6 @@ const SensorsPanel = () => {
     }
   };
 
-  const handleExport = (format: 'pdf' | 'jpg' | 'xlsx' | 'csv') => {
-    console.log(`Exporting in ${format} format`);
-    toast.info(`Eksportowanie danych w formacie ${format}`);
-  };
-
   const filteredSensors = currentCityData.sensors.map(sensor => {
     const realData = getSensorData(sensor.name);
     if (realData) {
@@ -155,7 +209,7 @@ const SensorsPanel = () => {
               />
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               onClick={() => handleExport('pdf')}
               variant="outline"

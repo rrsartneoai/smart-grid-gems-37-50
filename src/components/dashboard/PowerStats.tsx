@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -6,8 +7,6 @@ import { companiesData } from "@/data/companies";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import {
   LineChart,
   Line,
@@ -16,6 +15,16 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
+
+const HIDDEN_STATS = [
+  "Ładunek",
+  "Obciążenie netto",
+  "Cena główne źródło",
+  "Częstotliwość sieci",
+  "Napięcie fazowe",
+  "Jakość sygnału",
+  "Czas odpowiedzi"
+];
 
 const StatCard = ({ stat, index, expandedCard, setExpandedCard }) => {
   const isExpanded = expandedCard === index;
@@ -148,9 +157,13 @@ export const PowerStats = () => {
     (company) => company.id === selectedCompanyId
   );
 
+  const visibleStats = selectedCompany?.stats.filter(stat => 
+    !HIDDEN_STATS.includes(stat.title) || companiesData.length > 1
+  );
+
   return (
     <>
-      {selectedCompany?.stats.map((stat, index) => (
+      {visibleStats?.map((stat, index) => (
         <motion.div
           key={stat.title}
           initial={{ opacity: 0, y: 20 }}

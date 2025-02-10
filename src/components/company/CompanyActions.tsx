@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, MinusCircle, RotateCcw } from "lucide-react";
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { companiesData } from "@/data/companies";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { Separator } from "@/components/ui/separator";
@@ -35,7 +36,7 @@ export function CompanyActions() {
     const newProject = {
       id: (companiesData.length + 1).toString(),
       name: newProjectName,
-      energyData: [], // Add this line
+      energyData: [],
       stats: [
         {
           title: "PM2.5",
@@ -138,7 +139,7 @@ export function CompanyActions() {
 
     companiesData.push(newProject);
     setSelectedCompanyId(newProject.id);
-
+    
     toast({
       title: "Sukces",
       description: `Projekt "${newProjectName}" został dodany`,
@@ -153,6 +154,11 @@ export function CompanyActions() {
     if (index !== -1) {
       const [removedProject] = companiesData.splice(index, 1);
       setArchivedProjects(prev => [...prev, removedProject]);
+      
+      if (companiesData.length > 0) {
+        setSelectedCompanyId(companiesData[0].id);
+      }
+      
       toast({
         title: "Zarchiwizowano",
         description: `Projekt "${project.name}" został zarchiwizowany`,
@@ -166,6 +172,8 @@ export function CompanyActions() {
       const [restoredProject] = archivedProjects.splice(index, 1);
       companiesData.push(restoredProject);
       setArchivedProjects([...archivedProjects]);
+      setSelectedCompanyId(restoredProject.id);
+      
       toast({
         title: "Przywrócono",
         description: `Projekt "${project.name}" został przywrócony`,
@@ -202,6 +210,30 @@ export function CompanyActions() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {companiesData.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Aktywne projekty</h3>
+          <ul className="space-y-2">
+            {companiesData.map((project) => (
+              <li
+                key={project.id}
+                className="flex items-center justify-between text-sm text-muted-foreground"
+              >
+                <span>{project.name}</span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => handleArchiveProject(project)}
+                >
+                  <MinusCircle className="h-4 w-4 text-red-500" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {archivedProjects.length > 0 && (
         <div className="mt-4">
