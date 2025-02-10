@@ -38,13 +38,13 @@ export const IntegrationsPanel = () => {
       description: "System zarządzania inteligentnym domem",
       status: "connected",
     },
-    {
-      type: "energyManagement" as const,
-      icon: Zap,
-      name: "Zarządzanie energią",
-      description: "Optymalizacja zużycia energii",
-      status: "warning",
-    },
+    // {
+    //   type: "energyManagement" as const,
+    //   icon: Zap,
+    //   name: "Zarządzanie energią",
+    //   description: "Optymalizacja zużycia energii",
+    //   status: "warning",
+    // },
     {
       type: "zapier" as const,
       icon: Globe,
@@ -80,13 +80,13 @@ export const IntegrationsPanel = () => {
       description: "Powiadomienia o zdarzeniach alarmowych",
       status: "disconnected",
     },
-    {
-      type: "irrigation" as const,
-      icon: Droplet,
-      name: "System nawadniania",
-      description: "Automatyczne podlewanie",
-      status: "disconnected",
-    }
+    // {
+    //   type: "irrigation" as const,
+    //   icon: Droplet,
+    //   name: "System nawadniania",
+    //   description: "Automatyczne podlewanie",
+    //   status: "disconnected",
+    // }
   ];
 
   const handleConfigSubmit = async (e: React.FormEvent) => {
