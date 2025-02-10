@@ -102,7 +102,7 @@ export function CompanyAnalysis() {
       <div className="grid gap-6" id="company-analysis">
         <div className="flex justify-between items-center flex-wrap gap-2">
           <h2 className="text-2xl font-bold">
-            Analiza - {selectedCompany?.name}
+            Analiza dla projektu - {selectedCompany?.name}
           </h2>
           <ExportButtons 
             onExport={handleExport}
@@ -113,7 +113,7 @@ export function CompanyAnalysis() {
 
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Trendy zużycia energii</h3>
+            <h3 className="text-lg font-semibold mb-4">Trendy stanu jakości powietrza</h3>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={showForecast ? [...(selectedCompany?.energyData || []), ...calculateForecast(selectedCompany?.energyData || [])] : selectedCompany?.energyData}>
@@ -125,14 +125,14 @@ export function CompanyAnalysis() {
                   <Line
                     type="monotone"
                     dataKey="consumption"
-                    name="Zużycie"
+                    name="Przewidywane"
                     stroke="#8884d8"
                     strokeWidth={2}
                   />
                   <Line
                     type="monotone"
                     dataKey="production"
-                    name="Produkcja"
+                    name="Aktualne"
                     stroke="#82ca9d"
                     strokeWidth={2}
                   />
@@ -164,13 +164,13 @@ export function CompanyAnalysis() {
           </Card>
 
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Źródła energii</h3>
+            <h3 className="text-lg font-semibold mb-4">Źródła zanieczyszczeń</h3>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={[
-                      { name: "Energia słoneczna", value: 30 },
+                      { name: "Energia węglowa", value: 30 },
                       { name: "Energia wiatrowa", value: 25 },
                       { name: "Biomasa", value: 20 },
                       { name: "Inne źródła", value: 25 },
