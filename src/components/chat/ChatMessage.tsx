@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Bot, User } from "lucide-react";
@@ -9,7 +10,7 @@ interface ChatMessageProps {
   content: string;
   timestamp: Date;
   dataVisualizations?: Array<{
-    type: "consumption" | "production" | "efficiency";
+    type: "airQuality" | "temperature" | "humidity" | "consumption" | "production" | "efficiency";
     title: string;
   }>;
 }

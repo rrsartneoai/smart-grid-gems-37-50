@@ -66,12 +66,14 @@ export function AirQualityChart() {
     queryKey: ["airQuality", GDANSK_COORDINATES],
     queryFn: () => fetchAirQuality(GDANSK_COORDINATES.lat, GDANSK_COORDINATES.lon),
     refetchInterval: 300000, // Refresh every 5 minutes
-    onError: () => {
-      toast({
-        title: "Błąd pobierania danych",
-        description: "Nie udało się pobrać danych o jakości powietrza",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Błąd pobierania danych",
+          description: "Nie udało się pobrać danych o jakości powietrza",
+          variant: "destructive",
+        });
+      },
     },
   });
 
