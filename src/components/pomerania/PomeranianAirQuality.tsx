@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -7,6 +7,11 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface AirQualityData {
+  location: {
+    name: string;
+    lat: number;
+    lon: number;
+  };
   current: {
     values: Array<{
       name: string;
@@ -29,8 +34,8 @@ const TROJMIASTO_LOCATIONS = [
 ];
 
 export function PomeranianAirQuality() {
-  const mapRef = useState<HTMLDivElement | null>(null);
-  const mapInstance = useState<L.Map | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<L.Map | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -43,11 +48,13 @@ export function PomeranianAirQuality() {
     }).addTo(mapInstance.current);
 
     return () => {
-      mapInstance.current?.remove();
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+      }
     };
   }, []);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<AirQualityData[]>({
     queryKey: ['airlyData'],
     queryFn: async () => {
       const results = await Promise.all(
@@ -75,6 +82,13 @@ export function PomeranianAirQuality() {
 
   useEffect(() => {
     if (!mapInstance.current || !data) return;
+
+    // Clear existing markers
+    mapInstance.current.eachLayer((layer) => {
+      if (layer instanceof L.Marker) {
+        layer.remove();
+      }
+    });
 
     // Add markers for each location
     data.forEach((cityData) => {
@@ -132,7 +146,7 @@ export function PomeranianAirQuality() {
           <div className="w-full h-[500px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
           
           <div className="grid gap-4 md:grid-cols-3">
-            {data?.map((cityData) => (
+            {data && data.map((cityData) => (
               <Card key={cityData.location.name}>
                 <CardContent className="pt-6">
                   <h3 className="font-bold text-lg mb-2">{cityData.location.name}</h3>
