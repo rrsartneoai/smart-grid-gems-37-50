@@ -157,8 +157,8 @@ const Index = () => {
                     <TabsTrigger value="insights">{t('analysis')}</TabsTrigger>
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
-                    <TabsTrigger value="integrations">Integracje</TabsTrigger>
-                    <TabsTrigger value="experiments">Eksperymenty</TabsTrigger>
+                    <TabsTrigger value="integrations">{t('integrations')}</TabsTrigger>
+                    <TabsTrigger value="experiments">{t('Air quality status')}</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="spaces" className="space-y-6">
