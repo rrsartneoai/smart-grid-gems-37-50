@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -108,14 +109,14 @@ function SidebarContent({
     <div className="flex h-full flex-col gap-4">
       {!collapsed && (
         <div className="p-6">
-          <h2 className="text-lg font-semibold">Firmy</h2>
+          <h2 className="text-lg font-semibold">Projekty</h2>
           <p className="text-sm text-muted-foreground">
-            Wybierz firmę do monitorowania
+            Wybierz projekt do monitorowania
           </p>
           <div className="mt-4 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Szukaj firm..."
+              placeholder="Szukaj projektów..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
