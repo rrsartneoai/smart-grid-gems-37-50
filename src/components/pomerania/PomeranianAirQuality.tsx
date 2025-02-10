@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface AirQualityData {
   current: {
@@ -14,34 +16,91 @@ interface AirQualityData {
       value: number;
       level: string;
       description: string;
+      color: string;
     }>;
   };
 }
 
 const AIRLY_API_KEY = "zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP";
-const GDANSK_LAT = 54.352;
-const GDANSK_LON = 18.646;
+const TROJMIASTO_LOCATIONS = [
+  { name: "Gdańsk", lat: 54.352, lon: 18.646 },
+  { name: "Gdynia", lat: 54.518, lon: 18.531 },
+  { name: "Sopot", lat: 54.441, lon: 18.560 }
+];
 
 export function PomeranianAirQuality() {
+  const mapRef = useState<HTMLDivElement | null>(null);
+  const mapInstance = useState<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstance.current) return;
+
+    // Initialize map
+    mapInstance.current = L.map(mapRef.current).setView([54.372158, 18.638306], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(mapInstance.current);
+
+    return () => {
+      mapInstance.current?.remove();
+    };
+  }, []);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['airlyData'],
     queryFn: async () => {
-      const response = await fetch(
-        `https://airapi.airly.eu/v2/measurements/point?lat=${GDANSK_LAT}&lng=${GDANSK_LON}`,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'apikey': AIRLY_API_KEY,
-          },
-        }
+      const results = await Promise.all(
+        TROJMIASTO_LOCATIONS.map(async (location) => {
+          const response = await fetch(
+            `https://airapi.airly.eu/v2/measurements/point?lat=${location.lat}&lng=${location.lon}`,
+            {
+              headers: {
+                'Accept': 'application/json',
+                'apikey': AIRLY_API_KEY,
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          return { ...data, location };
+        })
       );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json() as Promise<AirQualityData>;
+      return results;
     },
     refetchInterval: 300000, // Refresh every 5 minutes
   });
+
+  useEffect(() => {
+    if (!mapInstance.current || !data) return;
+
+    // Add markers for each location
+    data.forEach((cityData) => {
+      const { location } = cityData;
+      const airQualityIndex = cityData.current.indexes[0];
+
+      const markerHtml = `
+        <div class="flex flex-col items-center p-2 bg-white rounded shadow">
+          <div class="w-4 h-4 rounded-full mb-1" style="background-color: ${airQualityIndex.color}"></div>
+          <div class="font-bold">${location.name}</div>
+          <div>${airQualityIndex.description}</div>
+          <div>CAQI: ${airQualityIndex.value.toFixed(0)}</div>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        className: 'custom-div-icon',
+        html: markerHtml,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+      });
+
+      L.marker([location.lat, location.lon], { icon })
+        .addTo(mapInstance.current!);
+    });
+  }, [data]);
 
   if (isLoading) {
     return (
@@ -64,39 +123,37 @@ export function PomeranianAirQuality() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Jakość powietrza w województwie pomorskim</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {data?.current.values.map((measurement) => (
-            <Card key={measurement.name}>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold">
-                  {measurement.value.toFixed(1)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {measurement.name}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {data?.current.indexes.map((index) => (
-            <Card key={index.description}>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold">{index.value}</div>
-                <div className="text-sm text-muted-foreground">
-                  {index.description}
-                </div>
-                <div className="mt-2 text-sm">
-                  Poziom: {index.level}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="grid gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Jakość powietrza w Trójmieście</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full h-[500px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
+          
+          <div className="grid gap-4 md:grid-cols-3">
+            {data?.map((cityData) => (
+              <Card key={cityData.location.name}>
+                <CardContent className="pt-6">
+                  <h3 className="font-bold text-lg mb-2">{cityData.location.name}</h3>
+                  <div className="space-y-2">
+                    {cityData.current.values.map((measurement) => (
+                      <div key={measurement.name} className="flex justify-between">
+                        <span>{measurement.name}:</span>
+                        <span className="font-medium">{measurement.value.toFixed(1)}</span>
+                      </div>
+                    ))}
+                    <div className="mt-4 p-3 rounded" style={{ backgroundColor: cityData.current.indexes[0].color + '20' }}>
+                      <div className="font-bold">{cityData.current.indexes[0].description}</div>
+                      <div>CAQI: {cityData.current.indexes[0].value.toFixed(0)}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
