@@ -1,5 +1,4 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { EnergyChart } from "@/components/dashboard/EnergyChart";
 import { PowerStats } from "@/components/dashboard/PowerStats";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { FileUpload } from "@/components/FileUpload";
@@ -31,6 +30,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import { ExperimentsPanel } from "@/components/experiments/ExperimentsPanel";
+import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
 import '../i18n/config';
 
 const Index = () => {
@@ -186,7 +186,7 @@ const Index = () => {
                       </DndContext>
 
                       <div className="grid gap-6 p-8">
-                        <EnergyChart />
+                        <AirQualityChart />
                       </div>
 
                       <div className="grid gap-6 p-8">
