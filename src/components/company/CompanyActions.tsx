@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronDown, ChevronUp, MinusCircle, RotateCcw } from "lucide-react";
@@ -17,172 +18,173 @@ import { Separator } from "@/components/ui/separator";
 
 export function CompanyActions() {
   const [isTestListOpen, setIsTestListOpen] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newProjectName, setNewProjectName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { setSelectedCompanyId } = useCompanyStore();
-  const [archivedCompanies, setArchivedCompanies] = useState<typeof companiesData>([]);
+  const [archivedProjects, setArchivedProjects] = useState<typeof companiesData>([]);
 
-  const handleAddCompany = () => {
-    if (!newCompanyName.trim()) {
+  const handleAddProject = () => {
+    if (!newProjectName.trim()) {
       toast({
         title: "Błąd",
-        description: "Nazwa firmy nie może być pusta",
+        description: "Nazwa projektu nie może być pusta",
         variant: "destructive",
       });
       return;
     }
 
-    const newCompany = {
+    const newProject = {
       id: (companiesData.length + 1).toString(),
-      name: newCompanyName,
+      name: newProjectName,
       stats: [
         {
-          title: "Ladunek",
-          value: (Math.random() * 20000).toFixed(0),
-          unit: "MW",
+          title: "PM2.5",
+          value: (Math.random() * 25).toFixed(1),
+          unit: "µg/m³",
           icon: companiesData[0].stats[0].icon,
-          description: "↗️ +5.2% od ostatniego dnia",
+          description: "↗️ +2.1% od ostatniego pomiaru",
           details: [
-            { label: "Szczyt dzienny", value: "13,000 MW" },
-            { label: "Minimum", value: "11,000 MW" },
-            { label: "Średnia", value: "12,000 MW" },
+            { label: "Norma WHO", value: "10 µg/m³" },
+            { label: "Norma EU", value: "25 µg/m³" },
+            { label: "Średnia 24h", value: "15.2 µg/m³" },
           ],
         },
         {
-          title: "Obciążenie netto",
-          value: (Math.random() * 15000).toFixed(0),
-          unit: "MW",
+          title: "PM10",
+          value: (Math.random() * 40).toFixed(1),
+          unit: "µg/m³",
           icon: companiesData[0].stats[1].icon,
+          description: "↘️ -1.2% od ostatniej godziny",
+          details: [
+            { label: "Norma WHO", value: "20 µg/m³" },
+            { label: "Norma EU", value: "50 µg/m³" },
+            { label: "Średnia 24h", value: "28.5 µg/m³" },
+          ],
+        },
+        {
+          title: "O₃ (Ozon)",
+          value: (Math.random() * 100).toFixed(1),
+          unit: "µg/m³",
+          icon: companiesData[0].stats[2].icon,
+          description: "↗️ +1.5% od ostatniego odczytu",
+          details: [
+            { label: "Norma WHO", value: "100 µg/m³" },
+            { label: "Norma EU", value: "120 µg/m³" },
+            { label: "Średnia 8h", value: "85.3 µg/m³" },
+          ],
+        },
+        {
+          title: "NO₂",
+          value: (Math.random() * 40).toFixed(1),
+          unit: "µg/m³",
+          icon: companiesData[0].stats[3].icon,
           description: "↘️ -0.8% od ostatniej godziny",
           details: [
-            { label: "Szczyt", value: "12,500 MW" },
-            { label: "Minimum dzienne", value: "11,000 MW" },
-            { label: "Prognoza", value: "11,500 MW" },
+            { label: "Norma WHO", value: "40 µg/m³" },
+            { label: "Norma EU", value: "40 µg/m³" },
+            { label: "Średnia roczna", value: "32.1 µg/m³" },
           ],
         },
         {
-          title: "Cena",
-          value: (25 + Math.random() * 10).toFixed(2),
-          unit: "/MWh",
-          icon: companiesData[0].stats[2].icon,
-          description: "↗️ +0.9% od ostatniego odczytu",
-          details: [
-            { label: "Maksymalna", value: "31.00 /MWh" },
-            { label: "Minimalna", value: "28.50 /MWh" },
-            { label: "Średnia dzienna", value: "29.25 /MWh" },
-          ],
-        },
-        {
-          title: "Główne źródło",
-          value: "Energia odnawialna",
-          icon: companiesData[0].stats[3].icon,
-          description: "70% udziału w miksie",
-          details: [
-            { label: "Wydajność", value: "88%" },
-            { label: "Emisja CO2", value: "150 g/kWh" },
-            { label: "Moc nominalna", value: "15,000 MW" },
-          ],
-        },
-        {
-          title: "Częstotliwość sieci",
-          value: (50 + Math.random() * 0.1).toFixed(2),
-          unit: "Hz",
+          title: "SO₂",
+          value: (Math.random() * 20).toFixed(1),
+          unit: "µg/m³",
           icon: companiesData[0].stats[4].icon,
-          description: "Stabilna częstotliwość w normie",
+          description: "Stabilny poziom",
           details: [
-            { label: "Min", value: "49.97 Hz" },
-            { label: "Max", value: "50.03 Hz" },
-            { label: "Średnia", value: "50.00 Hz" },
+            { label: "Norma WHO", value: "20 µg/m³" },
+            { label: "Norma EU", value: "125 µg/m³" },
+            { label: "Średnia 24h", value: "12.5 µg/m³" },
           ],
         },
         {
-          title: "Napięcie fazowe",
-          value: (230 + Math.random() * 1).toFixed(1),
-          unit: "V",
+          title: "CO",
+          value: (Math.random() * 4000).toFixed(0),
+          unit: "µg/m³",
           icon: companiesData[0].stats[5].icon,
-          description: "Optymalne napięcie w sieci",
+          description: "Dobry poziom",
           details: [
-            { label: "Min", value: "228.5 V" },
-            { label: "Max", value: "231.5 V" },
-            { label: "Średnia", value: "230.0 V" },
+            { label: "Norma EU", value: "10000 µg/m³" },
+            { label: "Średnia 8h", value: "3200 µg/m³" },
+            { label: "Trend", value: "Stabilny" },
           ],
         },
         {
-          title: "Jakość sygnału",
-          value: (90 + Math.random() * 10).toFixed(1),
-          unit: "%",
+          title: "Indeks CAQI",
+          value: (Math.random() * 100).toFixed(1),
+          unit: "",
           icon: companiesData[0].stats[6].icon,
-          description: "Wysoka jakość transmisji danych",
+          description: "Dobra jakość powietrza",
           details: [
-            { label: "Utracone pakiety", value: "0.03%" },
-            { label: "Opóźnienie", value: "18ms" },
-            { label: "Stabilność", value: "99.8%" },
+            { label: "Interpretacja", value: "Dobra" },
+            { label: "Zalecenia", value: "Można przebywać na zewnątrz" },
+            { label: "Trend", value: "Stabilny" },
           ],
         },
         {
-          title: "Czas odpowiedzi",
-          value: (10 + Math.random() * 10).toFixed(0),
-          unit: "ms",
+          title: "Wilgotność",
+          value: (40 + Math.random() * 30).toFixed(1),
+          unit: "%",
           icon: companiesData[0].stats[7].icon,
-          description: "Szybka komunikacja z urządzeniami",
+          description: "Optymalna wilgotność",
           details: [
-            { label: "Min", value: "10 ms" },
-            { label: "Max", value: "22 ms" },
-            { label: "Średnia", value: "16 ms" },
+            { label: "Min 24h", value: "45%" },
+            { label: "Max 24h", value: "65%" },
+            { label: "Średnia", value: "55%" },
           ],
         },
       ],
       energyData: [
-        { name: "00:00", consumption: 350, production: 320, efficiency: 91 },
-        { name: "12:00", consumption: 650, production: 600, efficiency: 92 },
-        { name: "23:59", consumption: 350, production: 320, efficiency: 91 },
+        { name: "00:00", consumption: 25, production: 12, efficiency: 91 },
+        { name: "12:00", consumption: 45, production: 35, efficiency: 92 },
+        { name: "23:59", consumption: 30, production: 20, efficiency: 91 },
       ],
     };
 
-    companiesData.push(newCompany);
-    setSelectedCompanyId(newCompany.id);
+    companiesData.push(newProject);
+    setSelectedCompanyId(newProject.id);
 
     toast({
       title: "Sukces",
-      description: `Firma "${newCompanyName}" została dodana`,
+      description: `Projekt "${newProjectName}" został dodany`,
     });
 
-    setNewCompanyName("");
+    setNewProjectName("");
     setIsDialogOpen(false);
   };
 
-  const handleCompanySelect = (companyId: string) => {
-    setSelectedCompanyId(companyId);
+  const handleProjectSelect = (projectId: string) => {
+    setSelectedCompanyId(projectId);
     setIsTestListOpen(false);
   };
 
-  const handleArchiveCompany = (company: (typeof companiesData)[0]) => {
-    const index = companiesData.findIndex(c => c.id === company.id);
+  const handleArchiveProject = (project: (typeof companiesData)[0]) => {
+    const index = companiesData.findIndex(c => c.id === project.id);
     if (index !== -1) {
-      const [removedCompany] = companiesData.splice(index, 1);
-      setArchivedCompanies(prev => [...prev, removedCompany]);
+      const [removedProject] = companiesData.splice(index, 1);
+      setArchivedProjects(prev => [...prev, removedProject]);
       toast({
         title: "Zarchiwizowano",
-        description: `Firma "${company.name}" została zarchiwizowana`,
+        description: `Projekt "${project.name}" został zarchiwizowany`,
       });
     }
   };
 
-  const handleRestoreCompany = (company: (typeof companiesData)[0]) => {
-    const index = archivedCompanies.findIndex(c => c.id === company.id);
+  const handleRestoreProject = (project: (typeof companiesData)[0]) => {
+    const index = archivedProjects.findIndex(c => c.id === project.id);
     if (index !== -1) {
-      const [restoredCompany] = archivedCompanies.splice(index, 1);
-      companiesData.push(restoredCompany);
-      setArchivedCompanies([...archivedCompanies]);
+      const [restoredProject] = archivedProjects.splice(index, 1);
+      companiesData.push(restoredProject);
+      setArchivedProjects([...archivedProjects]);
       toast({
         title: "Przywrócono",
-        description: `Firma "${company.name}" została przywrócona`,
+        description: `Projekt "${project.name}" został przywrócony`,
       });
     }
   };
 
-  const getNewCompanies = () => {
+  const getNewProjects = () => {
     return companiesData.slice(5);
   };
 
@@ -212,20 +214,20 @@ export function CompanyActions() {
                 className="absolute z-50 mt-2 w-64 rounded-md bg-popover shadow-lg ring-1 ring-black ring-opacity-5"
               >
                 <ul className="py-2 px-4 space-y-2">
-                  {companiesData.map((company) => (
+                  {companiesData.map((project) => (
                     <li
-                      key={company.id}
+                      key={project.id}
                       className="flex items-center justify-between text-sm text-muted-foreground hover:text-foreground cursor-pointer"
-                      onClick={() => handleCompanySelect(company.id)}
+                      onClick={() => handleProjectSelect(project.id)}
                     >
-                      <span>{company.name}</span>
+                      <span>{project.name}</span>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleArchiveCompany(company);
+                          handleArchiveProject(project);
                         }}
                       >
                         <MinusCircle className="h-4 w-4 text-red-500" />
@@ -242,22 +244,22 @@ export function CompanyActions() {
           <DialogTrigger asChild>
             <Button className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj firmę
+              Dodaj projekt
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Dodaj nową firmę</DialogTitle>
+              <DialogTitle>Dodaj nowy projekt</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Input
-                  placeholder="Nazwa firmy"
-                  value={newCompanyName}
-                  onChange={(e) => setNewCompanyName(e.target.value)}
+                  placeholder="Nazwa projektu"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
                 />
               </div>
-              <Button onClick={handleAddCompany} className="w-full">
+              <Button onClick={handleAddProject} className="w-full">
                 Dodaj
               </Button>
             </div>
@@ -265,24 +267,24 @@ export function CompanyActions() {
         </Dialog>
       </div>
 
-      {getNewCompanies().length > 0 && (
+      {getNewProjects().length > 0 && (
         <div className="mt-4">
-          <h3 className="text-sm font-medium mb-2">Nowe firmy</h3>
+          <h3 className="text-sm font-medium mb-2">Nowe projekty</h3>
           <ul className="space-y-2">
-            {getNewCompanies().map((company) => (
+            {getNewProjects().map((project) => (
               <li
-                key={company.id}
+                key={project.id}
                 className="flex items-center justify-between text-sm text-muted-foreground hover:text-foreground cursor-pointer"
-                onClick={() => handleCompanySelect(company.id)}
+                onClick={() => handleProjectSelect(project.id)}
               >
-                <span>{company.name}</span>
+                <span>{project.name}</span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleArchiveCompany(company);
+                    handleArchiveProject(project);
                   }}
                 >
                   <MinusCircle className="h-4 w-4 text-red-500" />
@@ -293,22 +295,22 @@ export function CompanyActions() {
         </div>
       )}
 
-      {archivedCompanies.length > 0 && (
+      {archivedProjects.length > 0 && (
         <div className="mt-4">
           <Separator className="my-4" />
-          <h3 className="text-sm font-medium mb-2">Zarchiwizowane firmy</h3>
+          <h3 className="text-sm font-medium mb-2">Zarchiwizowane projekty</h3>
           <ul className="space-y-2">
-            {archivedCompanies.map((company) => (
+            {archivedProjects.map((project) => (
               <li
-                key={company.id}
+                key={project.id}
                 className="flex items-center justify-between text-sm text-muted-foreground"
               >
-                <span>{company.name}</span>
+                <span>{project.name}</span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6"
-                  onClick={() => handleRestoreCompany(company)}
+                  onClick={() => handleRestoreProject(project)}
                 >
                   <RotateCcw className="h-4 w-4 text-green-500" />
                 </Button>
