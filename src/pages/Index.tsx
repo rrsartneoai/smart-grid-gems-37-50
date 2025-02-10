@@ -116,10 +116,10 @@ const Index = () => {
             <ApiKeySettings />
             <div className="flex flex-col items-center sm:items-start gap-1">
               <h1 className="text-xl font-semibold text-center sm:text-left">
-                {t('monitoringPanel')}
+                {t('Panel monitorowania jakości powietrza')}
               </h1>
               <p className="text-sm text-muted-foreground text-center sm:text-left">
-                {t('smartgridDescription')}
+                {t('Monitoruj zużycie i jakość powietrza w czasie rzeczywistym, oraz wykorzystaj potencjał zaawansowanych algorytmó AI ')}
               </p>
             </div>
           </div>
