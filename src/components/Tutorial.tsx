@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 
 const tutorialSteps = [
   {
-    title: "Witaj w Panelu Monitorowania Sieci Energetycznej",
-    description: "Ten panel pomoże Ci monitorować i analizować dane z inteligentnej sieci energetycznej. Przeprowadzimy Cię przez najważniejsze funkcje systemu."
+    title: "Witaj w panelu monitorowania. stanu jakości powietrza.",
+    description: "Ten panel pomoże Ci monitorować i analizować dane z inteligentnej sieci smart grid oraz inteligentnych czujników jakości powietrza. Przeprowadzimy Cię przez najważniejsze funkcje systemu."
   },
   {
     title: "Asystent AI i Analiza Danych",
@@ -29,10 +29,6 @@ const tutorialSteps = [
   {
     title: "Mapa i Lokalizacje",
     description: "Mapa pokazuje rozmieszczenie elementów sieci. Możesz przybliżać i oddalać widok oraz klikać w znaczniki, aby zobaczyć szczegóły każdej lokalizacji."
-  },
-  {
-    title: "Eksperymenty i Integracje",
-    description: "Sprawdź zakładki 'Eksperymenty' i 'Integracje', aby odkryć dodatkowe funkcje, takie jak monitoring stacji rowerowych czy analiza pogody."
   },
   {
     title: "Dostosowanie Wyglądu",
