@@ -1,10 +1,10 @@
+
 import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { AirlyApiSettings } from "@/components/settings/AirlyApiSettings";
 
 interface AirQualityData {
   pm25: number;
@@ -207,19 +207,6 @@ export function PomeranianAirQuality() {
         .addTo(mapInstance.current!);
     });
   }, [data]);
-
-  if (error instanceof Error && error.message.includes('Brak klucza API Airly')) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <p className="text-red-500 mb-4">Brak klucza API Airly. Proszę skonfigurować klucz w ustawieniach.</p>
-            <AirlyApiSettings />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (isLoading) {
     return (
