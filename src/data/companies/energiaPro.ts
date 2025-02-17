@@ -1,5 +1,15 @@
+
 import { Company } from "@/types/company";
-import { Battery, Cpu, Zap, Power, DollarSign, Flame, Activity, Gauge, Timer as Clock } from "lucide-react";
+import { 
+  Power, 
+  Zap, 
+  DollarSign, 
+  Flame, 
+  Activity, 
+  Gauge, 
+  Battery, 
+  Timer as Clock 
+} from "lucide-react";
 
 export const energiaPro: Company = {
   id: "1",
