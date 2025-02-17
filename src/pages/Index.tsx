@@ -32,6 +32,7 @@ import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
 import { PomeranianAirQuality } from "@/components/pomerania/PomeranianAirQuality";
 import '../i18n/config';
+import { AirlyMap } from "@/components/airly/AirlyMap";
 
 const Index = () => {
   const { toast } = useToast();
@@ -155,6 +156,7 @@ const Index = () => {
                   <TabsList className="w-full justify-start overflow-x-auto flex-wrap">
                     <TabsTrigger value="spaces">{t('spaces')}</TabsTrigger>
                     <TabsTrigger value="air-quality">Mapy jakości powietrza</TabsTrigger>
+                    <TabsTrigger value="airly">Airly</TabsTrigger>
                     <TabsTrigger value="insights">{t('analysis')}</TabsTrigger>
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
@@ -220,6 +222,10 @@ const Index = () => {
 
                   <TabsContent value="air-quality">
                     <PomeranianAirQuality />
+                  </TabsContent>
+
+                  <TabsContent value="airly">
+                    <AirlyMap />
                   </TabsContent>
 
                   <TabsContent value="insights">
