@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -11,21 +11,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const DEFAULT_API_KEY = 'zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP';
-
 export function AirlyApiSettings() {
   const [apiKey, setApiKey] = useState(localStorage.getItem('AIRLY_API_KEY') || '');
   const [isValidating, setIsValidating] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const storedKey = localStorage.getItem('AIRLY_API_KEY');
-    if (!storedKey) {
-      // Jeśli nie ma zapisanego klucza, używamy domyślnego
-      localStorage.setItem('AIRLY_API_KEY', DEFAULT_API_KEY);
-      setApiKey(DEFAULT_API_KEY);
-    }
-  }, []);
 
   const validateApiKey = async (key: string) => {
     try {
@@ -64,16 +53,6 @@ export function AirlyApiSettings() {
     }
   };
 
-  const handleResetToDefault = () => {
-    setApiKey(DEFAULT_API_KEY);
-    localStorage.setItem('AIRLY_API_KEY', DEFAULT_API_KEY);
-    toast({
-      title: "Sukces",
-      description: "Przywrócono domyślny klucz API.",
-    });
-    window.location.reload();
-  };
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -104,14 +83,9 @@ export function AirlyApiSettings() {
               </a>
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={handleSaveApiKey} disabled={isValidating}>
-              {isValidating ? "Sprawdzanie..." : "Zapisz klucz API"}
-            </Button>
-            <Button variant="secondary" onClick={handleResetToDefault}>
-              Przywróć domyślny klucz
-            </Button>
-          </div>
+          <Button onClick={handleSaveApiKey} disabled={isValidating}>
+            {isValidating ? "Sprawdzanie..." : "Zapisz klucz API"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
