@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useCompanyStore } from "@/components/CompanySidebar";
-import { companies } from "@/data/companies";
+import { companiesData } from "@/data/companies";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -152,12 +152,12 @@ const StatCard = ({ stat, index, expandedCard, setExpandedCard }) => {
 export const PowerStats = () => {
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const { selectedCompanyId } = useCompanyStore();
-  const selectedCompany = companies.find(
+  const selectedCompany = companiesData.find(
     (company) => company.id === selectedCompanyId
   );
 
   const visibleStats = selectedCompany?.stats.filter(stat => 
-    !HIDDEN_STATS.includes(stat.title) || companies.length > 1
+    !HIDDEN_STATS.includes(stat.title) || companiesData.length > 1
   );
 
   return (

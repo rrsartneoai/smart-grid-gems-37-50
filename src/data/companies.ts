@@ -1,6 +1,4 @@
-
 import { Company } from "@/types/company";
-import { Flame, Sun, Cloud, Recycle } from "lucide-react";
 
 export const companies: Company[] = [
   {
@@ -11,7 +9,7 @@ export const companies: Company[] = [
         title: "Energy Consumption",
         value: "350",
         unit: "MWh",
-        icon: Flame,
+        icon: require('lucide-react').Flame,
         description: "Total energy consumed this month",
         details: [
           { label: "Previous Month", value: "380 MWh" },
@@ -22,7 +20,7 @@ export const companies: Company[] = [
         title: "Renewable Energy",
         value: "60",
         unit: "%",
-        icon: Sun,
+        icon: require('lucide-react').Sun,
         description: "Percentage of energy from renewable sources",
         details: [
           { label: "Target", value: "75%" },
@@ -33,7 +31,7 @@ export const companies: Company[] = [
         title: "Carbon Footprint",
         value: "120",
         unit: "Tons",
-        icon: Cloud,
+        icon: require('lucide-react').Cloud,
         description: "Total carbon emissions this month",
         details: [
           { label: "Previous Month", value: "130 Tons" },
@@ -44,7 +42,7 @@ export const companies: Company[] = [
         title: "Waste Recycled",
         value: "85",
         unit: "%",
-        icon: Recycle,
+        icon: require('lucide-react').Recycle,
         description: "Percentage of waste recycled",
         details: [
           { label: "Target", value: "90%" },
