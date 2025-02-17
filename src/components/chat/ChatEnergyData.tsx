@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import {
   LineChart,
@@ -10,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useCompanyStore } from "@/components/CompanySidebar";
-import { companiesData } from "@/data/companies";
+import { companies } from "@/data/companies";
 import { sensorsData } from "@/components/sensors/SensorsData";
 
 interface ChatEnergyDataProps {
@@ -20,7 +19,7 @@ interface ChatEnergyDataProps {
 
 export function ChatEnergyData({ dataType, title }: ChatEnergyDataProps) {
   const { selectedCompanyId } = useCompanyStore();
-  const selectedCompany = companiesData.find(
+  const selectedCompany = companies.find(
     (company) => company.id === selectedCompanyId
   );
 
