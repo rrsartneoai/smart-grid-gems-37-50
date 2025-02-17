@@ -1,10 +1,11 @@
+
 import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { AirlyApiSettings } from "@/components/settings/AirlyApiSettings";
+import { AirQualitySpaces } from "./AirQualitySpaces";
 
 interface AirQualityData {
   pm25: number;
@@ -30,11 +31,7 @@ const cities = [
 ];
 
 export const fetchAirQualityData = async (city: { lat: number; lon: number; name: string }): Promise<AirQualityData> => {
-  const apiKey = localStorage.getItem('AIRLY_API_KEY');
-  
-  if (!apiKey) {
-    throw new Error('Brak klucza API Airly. Proszę skonfigurować klucz w ustawieniach.');
-  }
+  const apiKey = localStorage.getItem('AIRLY_API_KEY') || 'zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP';
 
   try {
     const response = await fetch(
@@ -48,10 +45,6 @@ export const fetchAirQualityData = async (city: { lat: number; lon: number; name
     );
 
     if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem('AIRLY_API_KEY');
-        throw new Error('Nieprawidłowy klucz API Airly. Sprawdź swój klucz w ustawieniach.');
-      }
       throw new Error('Błąd podczas pobierania danych o jakości powietrza');
     }
 
@@ -68,13 +61,6 @@ export const fetchAirQualityData = async (city: { lat: number; lon: number; name
       quality = "Zła";
     }
 
-    let temp = data.current.values.find((v: any) => v.name === 'TEMPERATURE')?.value;
-    if (temp === undefined) {
-      temp = 20;
-    } else if (temp > 50 || temp < -50) {
-      temp = temp / 10;
-    }
-
     return {
       pm25: pm25Value,
       pm10: pm10Value,
@@ -82,7 +68,7 @@ export const fetchAirQualityData = async (city: { lat: number; lon: number; name
       so2: data.current.values.find((v: any) => v.name === 'SO2')?.value || 0,
       o3: data.current.values.find((v: any) => v.name === 'O3')?.value || 0,
       co: data.current.values.find((v: any) => v.name === 'CO')?.value || 0,
-      temp: parseFloat(temp.toFixed(1)),
+      temp: data.current.values.find((v: any) => v.name === 'TEMPERATURE')?.value || 20,
       timestamp: data.current.fromDateTime,
       city: city.name,
       quality: quality,
@@ -208,19 +194,6 @@ export function PomeranianAirQuality() {
     });
   }, [data]);
 
-  if (error instanceof Error && error.message.includes('Brak klucza API Airly')) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center space-y-4">
-            <p className="text-red-500 mb-4">Brak klucza API Airly. Proszę skonfigurować klucz w ustawieniach.</p>
-            <AirlyApiSettings />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   if (isLoading) {
     return (
       <Card>
@@ -248,7 +221,9 @@ export function PomeranianAirQuality() {
           <CardTitle>Mapa jakości powietrza - województwo pomorskie</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full h-[600px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
+          <AirQualitySpaces />
+          
+          <div className="w-full h-[600px] rounded-lg overflow-hidden my-6" ref={mapRef} />
           
           <div className="grid gap-4 md:grid-cols-3">
             {Array.isArray(data) && data.map((cityData) => (
