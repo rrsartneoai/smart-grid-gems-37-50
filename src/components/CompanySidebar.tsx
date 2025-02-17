@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search, MessageSquare } from "lucide-react";
-import { companies } from "@/data/companies";
+import { companiesData } from "@/data/companies";
 import { create } from "zustand";
 import { Button } from "@/components/ui/button";
 import { CompanyStoreState } from "@/types/company";
@@ -33,7 +34,7 @@ export function CompanySidebar() {
     setCollapsed(!collapsed);
   };
 
-  const filteredCompanies = companies.filter(company => 
+  const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -92,7 +93,7 @@ interface SidebarContentProps {
   collapsed?: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filteredCompanies: typeof companies;
+  filteredCompanies: typeof companiesData;
   isAIAssistantVisible: boolean;
   navigate: (path: string) => void;
 }
