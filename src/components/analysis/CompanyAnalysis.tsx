@@ -1,7 +1,7 @@
 import { FloatingChatbot } from "../FloatingChatbot";
 import { Card } from "@/components/ui/card";
 import { useCompanyStore } from "@/components/CompanySidebar";
-import { companiesData } from "@/data/companies";
+import { companies } from "@/data/companies";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
@@ -30,7 +30,7 @@ const calculateForecast = (data: any[]) => {
 export function CompanyAnalysis() {
   const { toast } = useToast();
   const { selectedCompanyId } = useCompanyStore();
-  const selectedCompany = companiesData.find(
+  const selectedCompany = companies.find(
     (company) => company.id === selectedCompanyId
   );
   const [showForecast, setShowForecast] = useState(false);
