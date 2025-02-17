@@ -1,3 +1,4 @@
+
 import { LucideIcon } from "lucide-react";
 
 export interface EnergyData {
@@ -12,7 +13,7 @@ export interface CompanyStats {
   title: string;
   value: number | string;
   unit?: string;
-  icon: LucideIcon;
+  icon: string;
   description: string;
   details: Array<{
     label: string;
@@ -27,6 +28,9 @@ export interface Company {
   energyData: EnergyData[];
   description?: string;
 }
+
+// Add CompanyData type alias
+export type CompanyData = Company;
 
 export interface CompanyStoreState {
   selectedCompanyId: string | null;
