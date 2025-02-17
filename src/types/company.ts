@@ -3,7 +3,7 @@ import { LucideIcon } from 'lucide-react';
 
 export interface CompanyStats {
   title: string;
-  value: string;
+  value: number | string;
   unit?: string;
   icon: LucideIcon;
   description: string;
@@ -13,15 +13,25 @@ export interface CompanyStats {
   }>;
 }
 
+export interface EnergyData {
+  name: string;
+  consumption: number;
+  production: number;
+  efficiency: number;
+  timestamp?: string;
+}
+
 export interface Company {
   id: string;
   name: string;
   stats: CompanyStats[];
-  energyData: Array<{
-    name: string;
-    consumption: number;
-    production: number;
-    efficiency: number;
-    timestamp?: string;
-  }>;
+  energyData: EnergyData[];
+  description?: string;
+}
+
+export type CompanyData = Company;
+
+export interface CompanyStoreState {
+  selectedCompanyId: string | null;
+  setSelectedCompanyId: (id: string) => void;
 }
