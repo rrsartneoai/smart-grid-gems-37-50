@@ -1,81 +1,138 @@
 
 import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface AirQualityData {
-  location: {
-    name: string;
-    lat: number;
-    lon: number;
-  };
-  current: {
-    values: Array<{
-      name: string;
-      value: number;
-    }>;
-    indexes: Array<{
-      value: number;
-      level: string;
-      description: string;
-      color: string;
-    }>;
-  };
+  pm25: number;
+  pm10: number;
+  no2: number;
+  so2: number;
+  o3: number;
+  co: number;
+  temp: number;
+  timestamp: string;
+  city: string;
+  quality: string;
+  pm25_trend?: string;
+  pm10_trend?: string;
 }
 
-const AIRLY_API_KEY = "zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP";
-const LOCATIONS = [
-  { name: "Gdańsk", lat: 54.352, lon: 18.646 },
-  { name: "Gdynia", lat: 54.518, lon: 18.531 },
-  { name: "Sopot", lat: 54.441, lon: 18.560 },
-  { name: "Słupsk", lat: 54.464, lon: 17.029 },
-  { name: "Ustka", lat: 54.580, lon: 16.861 }
+const cities = [
+  { name: "Gdańsk", lat: 54.352, lon: 18.6466 },
+  { name: "Gdynia", lat: 54.5189, lon: 18.5305 },
+  { name: "Sopot", lat: 54.4418, lon: 18.5601 },
+  { name: "Słupsk", lat: 54.4641, lon: 17.0285 },
+  { name: "Ustka", lat: 54.5805, lon: 16.8614 }
 ];
+
+export const fetchAirQualityData = async (city: { lat: number; lon: number; name: string }): Promise<AirQualityData> => {
+  const apiKey = localStorage.getItem('AIRLY_API_KEY');
+  
+  if (!apiKey) {
+    throw new Error('Brak klucza API Airly. Proszę skonfigurować klucz w ustawieniach.');
+  }
+
+  try {
+    const response = await fetch(
+      `https://airapi.airly.eu/v2/measurements/point?lat=${city.lat}&lng=${city.lon}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'apikey': apiKey
+        }
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('AIRLY_API_KEY');
+        throw new Error('Nieprawidłowy klucz API Airly. Sprawdź swój klucz w ustawieniach.');
+      }
+      throw new Error('Błąd podczas pobierania danych o jakości powietrza');
+    }
+
+    const data = await response.json();
+    
+    const pm25Value = data.current.values.find((v: any) => v.name === 'PM25')?.value || 0;
+    const pm10Value = data.current.values.find((v: any) => v.name === 'PM10')?.value || 0;
+    
+    let quality = "Dobra";
+    if (pm25Value > 25 || pm10Value > 50) {
+      quality = "Umiarkowana";
+    }
+    if (pm25Value > 50 || pm10Value > 100) {
+      quality = "Zła";
+    }
+
+    let temp = data.current.values.find((v: any) => v.name === 'TEMPERATURE')?.value;
+    if (temp === undefined) {
+      temp = 20;
+    } else if (temp > 50 || temp < -50) {
+      temp = temp / 10;
+    }
+
+    return {
+      pm25: pm25Value,
+      pm10: pm10Value,
+      no2: data.current.values.find((v: any) => v.name === 'NO2')?.value || 0,
+      so2: data.current.values.find((v: any) => v.name === 'SO2')?.value || 0,
+      o3: data.current.values.find((v: any) => v.name === 'O3')?.value || 0,
+      co: data.current.values.find((v: any) => v.name === 'CO')?.value || 0,
+      temp: parseFloat(temp.toFixed(1)),
+      timestamp: data.current.fromDateTime,
+      city: city.name,
+      quality: quality,
+      pm25_trend: "Stabilny",
+      pm10_trend: "Stabilny"
+    };
+  } catch (error) {
+    console.error('Error fetching air quality data:', error);
+    throw error;
+  }
+};
+
+const useAirQualityData = () => {
+  return useQuery({
+    queryKey: ['airQuality'],
+    queryFn: async () => {
+      const promises = cities.map(city => fetchAirQualityData(city));
+      return Promise.all(promises);
+    },
+    retry: 1,
+    refetchInterval: 300000,
+    staleTime: 240000
+  });
+};
+
+const getQualityColor = (quality: string) => {
+  switch (quality) {
+    case "Dobra":
+      return "#00C853";
+    case "Umiarkowana":
+      return "#FFD600";
+    case "Zła":
+      return "#DD2C00";
+    default:
+      return "#757575";
+  }
+};
 
 export function PomeranianAirQuality() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const { data, isLoading, error } = useAirQualityData();
 
-  const { data, isLoading, error } = useQuery<AirQualityData[]>({
-    queryKey: ['airlyData'],
-    queryFn: async () => {
-      const results = await Promise.all(
-        LOCATIONS.map(async (location) => {
-          const response = await fetch(
-            `https://airapi.airly.eu/v2/measurements/point?lat=${location.lat}&lng=${location.lon}`,
-            {
-              headers: {
-                'Accept': 'application/json',
-                'apikey': AIRLY_API_KEY,
-              },
-            }
-          );
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const data = await response.json();
-          return { ...data, location };
-        })
-      );
-      return results;
-    },
-    refetchInterval: 300000, // Refresh every 5 minutes
-  });
-
-  // Initialize map
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Cleanup previous map instance if it exists
     if (mapInstance.current) {
       mapInstance.current.remove();
       mapInstance.current = null;
     }
 
-    // Create new map instance centered on Pomorskie
     const map = L.map(mapRef.current).setView([54.352, 18.646], 8);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -86,17 +143,15 @@ export function PomeranianAirQuality() {
       position: 'bottomright'
     }).addTo(map);
 
-    // Set map bounds to Pomorskie region
     const bounds = L.latLngBounds(
-      [54.8, 16.5], // Southwest corner
-      [53.9, 19.5]  // Northeast corner
+      [54.8, 16.5],
+      [53.9, 19.5]
     );
     map.setMaxBounds(bounds);
     map.setMinZoom(8);
 
     mapInstance.current = map;
 
-    // Cleanup on unmount
     return () => {
       if (mapInstance.current) {
         mapInstance.current.remove();
@@ -105,44 +160,36 @@ export function PomeranianAirQuality() {
     };
   }, []);
 
-  // Update markers when data changes
   useEffect(() => {
     if (!mapInstance.current || !data) return;
 
-    // Clear existing markers
     mapInstance.current.eachLayer((layer) => {
       if (layer instanceof L.Marker) {
         layer.remove();
       }
     });
 
-    // Add new markers
     data.forEach((cityData) => {
-      if (!cityData?.current?.indexes?.[0]) return;
-      
-      const { location } = cityData;
-      const airQualityIndex = cityData.current.indexes[0];
-      const pm10Value = cityData.current.values.find(v => v.name === 'PM10')?.value;
-      const pm25Value = cityData.current.values.find(v => v.name === 'PM25')?.value;
-      const pm1Value = cityData.current.values.find(v => v.name === 'PM1')?.value;
+      const city = cities.find(c => c.name === cityData.city);
+      if (!city) return;
 
       const markerHtml = `
-        <div style="background-color: ${airQualityIndex.color}; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; min-width: 200px;">
-          <div style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem;">${location.name}</div>
-          <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">${airQualityIndex.value?.toFixed(0) || 'N/A'}</div>
-          <div style="margin-bottom: 0.5rem;">${airQualityIndex.description}</div>
+        <div style="background-color: ${getQualityColor(cityData.quality)}; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; min-width: 200px;">
+          <div style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem;">${cityData.city}</div>
+          <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">${cityData.quality}</div>
+          <div style="margin-bottom: 0.5rem;">Temperatura: ${cityData.temp}°C</div>
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span>PM10:</span>
-              <span>${pm10Value?.toFixed(0) || 'N/A'} µg/m³</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>PM2.5:</span>
-              <span>${pm25Value?.toFixed(0) || 'N/A'} µg/m³</span>
+              <span>${cityData.pm25.toFixed(0)} µg/m³ (${cityData.pm25_trend})</span>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span>PM1:</span>
-              <span>${pm1Value?.toFixed(0) || 'N/A'} µg/m³</span>
+              <span>PM10:</span>
+              <span>${cityData.pm10.toFixed(0)} µg/m³ (${cityData.pm10_trend})</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>NO₂:</span>
+              <span>${cityData.no2.toFixed(0)} µg/m³</span>
             </div>
           </div>
         </div>
@@ -155,7 +202,7 @@ export function PomeranianAirQuality() {
         iconAnchor: [100, 60]
       });
 
-      L.marker([location.lat, location.lon], { icon })
+      L.marker([city.lat, city.lon], { icon })
         .addTo(mapInstance.current!);
     });
   }, [data]);
@@ -174,7 +221,7 @@ export function PomeranianAirQuality() {
     return (
       <Card>
         <CardContent className="pt-6 text-red-500">
-          Błąd podczas ładowania danych o jakości powietrza
+          {error instanceof Error ? error.message : 'Błąd podczas ładowania danych o jakości powietrza'}
         </CardContent>
       </Card>
     );
@@ -191,27 +238,59 @@ export function PomeranianAirQuality() {
           
           <div className="grid gap-4 md:grid-cols-3">
             {Array.isArray(data) && data.map((cityData) => (
-              <Card key={cityData.location.name} className="dark:bg-[#403E43]">
+              <Card key={cityData.city} className="dark:bg-[#403E43]">
                 <CardContent className="pt-6">
-                  <h3 className="font-bold text-lg mb-2">{cityData.location.name}</h3>
+                  <h3 className="font-bold text-lg mb-2">{cityData.city}</h3>
                   <div className="space-y-2">
-                    {cityData.current.values.map((measurement) => (
-                      <div key={measurement.name} className="flex justify-between">
-                        <span>{measurement.name}:</span>
-                        <span className="font-medium">
-                          {measurement.value?.toFixed(1) ?? 'N/A'} µg/m³
-                        </span>
-                      </div>
-                    ))}
-                    {cityData.current.indexes[0] && (
-                      <div 
-                        className="mt-4 p-3 rounded" 
-                        style={{ backgroundColor: cityData.current.indexes[0].color + '20' }}
-                      >
-                        <div className="font-bold">{cityData.current.indexes[0].description}</div>
-                        <div>CAQI: {cityData.current.indexes[0].value?.toFixed(0) ?? 'N/A'}</div>
-                      </div>
-                    )}
+                    <div className="flex justify-between">
+                      <span>PM2.5:</span>
+                      <span className="font-medium">
+                        {cityData.pm25.toFixed(1)} µg/m³ ({cityData.pm25_trend})
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>PM10:</span>
+                      <span className="font-medium">
+                        {cityData.pm10.toFixed(1)} µg/m³ ({cityData.pm10_trend})
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>NO₂:</span>
+                      <span className="font-medium">
+                        {cityData.no2.toFixed(1)} µg/m³
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>SO₂:</span>
+                      <span className="font-medium">
+                        {cityData.so2.toFixed(1)} µg/m³
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>O₃:</span>
+                      <span className="font-medium">
+                        {cityData.o3.toFixed(1)} µg/m³
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>CO:</span>
+                      <span className="font-medium">
+                        {cityData.co.toFixed(1)} µg/m³
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Temperatura:</span>
+                      <span className="font-medium">
+                        {cityData.temp}°C
+                      </span>
+                    </div>
+                    <div 
+                      className="mt-4 p-3 rounded" 
+                      style={{ backgroundColor: getQualityColor(cityData.quality) + '20' }}
+                    >
+                      <div className="font-bold">{cityData.quality}</div>
+                      <div>{new Date(cityData.timestamp).toLocaleString()}</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
