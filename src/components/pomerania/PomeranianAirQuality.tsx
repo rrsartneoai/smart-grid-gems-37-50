@@ -31,9 +31,8 @@ const LOCATIONS = [
   { name: "Gdańsk", lat: 54.352, lon: 18.646 },
   { name: "Gdynia", lat: 54.518, lon: 18.531 },
   { name: "Sopot", lat: 54.441, lon: 18.560 },
-  { name: "Warszawa", lat: 52.229, lon: 21.012 },
-  { name: "Kraków", lat: 50.064, lon: 19.944 },
-  { name: "Wrocław", lat: 51.107, lon: 17.038 }
+  { name: "Słupsk", lat: 54.464, lon: 17.029 },
+  { name: "Ustka", lat: 54.580, lon: 16.861 }
 ];
 
 export function PomeranianAirQuality() {
@@ -76,8 +75,8 @@ export function PomeranianAirQuality() {
       mapInstance.current = null;
     }
 
-    // Create new map instance
-    const map = L.map(mapRef.current).setView([52.069, 19.480], 6);
+    // Create new map instance centered on Pomorskie
+    const map = L.map(mapRef.current).setView([54.352, 18.646], 8);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -86,6 +85,14 @@ export function PomeranianAirQuality() {
     L.control.zoom({
       position: 'bottomright'
     }).addTo(map);
+
+    // Set map bounds to Pomorskie region
+    const bounds = L.latLngBounds(
+      [54.8, 16.5], // Southwest corner
+      [53.9, 19.5]  // Northeast corner
+    );
+    map.setMaxBounds(bounds);
+    map.setMinZoom(8);
 
     mapInstance.current = map;
 
@@ -177,7 +184,7 @@ export function PomeranianAirQuality() {
     <div className="grid gap-6">
       <Card className="dark:bg-[#1A1F2C]">
         <CardHeader>
-          <CardTitle>Mapa jakości powietrza w Polsce</CardTitle>
+          <CardTitle>Mapa jakości powietrza - województwo pomorskie</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full h-[600px] rounded-lg overflow-hidden mb-6" ref={mapRef} />
