@@ -27,10 +27,13 @@ interface AirQualityData {
 }
 
 const AIRLY_API_KEY = "zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP";
-const TROJMIASTO_LOCATIONS = [
+const LOCATIONS = [
   { name: "Gdańsk", lat: 54.352, lon: 18.646 },
   { name: "Gdynia", lat: 54.518, lon: 18.531 },
-  { name: "Sopot", lat: 54.441, lon: 18.560 }
+  { name: "Sopot", lat: 54.441, lon: 18.560 },
+  { name: "Warszawa", lat: 52.229, lon: 21.012 },
+  { name: "Kraków", lat: 50.064, lon: 19.944 },
+  { name: "Wrocław", lat: 51.107, lon: 17.038 }
 ];
 
 export function PomeranianAirQuality() {
@@ -40,8 +43,8 @@ export function PomeranianAirQuality() {
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    // Initialize map
-    mapInstance.current = L.map(mapRef.current).setView([54.372158, 18.638306], 11);
+    // Initialize map centered on Poland
+    mapInstance.current = L.map(mapRef.current).setView([52.069, 19.480], 6);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -63,7 +66,7 @@ export function PomeranianAirQuality() {
     queryKey: ['airlyData'],
     queryFn: async () => {
       const results = await Promise.all(
-        TROJMIASTO_LOCATIONS.map(async (location) => {
+        LOCATIONS.map(async (location) => {
           const response = await fetch(
             `https://airapi.airly.eu/v2/measurements/point?lat=${location.lat}&lng=${location.lon}`,
             {
@@ -163,7 +166,7 @@ export function PomeranianAirQuality() {
     <div className="grid gap-6">
       <Card className="dark:bg-[#1A1F2C]">
         <CardHeader>
-          <CardTitle>Mapa jakości powietrza - województwo pomorskie</CardTitle>
+          <CardTitle>Mapa jakości powietrza w Polsce</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full h-[600px] rounded-lg overflow-hidden mb-6" ref={mapRef} />

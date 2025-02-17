@@ -1,4 +1,3 @@
-
 import { motion, useScroll, useTransform } from "framer-motion";
 import { PowerStats } from "@/components/dashboard/PowerStats";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
@@ -155,7 +154,7 @@ const Index = () => {
                 <Tabs defaultValue="spaces" className="w-full">
                   <TabsList className="w-full justify-start overflow-x-auto flex-wrap">
                     <TabsTrigger value="spaces">{t('spaces')}</TabsTrigger>
-                    <TabsTrigger value="pomerania">Dane z Pomorskiego</TabsTrigger>
+                    <TabsTrigger value="air-quality">Mapy jakości powietrza</TabsTrigger>
                     <TabsTrigger value="insights">{t('analysis')}</TabsTrigger>
                     <TabsTrigger value="status">{t('status')}</TabsTrigger>
                     <TabsTrigger value="sensors">{t('sensors')}</TabsTrigger>
@@ -219,7 +218,7 @@ const Index = () => {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="pomerania">
+                  <TabsContent value="air-quality">
                     <PomeranianAirQuality />
                   </TabsContent>
 
