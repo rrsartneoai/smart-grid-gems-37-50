@@ -1,5 +1,5 @@
 import { useCompanyStore } from "@/components/CompanySidebar";
-import { companiesData } from "@/data/companies";
+import { companies } from "@/data/companies";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -94,7 +94,7 @@ const ProgressItem = ({
 export function IoTStatus() {
   const { t } = useTranslation();
   const { selectedCompanyId } = useCompanyStore();
-  const selectedCompany = companiesData.find(
+  const selectedCompany = companies.find(
     (company) => company.id === selectedCompanyId
   );
   const [activeView, setActiveView] = useState<'overview' | 'devices' | 'system'>('overview');
