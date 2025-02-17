@@ -40,28 +40,6 @@ export function PomeranianAirQuality() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
 
-  useEffect(() => {
-    if (!mapRef.current || mapInstance.current) return;
-
-    // Initialize map centered on Poland
-    mapInstance.current = L.map(mapRef.current).setView([52.069, 19.480], 6);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(mapInstance.current);
-
-    // Dodaj kontrolki zoom
-    L.control.zoom({
-      position: 'bottomright'
-    }).addTo(mapInstance.current);
-
-    return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-      }
-    };
-  }, []);
-
   const { data, isLoading, error } = useQuery<AirQualityData[]>({
     queryKey: ['airlyData'],
     queryFn: async () => {
@@ -88,6 +66,39 @@ export function PomeranianAirQuality() {
     refetchInterval: 300000, // Refresh every 5 minutes
   });
 
+  // Initialize map
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // Cleanup previous map instance if it exists
+    if (mapInstance.current) {
+      mapInstance.current.remove();
+      mapInstance.current = null;
+    }
+
+    // Create new map instance
+    const map = L.map(mapRef.current).setView([52.069, 19.480], 6);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.control.zoom({
+      position: 'bottomright'
+    }).addTo(map);
+
+    mapInstance.current = map;
+
+    // Cleanup on unmount
+    return () => {
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+    };
+  }, []);
+
+  // Update markers when data changes
   useEffect(() => {
     if (!mapInstance.current || !data) return;
 
@@ -98,7 +109,7 @@ export function PomeranianAirQuality() {
       }
     });
 
-    // Add markers for each location
+    // Add new markers
     data.forEach((cityData) => {
       if (!cityData?.current?.indexes?.[0]) return;
       
@@ -109,20 +120,20 @@ export function PomeranianAirQuality() {
       const pm1Value = cityData.current.values.find(v => v.name === 'PM1')?.value;
 
       const markerHtml = `
-        <div class="bg-[${airQualityIndex.color}] p-4 rounded-lg shadow-lg text-white min-w-[200px]">
-          <div class="font-bold text-lg mb-2">${location.name}</div>
-          <div class="text-3xl mb-2">${airQualityIndex.value?.toFixed(0) || 'N/A'}</div>
-          <div class="mb-2">${airQualityIndex.description}</div>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
+        <div style="background-color: ${airQualityIndex.color}; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: white; min-width: 200px;">
+          <div style="font-weight: bold; font-size: 1.125rem; margin-bottom: 0.5rem;">${location.name}</div>
+          <div style="font-size: 1.875rem; margin-bottom: 0.5rem;">${airQualityIndex.value?.toFixed(0) || 'N/A'}</div>
+          <div style="margin-bottom: 0.5rem;">${airQualityIndex.description}</div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>PM10:</span>
               <span>${pm10Value?.toFixed(0) || 'N/A'} µg/m³</span>
             </div>
-            <div class="flex justify-between items-center">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>PM2.5:</span>
               <span>${pm25Value?.toFixed(0) || 'N/A'} µg/m³</span>
             </div>
-            <div class="flex justify-between items-center">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>PM1:</span>
               <span>${pm1Value?.toFixed(0) || 'N/A'} µg/m³</span>
             </div>
