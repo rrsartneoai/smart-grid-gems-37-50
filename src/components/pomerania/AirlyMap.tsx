@@ -4,131 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
-interface Installation {
-  id: number;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  address: {
-    streetNumber?: string;
-    street?: string;
-    city?: string;
-  };
-}
-
-interface Measurement {
-  current: {
-    fromDateTime: string;
-    tillDateTime: string;
-    values: Array<{
-      name: string;
-      value: number;
-    }>;
-    indexes: Array<{
-      name: string;
-      value: number;
-      level: string;
-      description: string;
-      advice: string;
-      color: string;
-    }>;
-  };
-}
+import { fetchInstallations, fetchMeasurements } from "./airlyService";
+import { createMarkerPopup } from "./AirQualityPopup";
 
 export function AirlyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const apiKey = 'zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP';
-
-  const fetchInstallations = async (lat: number, lng: number): Promise<Installation[]> => {
-    try {
-      const response = await fetch(
-        `https://airapi.airly.eu/v2/installations/nearest?lat=${lat}&lng=${lng}&maxDistanceKM=10&maxResults=100`,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'apikey': apiKey
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Nie udało się pobrać danych o czujnikach');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching installations:', error);
-      throw error;
-    }
-  };
-
-  const fetchMeasurements = async (installationId: number): Promise<Measurement> => {
-    try {
-      const response = await fetch(
-        `https://airapi.airly.eu/v2/measurements/installation?installationId=${installationId}`,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'apikey': apiKey
-          }
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error('Nie udało się pobrać pomiarów');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching measurements:', error);
-      throw error;
-    }
-  };
-
-  const createMarkerPopup = (installation: Installation, measurements: Measurement) => {
-    const getValue = (name: string) => {
-      const value = measurements.current.values.find(v => v.name === name)?.value;
-      return value !== undefined ? value.toFixed(1) : 'brak danych';
-    };
-
-    const index = measurements.current.indexes[0];
-    const color = index?.color || '#gray';
-    const quality = index?.description || 'Brak danych';
-    const advice = index?.advice || '';
-
-    return `
-      <div class="p-4 min-w-[300px]">
-        <h3 class="font-bold text-lg mb-2">
-          ${installation.address.street || ''} ${installation.address.streetNumber || ''}, 
-          ${installation.address.city || ''}
-        </h3>
-        <div class="p-2 rounded mb-2" style="background-color: ${color}20;">
-          <div class="font-bold" style="color: ${color}">${quality}</div>
-          <div class="text-sm">${advice}</div>
-        </div>
-        <div class="grid grid-cols-2 gap-2 mt-4">
-          <div class="space-y-2">
-            <p><span class="font-bold">PM1:</span> ${getValue('PM1')} µg/m³</p>
-            <p><span class="font-bold">PM2.5:</span> ${getValue('PM25')} µg/m³</p>
-            <p><span class="font-bold">PM10:</span> ${getValue('PM10')} µg/m³</p>
-          </div>
-          <div class="space-y-2">
-            <p><span class="font-bold">Temperatura:</span> ${getValue('TEMPERATURE')}°C</p>
-            <p><span class="font-bold">Wilgotność:</span> ${getValue('HUMIDITY')}%</p>
-            <p><span class="font-bold">Ciśnienie:</span> ${getValue('PRESSURE')} hPa</p>
-          </div>
-        </div>
-        <div class="text-xs text-gray-500 mt-2">
-          Ostatnia aktualizacja: ${new Date(measurements.current.fromDateTime).toLocaleString()}
-        </div>
-      </div>
-    `;
-  };
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -138,7 +21,6 @@ export function AirlyMap() {
       setError(null);
 
       try {
-        // Initialize map centered on Gdańsk
         const map = L.map(mapRef.current).setView([54.34854, 18.64966], 11);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -151,10 +33,8 @@ export function AirlyMap() {
 
         mapInstance.current = map;
 
-        // Fetch installations
         const installations = await fetchInstallations(54.34854, 18.64966);
 
-        // Add markers for each installation
         for (const installation of installations) {
           try {
             const measurements = await fetchMeasurements(installation.id);
@@ -166,7 +46,6 @@ export function AirlyMap() {
             const popupContent = createMarkerPopup(installation, measurements);
             marker.bindPopup(popupContent);
             
-            // Add color to marker based on air quality index
             const index = measurements.current.indexes[0];
             if (index) {
               marker.setIcon(L.divIcon({
