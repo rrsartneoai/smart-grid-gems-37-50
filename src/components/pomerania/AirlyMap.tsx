@@ -14,13 +14,17 @@ export function AirlyMap() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current) {
+      console.error('Map reference is not available');
+      return;
+    }
 
     const initializeMap = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
+        console.log('Initializing map...');
         const map = L.map(mapRef.current).setView([54.34854, 18.64966], 11);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -32,12 +36,18 @@ export function AirlyMap() {
         }).addTo(map);
 
         mapInstance.current = map;
+        console.log('Map initialized successfully');
 
+        console.log('Fetching installations...');
         const installations = await fetchInstallations(54.34854, 18.64966);
+        console.log(`Fetched ${installations.length} installations`);
 
+        let addedMarkers = 0;
         for (const installation of installations) {
           try {
+            console.log(`Fetching measurements for installation ${installation.id}...`);
             const measurements = await fetchMeasurements(installation.id);
+            
             const marker = L.marker([
               installation.location.latitude,
               installation.location.longitude
@@ -64,11 +74,13 @@ export function AirlyMap() {
             }
 
             marker.addTo(map);
+            addedMarkers++;
           } catch (error) {
             console.error(`Error processing installation ${installation.id}:`, error);
           }
         }
 
+        console.log(`Successfully added ${addedMarkers} markers to the map`);
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -77,12 +89,17 @@ export function AirlyMap() {
       }
     };
 
-    initializeMap();
+    initializeMap().catch((error) => {
+      console.error('Unhandled error in initializeMap:', error);
+      setError('Wystąpił nieoczekiwany błąd');
+      setIsLoading(false);
+    });
 
     return () => {
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
+        console.log('Map instance cleaned up');
       }
     };
   }, []);

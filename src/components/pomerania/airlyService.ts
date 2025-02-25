@@ -16,7 +16,7 @@ export const fetchInstallations = async (lat: number, lng: number): Promise<Inst
     );
     
     if (!response.ok) {
-      throw new Error('Nie udało się pobrać danych o czujnikach');
+      throw new Error(`Failed to fetch installations: ${response.status} ${response.statusText}`);
     }
     
     return await response.json();
@@ -39,7 +39,7 @@ export const fetchMeasurements = async (installationId: number): Promise<Measure
     );
     
     if (!response.ok) {
-      throw new Error('Nie udało się pobrać pomiarów');
+      throw new Error(`Failed to fetch measurements: ${response.status} ${response.statusText}`);
     }
     
     return await response.json();
