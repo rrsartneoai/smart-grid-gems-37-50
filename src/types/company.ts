@@ -25,8 +25,3 @@ export interface Company {
     timestamp?: string;
   }>;
 }
-
-export interface CompanyStoreState {
-  selectedCompanyId: string;
-  setSelectedCompanyId: (id: string) => void;
-}

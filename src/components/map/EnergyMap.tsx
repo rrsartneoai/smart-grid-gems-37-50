@@ -1,14 +1,15 @@
+
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useCompanyStore } from '@/components/CompanySidebar';
-import { companies } from '@/data/companies';
+import { companiesData } from '@/data/companies';
 
-const EnergyMap = () => {
+const AirQualityMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const { selectedCompanyId } = useCompanyStore();
-  const selectedProject = companies.find(
+  const selectedProject = companiesData.find(
     (company) => company.id === selectedCompanyId
   );
 
@@ -106,4 +107,5 @@ const EnergyMap = () => {
   );
 };
 
-export default EnergyMap;
+export default AirQualityMap;
+
