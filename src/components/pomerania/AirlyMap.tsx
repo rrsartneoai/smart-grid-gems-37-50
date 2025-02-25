@@ -89,13 +89,17 @@ export function AirlyMap() {
       }
     };
 
-    initializeMap().catch((error) => {
-      console.error('Unhandled error in initializeMap:', error);
-      setError('Wystąpił nieoczekiwany błąd');
-      setIsLoading(false);
-    });
+    // Small delay to ensure the DOM is ready
+    const timer = setTimeout(() => {
+      initializeMap().catch((error) => {
+        console.error('Unhandled error in initializeMap:', error);
+        setError('Wystąpił nieoczekiwany błąd');
+        setIsLoading(false);
+      });
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
@@ -104,33 +108,24 @@ export function AirlyMap() {
     };
   }, []);
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="pt-6 flex items-center justify-center min-h-[200px]">
-          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="pt-6 text-red-500">
-          {error}
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="dark:bg-[#1A1F2C]">
       <CardHeader>
         <CardTitle>Mapa czujników Airly - Trójmiasto</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[600px] rounded-lg overflow-hidden" ref={mapRef} />
+        <div className="w-full h-[600px] rounded-lg overflow-hidden relative" ref={mapRef}>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          )}
+          {error && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-red-500">{error}</div>
+            </div>
+          )}
+        </div>
         <div className="mt-4 text-sm text-muted-foreground">
           Dane pochodzą z czujników Airly. Kliknij w znacznik na mapie, aby zobaczyć szczegółowe informacje o jakości powietrza.
           Kolor znacznika odpowiada jakości powietrza w danym miejscu.
