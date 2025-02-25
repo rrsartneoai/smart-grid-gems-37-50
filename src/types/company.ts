@@ -1,17 +1,10 @@
 
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from 'lucide-react';
 
-export interface Company {
-  id: string;
-  name: string;
-  stats: CompanyStat[];
-  energyData: EnergyData[];
-}
-
-export interface CompanyStat {
+export interface CompanyStats {
   title: string;
   value: string;
-  unit: string;
+  unit?: string;
   icon: LucideIcon;
   description: string;
   details: Array<{
@@ -20,20 +13,15 @@ export interface CompanyStat {
   }>;
 }
 
-export interface EnergyData {
+export interface Company {
+  id: string;
   name: string;
-  consumption: number;
-  production: number;
-  efficiency: number;
-  timestamp: string;
-}
-
-export interface CompanyStoreState {
-  selectedCompanyId: string;
-  setSelectedCompanyId: (id: string) => void;
-}
-
-export interface CompanyData extends Company {
-  stats: CompanyStat[];
-  energyData: EnergyData[];
+  stats: CompanyStats[];
+  energyData: Array<{
+    name: string;
+    consumption: number;
+    production: number;
+    efficiency: number;
+    timestamp?: string;
+  }>;
 }
