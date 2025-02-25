@@ -6,21 +6,83 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
 import { createMarkerPopup } from "./AirQualityPopup";
+import { fetchGIOSStations, fetchGIOSData } from "@/services/airQuality/giosService";
+import { fetchSyngeosStations, fetchSyngeosData } from "@/services/airQuality/syngeos";
+import { AirQualityData, AirQualitySource } from "@/types/company";
+
+// Utility function to check if coordinates are in the Tri-City area
+export const isInTriCity = (lat: number, lon: number) => {
+  const bounds = {
+    north: 54.60,  // North of Gdynia
+    south: 54.30,  // South of Gdańsk
+    east: 18.70,   // East coast
+    west: 18.40    // West of Gdynia
+  };
+  return lat >= bounds.south && lat <= bounds.north && lon >= bounds.west && lon <= bounds.east;
+};
 
 // Rate limiting helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const createMarker = (data: AirQualityData, map: L.Map) => {
+  const { source, current } = data;
+  const marker = L.marker([source.location.latitude, source.location.longitude]);
+  
+  // Calculate color based on PM2.5 or PM10 values
+  let color = '#gray';
+  let value = 0;
+  if (current.pm25 !== undefined) {
+    value = current.pm25;
+    color = value <= 10 ? '#34D399' : 
+            value <= 25 ? '#FBBF24' : 
+            value <= 50 ? '#F59E0B' : '#EF4444';
+  } else if (current.pm10 !== undefined) {
+    value = current.pm10;
+    color = value <= 20 ? '#34D399' : 
+            value <= 50 ? '#FBBF24' : 
+            value <= 100 ? '#F59E0B' : '#EF4444';
+  }
+
+  marker.setIcon(L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div style="
+      width: 24px;
+      height: 24px;
+      background-color: ${color};
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: Montserrat, sans-serif;
+      font-size: 10px;
+      font-weight: bold;
+    ">${Math.round(value)}</div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  }));
+
+  const popupContent = createMarkerPopup(data);
+  marker.bindPopup(popupContent, {
+    maxWidth: 400,
+    className: 'airly-popup'
+  });
+
+  marker.addTo(map);
+  return marker;
+};
+
 export function AirlyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current) {
-      console.error('Map reference is not available');
-      return;
-    }
+    if (!mapRef.current) return;
 
     const initializeMap = async () => {
       setIsLoading(true);
@@ -42,86 +104,70 @@ export function AirlyMap() {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        const cities = [
-          { lat: 54.372158, lng: 18.638306 }, // Gdańsk
-          { lat: 54.441581, lng: 18.560096 }, // Sopot
-          { lat: 54.518889, lng: 18.531889 }  // Gdynia
-        ];
+        // Fetch data from all providers
+        const [airlyStations, giosStations, syngeosStations] = await Promise.all([
+          fetchInstallations(54.372158, 18.638306),
+          fetchGIOSStations(),
+          fetchSyngeosStations()
+        ]);
 
-        let allInstallations = [];
-        for (const city of cities) {
-          const installations = await fetchInstallations(city.lat, city.lng);
-          allInstallations.push(...installations);
-          // Add delay between city requests
-          await delay(100);
-        }
-
-        const uniqueInstallations = Array.from(new Map(
-          allInstallations.map(item => [item.id, item])
-        ).values());
-
-        console.log(`Fetched ${uniqueInstallations.length} unique installations`);
-
-        let addedMarkers = 0;
-        // Process installations in smaller batches to prevent rate limiting
-        const batchSize = 5;
-        for (let i = 0; i < uniqueInstallations.length; i += batchSize) {
-          const batch = uniqueInstallations.slice(i, i + batchSize);
-          
-          await Promise.all(batch.map(async (installation) => {
-            try {
-              console.log(`Fetching measurements for installation ${installation.id}...`);
-              const measurements = await fetchMeasurements(installation.id);
-              
-              const marker = L.marker([
-                installation.location.latitude,
-                installation.location.longitude
-              ]);
-
-              const popupContent = createMarkerPopup(installation, measurements);
-              marker.bindPopup(popupContent, {
-                maxWidth: 400,
-                className: 'airly-popup'
-              });
-              
-              const index = measurements.current.indexes[0];
-              if (index) {
-                marker.setIcon(L.divIcon({
-                  className: 'custom-div-icon',
-                  html: `<div style="
-                    width: 24px;
-                    height: 24px;
-                    background-color: ${index.color};
-                    border-radius: 50%;
-                    border: 2px solid white;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-family: Montserrat, sans-serif;
-                    font-size: 10px;
-                    font-weight: bold;
-                  ">${Math.round(index.value)}</div>`,
-                  iconSize: [24, 24],
-                  iconAnchor: [12, 12]
-                }));
+        // Process Airly stations
+        for (const station of airlyStations) {
+          try {
+            const measurements = await fetchMeasurements(station.id);
+            const data: AirQualityData = {
+              source: {
+                id: `airly-${station.id}`,
+                name: `Airly ${station.address.street || ''}`,
+                provider: 'Airly',
+                location: {
+                  latitude: station.location.latitude,
+                  longitude: station.location.longitude
+                },
+                address: station.address
+              },
+              current: {
+                ...measurements.current,
+                provider: 'Airly',
+                timestamp: measurements.current.fromDateTime
               }
-
-              marker.addTo(map);
-              addedMarkers++;
-            } catch (error) {
-              console.error(`Error processing installation ${installation.id}:`, error);
-            }
-          }));
-
-          // Add delay between batches
-          if (i + batchSize < uniqueInstallations.length) {
-            await delay(500);
+            };
+            const marker = createMarker(data, map);
+            markersRef.current.push(marker);
+            await delay(100);
+          } catch (error) {
+            console.error(`Error processing Airly station ${station.id}:`, error);
           }
         }
 
-        console.log(`Successfully added ${addedMarkers} markers to the map`);
+        // Process GIOŚ stations
+        for (const station of giosStations) {
+          try {
+            const data = await fetchGIOSData(station.id);
+            if (data) {
+              const marker = createMarker(data, map);
+              markersRef.current.push(marker);
+              await delay(100);
+            }
+          } catch (error) {
+            console.error(`Error processing GIOŚ station ${station.id}:`, error);
+          }
+        }
+
+        // Process Syngeos stations
+        for (const station of syngeosStations) {
+          try {
+            const data = await fetchSyngeosData(station.id);
+            if (data) {
+              const marker = createMarker(data, map);
+              markersRef.current.push(marker);
+              await delay(100);
+            }
+          } catch (error) {
+            console.error(`Error processing Syngeos station ${station.id}:`, error);
+          }
+        }
+
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -130,20 +176,14 @@ export function AirlyMap() {
       }
     };
 
-    const timer = setTimeout(() => {
-      initializeMap().catch((error) => {
-        console.error('Unhandled error in initializeMap:', error);
-        setError('Wystąpił nieoczekiwany błąd');
-        setIsLoading(false);
-      });
-    }, 100);
+    initializeMap();
 
     return () => {
-      clearTimeout(timer);
       if (mapInstance.current) {
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
         mapInstance.current.remove();
         mapInstance.current = null;
-        console.log('Map instance cleaned up');
       }
     };
   }, []);
@@ -151,7 +191,7 @@ export function AirlyMap() {
   return (
     <Card className="dark:bg-[#1A1F2C] font-['Montserrat']">
       <CardHeader>
-        <CardTitle className="text-xl">Mapa czujników Airly - Trójmiasto</CardTitle>
+        <CardTitle className="text-xl">Mapa czujników jakości powietrza - Trójmiasto</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="w-full h-[600px] rounded-lg overflow-hidden relative" ref={mapRef}>
@@ -167,7 +207,7 @@ export function AirlyMap() {
           )}
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
-          Dane pochodzą z czujników Airly. Kliknij w znacznik na mapie, aby zobaczyć szczegółowe informacje o jakości powietrza.
+          Dane pochodzą z różnych źródeł: Airly, GIOŚ, Syngeos. Kliknij w znacznik na mapie, aby zobaczyć szczegółowe informacje o jakości powietrza.
           Kolor znacznika odpowiada jakości powietrza w danym miejscu.
         </div>
       </CardContent>
