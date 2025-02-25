@@ -1,11 +1,6 @@
 
 import { Company } from "@/types/company";
 import { Flame, Sun, Cloud, Recycle } from "lucide-react";
-import { ekoEnergiaPlus } from "./companies/ekoEnergiaPlus";
-import { energiaPro } from "./companies/energiaPro";
-import { futureEnergy } from "./companies/futureEnergy";
-import { greenTech } from "./companies/greenTech";
-import { smartPowerCorp } from "./companies/smartPowerCorp";
 
 export const companies: Company[] = [
   {
@@ -81,9 +76,4 @@ export const companies: Company[] = [
       },
     ],
   },
-  ekoEnergiaPlus,
-  energiaPro,
-  futureEnergy,
-  greenTech,
-  smartPowerCorp,
 ];
