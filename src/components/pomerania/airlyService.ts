@@ -29,7 +29,7 @@ export const fetchInstallations = async (lat: number, lng: number): Promise<Inst
 export const fetchMeasurements = async (installationId: number): Promise<Measurement> => {
   try {
     const response = await fetch(
-      `https://airapi.airly.eu/v2/measurements/installation?installationId=${installationId}`,
+      `https://airapi.airly.eu/v2/measurements/installation?installationId=${installationId}&includeWind=true&includeForecast=true`,
       {
         headers: {
           'Accept': 'application/json',

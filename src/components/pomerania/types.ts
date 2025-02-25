@@ -12,6 +12,15 @@ export interface Installation {
   };
 }
 
+export interface AirQualityIndex {
+  name: string;
+  value: number;
+  level: string;
+  description: string;
+  advice: string;
+  color: string;
+}
+
 export interface Measurement {
   current: {
     fromDateTime: string;
@@ -20,13 +29,24 @@ export interface Measurement {
       name: string;
       value: number;
     }>;
-    indexes: Array<{
+    indexes: AirQualityIndex[];
+  };
+  forecast?: Array<{
+    fromDateTime: string;
+    tillDateTime: string;
+    values: Array<{
       name: string;
       value: number;
-      level: string;
-      description: string;
-      advice: string;
-      color: string;
     }>;
-  };
+    indexes: AirQualityIndex[];
+  }>;
+  history?: Array<{
+    fromDateTime: string;
+    tillDateTime: string;
+    values: Array<{
+      name: string;
+      value: number;
+    }>;
+    indexes: AirQualityIndex[];
+  }>;
 }

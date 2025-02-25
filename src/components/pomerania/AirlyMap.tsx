@@ -25,10 +25,13 @@ export function AirlyMap() {
 
       try {
         console.log('Initializing map...');
-        const map = L.map(mapRef.current).setView([54.34854, 18.64966], 11);
+        // Center on Gdańsk with a wider view to show the Tricity area
+        const map = L.map(mapRef.current).setView([54.372158, 18.638306], 12);
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors'
+        // Use a darker map style to match Airly's design
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '©OpenStreetMap, ©CartoDB',
+          subdomains: 'abcd'
         }).addTo(map);
 
         L.control.zoom({
@@ -38,12 +41,28 @@ export function AirlyMap() {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        console.log('Fetching installations...');
-        const installations = await fetchInstallations(54.34854, 18.64966);
-        console.log(`Fetched ${installations.length} installations`);
+        // Fetch installations for Gdańsk, Sopot, and Gdynia
+        const cities = [
+          { lat: 54.372158, lng: 18.638306 }, // Gdańsk
+          { lat: 54.441581, lng: 18.560096 }, // Sopot
+          { lat: 54.518889, lng: 18.531889 }  // Gdynia
+        ];
+
+        let allInstallations = [];
+        for (const city of cities) {
+          const installations = await fetchInstallations(city.lat, city.lng);
+          allInstallations.push(...installations);
+        }
+
+        // Remove duplicates based on installation ID
+        const uniqueInstallations = Array.from(new Map(
+          allInstallations.map(item => [item.id, item])
+        ).values());
+
+        console.log(`Fetched ${uniqueInstallations.length} unique installations`);
 
         let addedMarkers = 0;
-        for (const installation of installations) {
+        for (const installation of uniqueInstallations) {
           try {
             console.log(`Fetching measurements for installation ${installation.id}...`);
             const measurements = await fetchMeasurements(installation.id);
@@ -54,7 +73,10 @@ export function AirlyMap() {
             ]);
 
             const popupContent = createMarkerPopup(installation, measurements);
-            marker.bindPopup(popupContent);
+            marker.bindPopup(popupContent, {
+              maxWidth: 400,
+              className: 'airly-popup'
+            });
             
             const index = measurements.current.indexes[0];
             if (index) {
@@ -67,7 +89,14 @@ export function AirlyMap() {
                   border-radius: 50%;
                   border: 2px solid white;
                   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                "></div>`,
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  font-family: Montserrat, sans-serif;
+                  font-size: 10px;
+                  font-weight: bold;
+                ">${Math.round(index.value)}</div>`,
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
               }));
@@ -109,9 +138,9 @@ export function AirlyMap() {
   }, []);
 
   return (
-    <Card className="dark:bg-[#1A1F2C]">
+    <Card className="dark:bg-[#1A1F2C] font-['Montserrat']">
       <CardHeader>
-        <CardTitle>Mapa czujników Airly - Trójmiasto</CardTitle>
+        <CardTitle className="text-xl">Mapa czujników Airly - Trójmiasto</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="w-full h-[600px] rounded-lg overflow-hidden relative" ref={mapRef}>
