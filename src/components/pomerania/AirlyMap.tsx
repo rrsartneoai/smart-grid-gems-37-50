@@ -138,7 +138,7 @@ export function AirlyMap() {
       setError(null);
 
       try {
-        // Initialize map
+        // Inicjalizacja mapy
         const map = L.map(mapRef.current).setView([54.34854, 18.64966], 11);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -151,10 +151,10 @@ export function AirlyMap() {
 
         mapInstance.current = map;
 
-        // Fetch installations
+        // Pobierz instalacje
         const installations = await fetchInstallations(54.34854, 18.64966);
 
-        // Add markers for each installation
+        // Dodaj markery dla każdej instalacji
         for (const installation of installations) {
           try {
             const measurements = await fetchMeasurements(installation.id);
@@ -166,7 +166,7 @@ export function AirlyMap() {
             const popupContent = createMarkerPopup(installation, measurements);
             marker.bindPopup(popupContent);
             
-            // Add color to marker based on air quality index
+            // Dodaj kolor do markera na podstawie indeksu jakości powietrza
             const index = measurements.current.indexes[0];
             if (index) {
               marker.setIcon(L.divIcon({
