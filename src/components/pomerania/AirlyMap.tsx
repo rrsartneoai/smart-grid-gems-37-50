@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
@@ -8,27 +7,15 @@ import { fetchInstallations, fetchMeasurements } from "./airlyService";
 import { createMarkerPopup } from "./AirQualityPopup";
 import { fetchGIOSStations, fetchGIOSData } from "@/services/airQuality/giosService";
 import { fetchSyngeosStations, fetchSyngeosData } from "@/services/airQuality/syngeos";
-import { AirQualityData, AirQualitySource } from "@/types/company";
+import { AirQualityData } from "@/types/company";
+import { isInTriCity } from "@/utils/locationUtils";
 
-// Utility function to check if coordinates are in the Tri-City area
-export const isInTriCity = (lat: number, lon: number) => {
-  const bounds = {
-    north: 54.60,  // North of Gdynia
-    south: 54.30,  // South of Gdańsk
-    east: 18.70,   // East coast
-    west: 18.40    // West of Gdynia
-  };
-  return lat >= bounds.south && lat <= bounds.north && lon >= bounds.west && lon <= bounds.east;
-};
-
-// Rate limiting helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const createMarker = (data: AirQualityData, map: L.Map) => {
   const { source, current } = data;
   const marker = L.marker([source.location.latitude, source.location.longitude]);
   
-  // Calculate color based on PM2.5 or PM10 values
   let color = '#gray';
   let value = 0;
   if (current.pm25 !== undefined) {
@@ -80,6 +67,7 @@ export function AirlyMap() {
   const markersRef = useRef<L.Marker[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({ total: 0, loaded: 0 });
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -87,6 +75,7 @@ export function AirlyMap() {
     const initializeMap = async () => {
       setIsLoading(true);
       setError(null);
+      setStats({ total: 0, loaded: 0 });
 
       try {
         console.log('Initializing map...');
@@ -104,27 +93,56 @@ export function AirlyMap() {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        // Fetch data from all providers
         const [airlyStations, giosStations, syngeosStations] = await Promise.all([
-          fetchInstallations(54.372158, 18.638306),
-          fetchGIOSStations(),
-          fetchSyngeosStations()
+          fetchInstallations(54.372158, 18.638306).catch(err => {
+            console.error('Error fetching Airly stations:', err);
+            return [];
+          }),
+          fetchGIOSStations().catch(err => {
+            console.error('Error fetching GIOŚ stations:', err);
+            return [];
+          }),
+          fetchSyngeosStations().catch(err => {
+            console.error('Error fetching Syngeos stations:', err);
+            return [];
+          })
         ]);
 
-        // Process Airly stations
-        for (const station of airlyStations) {
-          try {
-            const measurements = await fetchMeasurements(station.id);
-            const data: AirQualityData = {
+        console.log(`Found stations: Airly: ${airlyStations.length}, GIOŚ: ${giosStations.length}, Syngeos: ${syngeosStations.length}`);
+
+        const totalStations = airlyStations.length + giosStations.length + syngeosStations.length;
+        setStats(prev => ({ ...prev, total: totalStations }));
+
+        const processStations = async (stations: any[], fetchData: (id: string) => Promise<any>, provider: string) => {
+          const batchSize = 5;
+          for (let i = 0; i < stations.length; i += batchSize) {
+            const batch = stations.slice(i, i + batchSize);
+            await Promise.all(batch.map(async (station) => {
+              try {
+                const data = await fetchData(station.id);
+                if (data) {
+                  const marker = createMarker(data, map);
+                  markersRef.current.push(marker);
+                  setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
+                }
+              } catch (error) {
+                console.error(`Error processing ${provider} station ${station.id}:`, error);
+              }
+            }));
+            await delay(500);
+          }
+        };
+
+        await Promise.all([
+          processStations(airlyStations, async (id) => {
+            const measurements = await fetchMeasurements(Number(id.replace('airly-', '')));
+            return {
               source: {
-                id: `airly-${station.id}`,
-                name: `Airly ${station.address.street || ''}`,
+                id,
+                name: `Airly ${measurements.location?.address?.street || ''}`,
                 provider: 'Airly',
-                location: {
-                  latitude: station.location.latitude,
-                  longitude: station.location.longitude
-                },
-                address: station.address
+                location: measurements.location,
+                address: measurements.location?.address
               },
               current: {
                 ...measurements.current,
@@ -132,46 +150,16 @@ export function AirlyMap() {
                 timestamp: measurements.current.fromDateTime
               }
             };
-            const marker = createMarker(data, map);
-            markersRef.current.push(marker);
-            await delay(100);
-          } catch (error) {
-            console.error(`Error processing Airly station ${station.id}:`, error);
-          }
-        }
+          }, 'Airly'),
+          processStations(giosStations, fetchGIOSData, 'GIOŚ'),
+          processStations(syngeosStations, fetchSyngeosData, 'Syngeos')
+        ]);
 
-        // Process GIOŚ stations
-        for (const station of giosStations) {
-          try {
-            const data = await fetchGIOSData(station.id);
-            if (data) {
-              const marker = createMarker(data, map);
-              markersRef.current.push(marker);
-              await delay(100);
-            }
-          } catch (error) {
-            console.error(`Error processing GIOŚ station ${station.id}:`, error);
-          }
-        }
-
-        // Process Syngeos stations
-        for (const station of syngeosStations) {
-          try {
-            const data = await fetchSyngeosData(station.id);
-            if (data) {
-              const marker = createMarker(data, map);
-              markersRef.current.push(marker);
-              await delay(100);
-            }
-          } catch (error) {
-            console.error(`Error processing Syngeos station ${station.id}:`, error);
-          }
-        }
-
+        console.log('All stations processed');
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing map:', error);
-        setError('Wystąpił błąd podczas ładowania danych');
+        setError('Wystąpił błąd podczas ładowania danych. Spróbuj odświeżyć stronę.');
         setIsLoading(false);
       }
     };
@@ -197,12 +185,20 @@ export function AirlyMap() {
         <div className="w-full h-[600px] rounded-lg overflow-hidden relative" ref={mapRef}>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+                <div className="text-sm text-gray-500">
+                  Ładowanie czujników... ({stats.loaded}/{stats.total})
+                </div>
+              </div>
             </div>
           )}
           {error && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-red-500">{error}</div>
+              <div className="text-red-500 text-center p-4 bg-background/95 rounded-lg">
+                <div className="font-bold mb-2">Błąd</div>
+                <div>{error}</div>
+              </div>
             </div>
           )}
         </div>

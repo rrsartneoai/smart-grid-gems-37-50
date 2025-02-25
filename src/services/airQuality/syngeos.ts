@@ -1,22 +1,27 @@
 
 import { AirQualityData, AirQualitySource } from "@/types/company";
+import { isInTriCity } from "@/utils/locationUtils";
 
-const SYNGEOS_API = 'https://api.syngeos.pl/api/public/measurements';
+// Update Syngeos API endpoint to use HTTPS and the correct path
+const SYNGEOS_API = 'https://api.syngeos.pl/public/data/air';
 
 export const fetchSyngeosStations = async (): Promise<AirQualitySource[]> => {
   try {
     const response = await fetch(SYNGEOS_API);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
     
-    return data.sensors
-      .filter((sensor: any) => isInTriCity(sensor.lat, sensor.lng))
-      .map((sensor: any) => ({
-        id: `syngeos-${sensor.id}`,
-        name: sensor.name,
+    return data.stations
+      .filter((station: any) => isInTriCity(station.latitude, station.longitude))
+      .map((station: any) => ({
+        id: `syngeos-${station.id}`,
+        name: station.name || 'Stacja Syngeos',
         provider: 'Syngeos',
         location: {
-          latitude: sensor.lat,
-          longitude: sensor.lng
+          latitude: station.latitude,
+          longitude: station.longitude
         }
       }));
   } catch (error) {
@@ -28,7 +33,10 @@ export const fetchSyngeosStations = async (): Promise<AirQualitySource[]> => {
 export const fetchSyngeosData = async (stationId: string): Promise<AirQualityData | null> => {
   try {
     const rawId = stationId.replace('syngeos-', '');
-    const response = await fetch(`${SYNGEOS_API}/${rawId}`);
+    const response = await fetch(`${SYNGEOS_API}/station/${rawId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
 
     return {

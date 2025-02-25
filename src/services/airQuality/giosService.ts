@@ -1,11 +1,15 @@
 
 import { AirQualityData, AirQualitySource } from "@/types/company";
+import { isInTriCity } from "@/utils/locationUtils";
 
 const GIOS_API_BASE = 'https://api.gios.gov.pl/pjp-api/rest';
 
 export const fetchGIOSStations = async (): Promise<AirQualitySource[]> => {
   try {
     const response = await fetch(`${GIOS_API_BASE}/station/findAll`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const stations = await response.json();
     
     return stations
