@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, MinusCircle, RotateCcw } from "lucide-react";
@@ -11,12 +10,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { companiesData } from "@/data/companies";
+import { companies } from "@/data/companies";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { Separator } from "@/components/ui/separator";
-import { CompanyStats } from "@/types/company";
+import { CompanyStat } from "@/types/company";
 import { Activity, Battery, Cpu, DollarSign, Flame, Gauge, Power, Timer, Wifi, Zap } from "lucide-react";
 
 export function CompanyActions() {
@@ -24,9 +23,9 @@ export function CompanyActions() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { setSelectedCompanyId } = useCompanyStore();
-  const [archivedProjects, setArchivedProjects] = useState<typeof companiesData>([]);
+  const [archivedProjects, setArchivedProjects] = useState<typeof companies>([]);
 
-  const defaultStats: CompanyStats[] = [
+  const defaultStats: CompanyStat[] = [
     {
       title: "PM2.5",
       value: "0.6",
@@ -136,13 +135,13 @@ export function CompanyActions() {
     }
 
     const newProject = {
-      id: (companiesData.length + 1).toString(),
+      id: (companies.length + 1).toString(),
       name: newProjectName,
       energyData: [],
       stats: defaultStats,
     };
 
-    companiesData.push(newProject);
+    companies.push(newProject);
     setSelectedCompanyId(newProject.id);
     
     toast({
@@ -154,14 +153,14 @@ export function CompanyActions() {
     setIsDialogOpen(false);
   };
 
-  const handleArchiveProject = (project: (typeof companiesData)[0]) => {
-    const index = companiesData.findIndex(c => c.id === project.id);
+  const handleArchiveProject = (project: (typeof companies)[0]) => {
+    const index = companies.findIndex(c => c.id === project.id);
     if (index !== -1) {
-      const [removedProject] = companiesData.splice(index, 1);
+      const [removedProject] = companies.splice(index, 1);
       setArchivedProjects(prev => [...prev, removedProject]);
       
-      if (companiesData.length > 0) {
-        setSelectedCompanyId(companiesData[0].id);
+      if (companies.length > 0) {
+        setSelectedCompanyId(companies[0].id);
       }
       
       toast({
@@ -171,11 +170,11 @@ export function CompanyActions() {
     }
   };
 
-  const handleRestoreProject = (project: (typeof companiesData)[0]) => {
+  const handleRestoreProject = (project: (typeof companies)[0]) => {
     const index = archivedProjects.findIndex(c => c.id === project.id);
     if (index !== -1) {
       const [restoredProject] = archivedProjects.splice(index, 1);
-      companiesData.push(restoredProject);
+      companies.push(restoredProject);
       setArchivedProjects([...archivedProjects]);
       setSelectedCompanyId(restoredProject.id);
       
@@ -219,11 +218,11 @@ export function CompanyActions() {
         </Dialog>
       </div>
 
-      {companiesData.length > 0 && (
+      {companies.length > 0 && (
         <div className="mt-4">
           <h3 className="text-sm font-medium mb-2">Aktywne projekty</h3>
           <ul className="space-y-2">
-            {companiesData.map((project) => (
+            {companies.map((project) => (
               <li
                 key={project.id}
                 className="flex items-center justify-between text-sm text-muted-foreground"
