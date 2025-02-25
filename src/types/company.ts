@@ -29,8 +29,8 @@ export interface EnergyData {
 }
 
 export interface CompanyStoreState {
-  selectedCompanyId: string;
-  setSelectedCompanyId: (id: string) => void;
+  selectedCompany: string | null;
+  setSelectedCompany: (id: string | null) => void;
 }
 
 export interface CompanyData extends Company {
