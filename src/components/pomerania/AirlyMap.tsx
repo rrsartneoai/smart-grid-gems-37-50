@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
@@ -6,18 +7,29 @@ import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
 import { createMarkerPopup } from "./AirQualityPopup";
 import { AirQualityData, Installation, Measurement } from "@/types/company";
-import { LatLngExpression } from 'leaflet';
+import { LatLngExpression, LatLngBounds } from 'leaflet';
 
 // Rate limiting helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Default map settings
+// Updated map settings to cover both Gdańsk and Gdynia
 const MAP_CONFIG = {
-  center: [54.372158, 18.638306] as LatLngExpression,
-  zoom: 12,
+  // Center point between Gdańsk and Gdynia
+  center: [54.460, 18.5305] as LatLngExpression,
+  zoom: 11, // Adjusted zoom to show both cities
   minZoom: 10,
-  maxZoom: 18
+  maxZoom: 18,
+  bounds: new LatLngBounds(
+    [54.32, 18.45], // Southwest corner
+    [54.56, 18.70]  // Northeast corner
+  )
 };
+
+// Cities coordinates for fetching data
+const CITIES = [
+  { name: 'Gdańsk', lat: 54.372158, lon: 18.638306 },
+  { name: 'Gdynia', lat: 54.5189, lon: 18.5305 }
+];
 
 export function AirlyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -90,9 +102,12 @@ export function AirlyMap() {
           zoom: MAP_CONFIG.zoom,
           minZoom: MAP_CONFIG.minZoom,
           maxZoom: MAP_CONFIG.maxZoom,
-          zoomControl: false, // We'll add it manually in a different position
+          zoomControl: false,
           attributionControl: true
         });
+
+        // Set bounds to restrict the view to Tricity area
+        map.setMaxBounds(MAP_CONFIG.bounds);
 
         // Add a dark theme map layer
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -109,14 +124,19 @@ export function AirlyMap() {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        // Fetch air quality data for the Tri-City area
-        const installations = await fetchInstallations(MAP_CONFIG.center[0], MAP_CONFIG.center[1]);
-        setStats({ total: installations.length, loaded: 0 });
+        // Fetch installations for all cities
+        let allInstallations: Installation[] = [];
+        for (const city of CITIES) {
+          const installations = await fetchInstallations(city.lat, city.lon);
+          allInstallations = [...allInstallations, ...installations];
+        }
+
+        setStats({ total: allInstallations.length, loaded: 0 });
 
         // Process installations in batches to prevent rate limiting
         const batchSize = 5;
-        for (let i = 0; i < installations.length; i += batchSize) {
-          const batch = installations.slice(i, i + batchSize);
+        for (let i = 0; i < allInstallations.length; i += batchSize) {
+          const batch = allInstallations.slice(i, i + batchSize);
           
           await Promise.all(batch.map(async (installation: Installation) => {
             try {
@@ -146,7 +166,7 @@ export function AirlyMap() {
           }));
 
           // Add delay between batches
-          if (i + batchSize < installations.length) {
+          if (i + batchSize < allInstallations.length) {
             await delay(500);
           }
         }
