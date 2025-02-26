@@ -18,7 +18,6 @@ export const generateRAGResponse = async (query: string): Promise<string> => {
   if (documentChunks.length === 0) {
     console.log('Brak dokumentów w pamięci');
     
-    // If it's an air quality query, use Gemini API even without local documents
     if (isAirQualityRelated) {
       const enhancedPrompt = `Odpowiedz na pytanie dotyczące jakości powietrza: ${query}. 
       Skup się na informacjach dotyczących wpływu na zdrowie i zalecanych działaniach profilaktycznych.`;
@@ -33,7 +32,6 @@ export const generateRAGResponse = async (query: string): Promise<string> => {
   if (relevantChunks.length === 0) {
     console.log('Nie znaleziono pasujących fragmentów');
     
-    // For air quality queries, use Gemini API with enhanced prompt
     if (isAirQualityRelated) {
       const enhancedPrompt = `Odpowiedz na pytanie dotyczące jakości powietrza: ${query}. 
       Uwzględnij wpływ na zdrowie i zalecane działania profilaktyczne.`;
@@ -75,24 +73,23 @@ export const searchRelevantChunks = (query: string): string[] => {
     documentChunks.map(chunk => chunk.text)
   );
 
-  // Return top 3 most relevant chunks
   return results.slice(0, 3).map(result => result.text);
 };
 
 async function extractMainTopics(text: string): Promise<string[]> {
   try {
     console.log('Rozpoczynam ekstrakcję głównych tematów...');
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
     
     const prompt = `
-      Na podstawie poniższego tekstu, wypisz 5 najważniejszych zagadnień lub tematów.
-      Zachowaj krótką i zwięzłą formę, maksymalnie kilka słów na temat.
+      Przeanalizuj poniższy tekst i wypisz 5 najważniejszych zagadnień lub tematów.
+      Wypisz je w formie krótkich, zwięzłych haseł (maksymalnie 3-4 słowa na temat).
       
       Tekst do analizy:
       ${text}
       
       Zwróć dokładnie 5 głównych tematów, każdy w nowej linii, bez numeracji i dodatkowych oznaczeń.
-      Format odpowiedzi powinien wyglądać tak:
+      Format odpowiedzi - tylko tematy, jeden pod drugim:
       Temat pierwszy
       Temat drugi
       Temat trzeci
@@ -107,33 +104,25 @@ async function extractMainTopics(text: string): Promise<string[]> {
     
     console.log('Otrzymano odpowiedź od modelu:', topicsString);
     
-    // Podziel odpowiedź na linie i usuń puste linie oraz białe znaki
     const topics = topicsString
       .split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0)
-      .slice(0, 5); // Upewnij się, że mamy dokładnie 5 tematów
+      .slice(0, 5);
 
     console.log('Przetworzone tematy:', topics);
     
     if (topics.length !== 5) {
       console.warn('Nieoczekiwana liczba tematów:', topics.length);
-      // Uzupełnij brakujące tematy, jeśli jest ich mniej niż 5
       while (topics.length < 5) {
-        topics.push('Temat w trakcie analizy...');
+        topics.push('Analizowanie treści...');
       }
     }
 
     return topics;
   } catch (error) {
     console.error('Błąd podczas ekstrakcji tematów:', error);
-    return [
-      "Błąd przetwarzania dokumentu",
-      "Spróbuj ponownie później",
-      "Problem z analizą tekstu",
-      "Skontaktuj się z administratorem",
-      "Sprawdź poprawność dokumentu"
-    ];
+    throw new Error("Wystąpił błąd podczas analizy dokumentu. Spróbuj ponownie później.");
   }
 }
 
@@ -154,7 +143,6 @@ export const processDocumentForRAG = async (text: string) => {
 
     console.log(`Dokument przetworzony na ${documentChunks.length} fragmentów`);
 
-    // Wywołanie funkcji do ekstrakcji tematów
     const mainTopics = await extractMainTopics(text);
     console.log('Wyodrębnione główne tematy:', mainTopics);
 
@@ -165,6 +153,7 @@ export const processDocumentForRAG = async (text: string) => {
     };
   } catch (error) {
     console.error("Błąd podczas przetwarzania dokumentu:", error);
-    throw new Error("Wystąpił błąd podczas przetwarzania dokumentu");
+    throw error;
   }
 };
+
