@@ -19,8 +19,9 @@ const getQualityDescription = (index: any) => {
 export const createMarkerPopup = (data: AirQualityData) => {
   const { source, current } = data;
   const index = current.indexes?.[0];
-  const lastUpdate = current.fromDateTime ? new Date(current.fromDateTime).toLocaleString() : 'Brak danych';
+  const lastUpdate = new Date(current.timestamp).toLocaleString();
 
+  // Calculate background color and text classes based on air quality
   const getColorClasses = (index: any) => {
     if (!index) return ['bg-gray-500/15', 'text-gray-300'];
     
@@ -33,9 +34,6 @@ export const createMarkerPopup = (data: AirQualityData) => {
 
   const [bgClass, textClass] = getColorClasses(index);
 
-  const pm25Value = current.values?.find(v => v.name === 'PM2.5')?.value ?? current.pm25;
-  const pm10Value = current.values?.find(v => v.name === 'PM10')?.value ?? current.pm10;
-
   return `
     <div class="p-4 font-['Montserrat']">
       <div class="flex items-center justify-between mb-3">
@@ -45,7 +43,7 @@ export const createMarkerPopup = (data: AirQualityData) => {
       
       <div class="p-3 rounded-lg mb-4 ${bgClass}">
         <div class="font-bold text-lg ${textClass}">
-          ${index ? index.description : 'Brak danych o jakości powietrza'}
+          ${index ? index.description : 'Cóż... Bywało lepiej.'}
         </div>
         ${index?.advice ? `
           <div class="text-sm mt-1 text-gray-300">
@@ -55,25 +53,31 @@ export const createMarkerPopup = (data: AirQualityData) => {
       </div>
       
       <div class="grid grid-cols-2 gap-x-6 gap-y-4">
-        ${pm25Value !== undefined ? `
-          <div>
-            <div class="text-sm text-gray-400">PM2.5</div>
-            <div class="text-lg font-semibold text-white">
-              ${formatValue(pm25Value, 'µg/m³')}
-            </div>
+        <div>
+          <div class="text-sm text-gray-400">PM2.5</div>
+          <div class="text-lg font-semibold text-white">
+            ${formatValue(current.pm25, 'µg/m³')}
           </div>
-        ` : ''}
-
-        ${pm10Value !== undefined ? `
-          <div>
-            <div class="text-sm text-gray-400">PM10</div>
-            <div class="text-lg font-semibold text-white">
-              ${formatValue(pm10Value, 'µg/m³')}
+          ${current.standards?.find(s => s.pollutant === 'PM25')?.percent ? `
+            <div class="text-xs text-gray-400">
+              ${current.standards.find(s => s.pollutant === 'PM25')?.percent}% normy
             </div>
-          </div>
-        ` : ''}
+          ` : ''}
+        </div>
 
-        ${current.no2 !== undefined ? `
+        <div>
+          <div class="text-sm text-gray-400">PM10</div>
+          <div class="text-lg font-semibold text-white">
+            ${formatValue(current.pm10, 'µg/m³')}
+          </div>
+          ${current.standards?.find(s => s.pollutant === 'PM10')?.percent ? `
+            <div class="text-xs text-gray-400">
+              ${current.standards.find(s => s.pollutant === 'PM10')?.percent}% normy
+            </div>
+          ` : ''}
+        </div>
+
+        ${current.no2 ? `
           <div>
             <div class="text-sm text-gray-400">NO₂</div>
             <div class="text-lg font-semibold text-white">
@@ -82,7 +86,7 @@ export const createMarkerPopup = (data: AirQualityData) => {
           </div>
         ` : ''}
 
-        ${current.o3 !== undefined ? `
+        ${current.o3 ? `
           <div>
             <div class="text-sm text-gray-400">O₃</div>
             <div class="text-lg font-semibold text-white">
@@ -91,7 +95,7 @@ export const createMarkerPopup = (data: AirQualityData) => {
           </div>
         ` : ''}
 
-        ${current.so2 !== undefined ? `
+        ${current.so2 ? `
           <div>
             <div class="text-sm text-gray-400">SO₂</div>
             <div class="text-lg font-semibold text-white">
@@ -100,7 +104,16 @@ export const createMarkerPopup = (data: AirQualityData) => {
           </div>
         ` : ''}
 
-        ${current.temperature !== undefined ? `
+        ${current.co ? `
+          <div>
+            <div class="text-sm text-gray-400">CO</div>
+            <div class="text-lg font-semibold text-white">
+              ${formatValue(current.co, 'mg/m³')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${current.temperature ? `
           <div>
             <div class="text-sm text-gray-400">Temperatura</div>
             <div class="text-lg font-semibold text-white">
@@ -109,7 +122,7 @@ export const createMarkerPopup = (data: AirQualityData) => {
           </div>
         ` : ''}
 
-        ${current.humidity !== undefined ? `
+        ${current.humidity ? `
           <div>
             <div class="text-sm text-gray-400">Wilgotność</div>
             <div class="text-lg font-semibold text-white">
@@ -118,7 +131,7 @@ export const createMarkerPopup = (data: AirQualityData) => {
           </div>
         ` : ''}
 
-        ${current.pressure !== undefined ? `
+        ${current.pressure ? `
           <div>
             <div class="text-sm text-gray-400">Ciśnienie</div>
             <div class="text-lg font-semibold text-white">
