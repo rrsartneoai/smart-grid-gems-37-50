@@ -79,7 +79,7 @@ export const searchRelevantChunks = (query: string): string[] => {
 async function extractMainTopics(text: string): Promise<string[]> {
   try {
     console.log('Rozpoczynam ekstrakcję głównych tematów...');
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Używamy poprawnej nazwy modelu
     
     const prompt = `
       Przeanalizuj poniższy tekst i wypisz 5 najważniejszych zagadnień lub tematów.
