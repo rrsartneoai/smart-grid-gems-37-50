@@ -85,7 +85,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Witaj! Jestem twoim asystentem monitorowania stanu jakości powietrza. Jak mogę ci pomóc?",
+      content: "Witaj! Jestem twoim asystentem. Mogę pomóc w przetwarzaniu dokumentów i odpowiadaniu na pytania o jakość powietrza. Jak mogę ci pomóc?",
       timestamp: new Date(),
     },
   ]);
@@ -96,7 +96,7 @@ export const useChat = () => {
     setMessages([
       {
         role: "assistant",
-        content: "Witaj! Jestem twoim asystentem monitorowania stanu jakości powietrza. Jak mogę ci pomóc?",
+        content: "Witaj! Jestem twoim asystentem. Mogę pomóc w przetwarzaniu dokumentów i odpowiadaniu na pytania o jakość powietrza. Jak mogę ci pomóc?",
         timestamp: new Date(),
       },
     ]);

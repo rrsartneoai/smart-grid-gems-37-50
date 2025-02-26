@@ -62,14 +62,13 @@ export interface AirQualitySource {
 }
 
 export interface AirQualityMeasurement {
-  timestamp: string;
-  fromDateTime?: string;
-  tillDateTime?: string;
-  values?: Array<{
+  fromDateTime: string;
+  tillDateTime: string;
+  values: Array<{
     name: string;
     value: number;
   }>;
-  indexes?: Array<{
+  indexes: Array<{
     name: string;
     value: number;
     level: string;
@@ -77,22 +76,12 @@ export interface AirQualityMeasurement {
     advice: string;
     color: string;
   }>;
-  standards?: Array<{
+  standards: Array<{
     name: string;
     pollutant: string;
     limit: number;
     percent: number;
   }>;
-  pm25?: number;
-  pm10?: number;
-  no2?: number;
-  so2?: number;
-  o3?: number;
-  co?: number;
-  temperature?: number;
-  humidity?: number;
-  pressure?: number;
-  provider: string;
 }
 
 export interface AirQualityData {
@@ -106,44 +95,6 @@ export interface Installation {
     latitude: number;
     longitude: number;
     address?: {
-      street?: string;
-      number?: string;
-      city?: string;
-      displayAddress1?: string;
-      displayAddress2?: string;
-    };
-  };
-}
-
-export interface Measurement {
-  current: {
-    fromDateTime: string;
-    tillDateTime: string;
-    values: Array<{
-      name: string;
-      value: number;
-    }>;
-    indexes: Array<{
-      name: string;
-      value: number;
-      level: string;
-      description: string;
-      advice: string;
-      color: string;
-    }>;
-    standards: Array<{
-      name: string;
-      pollutant: string;
-      limit: number;
-      percent: number;
-    }>;
-  };
-  forecast: any[];
-  history: any[];
-  location: {
-    latitude: number;
-    longitude: number;
-    address: {
       street?: string;
       number?: string;
       city?: string;
