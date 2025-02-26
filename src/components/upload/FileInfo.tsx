@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { FileText, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,9 +50,9 @@ export function FileInfo({ file, topics = [] }: FileInfoProps) {
                     variant="outline"
                     size="sm"
                     className="text-sm"
-                    onClick={() => handleTopicClick(topic.trim())}
+                    onClick={() => handleTopicClick(topic)}
                   >
-                    {topic.trim()}
+                    {topic}
                   </Button>
                 ))}
               </div>

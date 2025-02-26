@@ -80,71 +80,91 @@ export const searchRelevantChunks = (query: string): string[] => {
 };
 
 async function extractMainTopics(text: string): Promise<string[]> {
-    try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  try {
+    console.log('Rozpoczynam ekstrakcję głównych tematów...');
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    
+    const prompt = `
+      Na podstawie poniższego tekstu, wypisz 5 najważniejszych zagadnień lub tematów.
+      Zachowaj krótką i zwięzłą formę, maksymalnie kilka słów na temat.
       
-      const prompt = `
-        Przeanalizuj poniższy tekst i wypisz 5 najważniejszych zagadnień lub tematów z tego dokumentu:
-        ${text}
-        
-        Odpowiedź sformatuj jako prostą listę 5 najważniejszych zagadnień, po jednym w linii.
-        Zwróć TYLKO te 5 zagadnień, nic więcej.
-        
-        Przykładowy format odpowiedzi:
-        1. Pierwsze zagadnienie
-        2. Drugie zagadnienie
-        3. Trzecie zagadnienie
-        4. Czwarte zagadnienie
-        5. Piąte zagadnienie
-      `;
-  
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const topicsString = response.text();
-      // Podziel string na linie i przefiltruj puste linie
-      return topicsString.split('\n').filter(line => line.trim() !== '').map(line => line.replace(/^\d+\.\s*/, '').trim());;
-    } catch (error) {
-      console.error('Error extracting topics:', error);
-      return [
-        "Nie udało się przetworzyć dokumentu",
-        "Spróbuj ponownie później",
-        "Sprawdź czy dokument zawiera tekst",
-        "Upewnij się, że dokument jest czytelny",
-        "Skontaktuj się z administratorem systemu"
-      ];
-    }
-  }
+      Tekst do analizy:
+      ${text}
+      
+      Zwróć dokładnie 5 głównych tematów, każdy w nowej linii, bez numeracji i dodatkowych oznaczeń.
+      Format odpowiedzi powinien wyglądać tak:
+      Temat pierwszy
+      Temat drugi
+      Temat trzeci
+      Temat czwarty
+      Temat piąty
+    `;
 
+    console.log('Wysyłam zapytanie do modelu Gemini...');
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const topicsString = response.text();
+    
+    console.log('Otrzymano odpowiedź od modelu:', topicsString);
+    
+    // Podziel odpowiedź na linie i usuń puste linie oraz białe znaki
+    const topics = topicsString
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .slice(0, 5); // Upewnij się, że mamy dokładnie 5 tematów
+
+    console.log('Przetworzone tematy:', topics);
+    
+    if (topics.length !== 5) {
+      console.warn('Nieoczekiwana liczba tematów:', topics.length);
+      // Uzupełnij brakujące tematy, jeśli jest ich mniej niż 5
+      while (topics.length < 5) {
+        topics.push('Temat w trakcie analizy...');
+      }
+    }
+
+    return topics;
+  } catch (error) {
+    console.error('Błąd podczas ekstrakcji tematów:', error);
+    return [
+      "Błąd przetwarzania dokumentu",
+      "Spróbuj ponownie później",
+      "Problem z analizą tekstu",
+      "Skontaktuj się z administratorem",
+      "Sprawdź poprawność dokumentu"
+    ];
+  }
+}
 
 export const processDocumentForRAG = async (text: string) => {
-    try {
-        console.log('Rozpoczynam przetwarzanie dokumentu dla RAG, długość tekstu:', text.length);
-        console.log('Przykład tekstu:', text.substring(0, 200) + '...');
+  try {
+    console.log('Rozpoczynam przetwarzanie dokumentu dla RAG, długość tekstu:', text.length);
 
-        const splitter = new RecursiveCharacterTextSplitter({
-            chunkSize: 1000,
-            chunkOverlap: 200,
-        });
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+      chunkOverlap: 200,
+    });
 
-        const chunks = await splitter.createDocuments([text]);
-        documentChunks = chunks.map(chunk => ({
-            text: chunk.pageContent,
-            metadata: chunk.metadata,
-        }));
+    const chunks = await splitter.createDocuments([text]);
+    documentChunks = chunks.map(chunk => ({
+      text: chunk.pageContent,
+      metadata: chunk.metadata,
+    }));
 
-        console.log(`Dokument przetworzony na ${documentChunks.length} fragmentów`);
-        console.log('Przykładowy fragment:', documentChunks[0]?.text.substring(0, 100) + '...');
+    console.log(`Dokument przetworzony na ${documentChunks.length} fragmentów`);
 
-        // Wywołaj funkcję do ekstrakcji tematów
-        const mainTopics = await extractMainTopics(text);
+    // Wywołanie funkcji do ekstrakcji tematów
+    const mainTopics = await extractMainTopics(text);
+    console.log('Wyodrębnione główne tematy:', mainTopics);
 
-        return {
-          message: `Dokument został przetworzony na ${documentChunks.length} fragmentów`,
-           chunks: documentChunks,
-           topics: mainTopics
-        }
-    } catch (error) {
-        console.error("Błąd podczas przetwarzania dokumentu:", error);
-        throw new Error("Wystąpił błąd podczas przetwarzania dokumentu");
-    }
+    return {
+      message: `Dokument został przetworzony na ${documentChunks.length} fragmentów`,
+      chunks: documentChunks,
+      topics: mainTopics
+    };
+  } catch (error) {
+    console.error("Błąd podczas przetwarzania dokumentu:", error);
+    throw new Error("Wystąpił błąd podczas przetwarzania dokumentu");
+  }
 };
