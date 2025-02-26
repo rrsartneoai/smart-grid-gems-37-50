@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, MinusCircle, RotateCcw } from "lucide-react";
@@ -16,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { Separator } from "@/components/ui/separator";
-import { CompanyStats } from "@/types/company";
+import { CompanyStats, Company } from "@/types/company";
 import { Activity, Battery, Cpu, DollarSign, Flame, Gauge, Power, Timer, Wifi, Zap } from "lucide-react";
 
 export function CompanyActions() {
@@ -135,9 +134,11 @@ export function CompanyActions() {
       return;
     }
 
-    const newProject = {
+    const newProject: Company = {
       id: (companiesData.length + 1).toString(),
       name: newProjectName,
+      description: "Nowy projekt monitorowania jakości powietrza",
+      logo: "/logo-demo.png",
       energyData: [],
       stats: defaultStats,
     };
