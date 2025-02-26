@@ -1,3 +1,4 @@
+
 import { LucideIcon } from 'lucide-react';
 
 // Base company interfaces
@@ -43,22 +44,28 @@ export interface CompanyStoreState {
   setSelectedCompanyId?: (id: string) => void;
 }
 
+// Address interface for reuse
+export interface Address {
+  street?: string;
+  number?: string;
+  city?: string;
+  displayAddress1?: string;
+  displayAddress2?: string;
+}
+
+// Location interface for reuse
+export interface Location {
+  latitude: number;
+  longitude: number;
+  address?: Address;
+}
+
 // Air quality related interfaces
 export interface AirQualitySource {
   id: string;
   name: string;
   provider: string;
-  location: {
-    latitude: number;
-    longitude: number;
-    address?: {
-      street?: string;
-      number?: string;
-      city?: string;
-      displayAddress1?: string;
-      displayAddress2?: string;
-    };
-  };
+  location: Location;
 }
 
 export interface AirQualityMeasurement {
@@ -102,17 +109,7 @@ export interface AirQualityData {
 
 export interface Installation {
   id: number;
-  location: {
-    latitude: number;
-    longitude: number;
-    address?: {
-      street?: string;
-      number?: string;
-      city?: string;
-      displayAddress1?: string;
-      displayAddress2?: string;
-    };
-  };
+  location: Location;
 }
 
 export interface Measurement {
@@ -140,15 +137,6 @@ export interface Measurement {
   };
   forecast: any[];
   history: any[];
-  location: {
-    latitude: number;
-    longitude: number;
-    address: {
-      street?: string;
-      number?: string;
-      city?: string;
-      displayAddress1?: string;
-      displayAddress2?: string;
-    };
-  };
+  location: Location;
 }
+
