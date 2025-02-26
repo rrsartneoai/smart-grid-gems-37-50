@@ -1,5 +1,6 @@
+
 import { Company } from "@/types/company";
-import { Activity, Battery, Cpu, DollarSign, Flame } from "lucide-react";
+import { Activity, Battery, Cpu, DollarSign, Flame, Gauge, Power, Zap } from "lucide-react";
 
 export const greenTech: Company = {
   id: "5",
