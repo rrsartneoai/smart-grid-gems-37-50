@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { getGeminiResponse } from '@/lib/gemini';
@@ -79,7 +78,10 @@ export const searchRelevantChunks = (query: string): string[] => {
 async function extractMainTopics(text: string): Promise<string[]> {
   try {
     console.log('Rozpoczynam ekstrakcję głównych tematów...');
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Używamy poprawnej nazwy modelu
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-pro",
+      apiVersion: "v1" // Using the correct API version
+    });
     
     const prompt = `
       Przeanalizuj poniższy tekst i wypisz 5 najważniejszych zagadnień lub tematów.
@@ -156,4 +158,3 @@ export const processDocumentForRAG = async (text: string) => {
     throw error;
   }
 };
-
