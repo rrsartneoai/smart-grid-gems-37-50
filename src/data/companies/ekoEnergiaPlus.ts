@@ -1,9 +1,12 @@
+
 import { Company } from "@/types/company";
 import { Activity, DollarSign, Flame, Power, Zap } from "lucide-react";
 
 export const ekoEnergiaPlus: Company = {
   id: "3",
   name: "EkoEnergia Plus",
+  description: "Innowacyjne rozwiązania energetyczne dla przemysłu",
+  logo: "/logo-ekoenergiaplus.png",
   stats: [
     {
       title: "Ladunek",
