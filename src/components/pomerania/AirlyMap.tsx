@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
@@ -5,60 +6,17 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
 import { createMarkerPopup } from "./AirQualityPopup";
-import { fetchGIOSStations, fetchGIOSData } from "@/services/airQuality/giosService";
-import { fetchSyngeosStations, fetchSyngeosData } from "@/services/airQuality/syngeos";
-import { AirQualityData } from "@/types/company";
-import { isInTriCity } from "@/utils/locationUtils";
+import { AirQualityData, Installation, Measurement } from "@/types/company";
 
+// Rate limiting helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const createMarker = (data: AirQualityData, map: L.Map) => {
-  const { source, current } = data;
-  const marker = L.marker([source.location.latitude, source.location.longitude]);
-  
-  let color = '#gray';
-  let value = 0;
-  if (current.pm25 !== undefined) {
-    value = current.pm25;
-    color = value <= 10 ? '#34D399' : 
-            value <= 25 ? '#FBBF24' : 
-            value <= 50 ? '#F59E0B' : '#EF4444';
-  } else if (current.pm10 !== undefined) {
-    value = current.pm10;
-    color = value <= 20 ? '#34D399' : 
-            value <= 50 ? '#FBBF24' : 
-            value <= 100 ? '#F59E0B' : '#EF4444';
-  }
-
-  marker.setIcon(L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div style="
-      width: 24px;
-      height: 24px;
-      background-color: ${color};
-      border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-family: Montserrat, sans-serif;
-      font-size: 10px;
-      font-weight: bold;
-    ">${Math.round(value)}</div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-  }));
-
-  const popupContent = createMarkerPopup(data);
-  marker.bindPopup(popupContent, {
-    maxWidth: 400,
-    className: 'airly-popup'
-  });
-
-  marker.addTo(map);
-  return marker;
+// Default map settings
+const MAP_CONFIG = {
+  center: [54.372158, 18.638306], // Gdańsk
+  zoom: 12,
+  minZoom: 10,
+  maxZoom: 18
 };
 
 export function AirlyMap() {
@@ -69,6 +27,53 @@ export function AirlyMap() {
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({ total: 0, loaded: 0 });
 
+  // Function to create a marker for each air quality station
+  const createMarker = (data: AirQualityData, map: L.Map) => {
+    const { source, current } = data;
+    const marker = L.marker([source.location.latitude, source.location.longitude]);
+
+    // Get the air quality index from measurements
+    const index = current.indexes?.[0];
+    const color = index?.color || '#999999';
+    const value = index?.value || 0;
+
+    // Create a custom marker icon with air quality information
+    marker.setIcon(L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div 
+        style="
+          width: 32px;
+          height: 32px;
+          background-color: ${color};
+          border-radius: 50%;
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 12px;
+          font-weight: bold;
+        "
+        role="img"
+        aria-label="Air quality index: ${value}"
+      >${Math.round(value)}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    }));
+
+    // Create and bind popup with air quality information
+    const popupContent = createMarkerPopup(data);
+    marker.bindPopup(popupContent, {
+      maxWidth: 400,
+      className: 'airly-popup'
+    });
+
+    marker.addTo(map);
+    return marker;
+  };
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -78,14 +83,25 @@ export function AirlyMap() {
       setStats({ total: 0, loaded: 0 });
 
       try {
+        // Initialize the map
         console.log('Initializing map...');
-        const map = L.map(mapRef.current).setView([54.372158, 18.638306], 12);
-        
+        const map = L.map(mapRef.current, {
+          center: MAP_CONFIG.center,
+          zoom: MAP_CONFIG.zoom,
+          minZoom: MAP_CONFIG.minZoom,
+          maxZoom: MAP_CONFIG.maxZoom,
+          zoomControl: false, // We'll add it manually in a different position
+          attributionControl: true
+        });
+
+        // Add a dark theme map layer
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          attribution: '©OpenStreetMap, ©CartoDB',
-          subdomains: 'abcd'
+          attribution: '©OpenStreetMap, ©CartoDB, ©Airly',
+          subdomains: 'abcd',
+          className: 'dark-map-tiles'
         }).addTo(map);
 
+        // Add zoom control to bottom right
         L.control.zoom({
           position: 'bottomright'
         }).addTo(map);
@@ -93,69 +109,48 @@ export function AirlyMap() {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        const [airlyStations, giosStations, syngeosStations] = await Promise.all([
-          fetchInstallations(54.372158, 18.638306).catch(err => {
-            console.error('Error fetching Airly stations:', err);
-            return [];
-          }),
-          fetchGIOSStations().catch(err => {
-            console.error('Error fetching GIOŚ stations:', err);
-            return [];
-          }),
-          fetchSyngeosStations().catch(err => {
-            console.error('Error fetching Syngeos stations:', err);
-            return [];
-          })
-        ]);
+        // Fetch air quality data for the Tri-City area
+        const installations = await fetchInstallations(MAP_CONFIG.center[0], MAP_CONFIG.center[1]);
+        setStats({ total: installations.length, loaded: 0 });
 
-        console.log(`Found stations: Airly: ${airlyStations.length}, GIOŚ: ${giosStations.length}, Syngeos: ${syngeosStations.length}`);
-
-        const totalStations = airlyStations.length + giosStations.length + syngeosStations.length;
-        setStats(prev => ({ ...prev, total: totalStations }));
-
-        const processStations = async (stations: any[], fetchData: (id: string) => Promise<any>, provider: string) => {
-          const batchSize = 5;
-          for (let i = 0; i < stations.length; i += batchSize) {
-            const batch = stations.slice(i, i + batchSize);
-            await Promise.all(batch.map(async (station) => {
-              try {
-                const data = await fetchData(station.id);
-                if (data) {
-                  const marker = createMarker(data, map);
-                  markersRef.current.push(marker);
-                  setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
+        // Process installations in batches to prevent rate limiting
+        const batchSize = 5;
+        for (let i = 0; i < installations.length; i += batchSize) {
+          const batch = installations.slice(i, i + batchSize);
+          
+          await Promise.all(batch.map(async (installation: Installation) => {
+            try {
+              console.log(`Fetching data for installation ${installation.id}...`);
+              const measurements = await fetchMeasurements(installation.id);
+              
+              const data: AirQualityData = {
+                source: {
+                  id: `airly-${installation.id}`,
+                  name: `Airly ${installation.location.address?.street || ''}`,
+                  provider: 'Airly',
+                  location: installation.location
+                },
+                current: {
+                  ...measurements.current,
+                  provider: 'Airly',
+                  timestamp: measurements.current.fromDateTime
                 }
-              } catch (error) {
-                console.error(`Error processing ${provider} station ${station.id}:`, error);
-              }
-            }));
+              };
+
+              const marker = createMarker(data, map);
+              markersRef.current.push(marker);
+              setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
+            } catch (error) {
+              console.error(`Error processing installation ${installation.id}:`, error);
+            }
+          }));
+
+          // Add delay between batches
+          if (i + batchSize < installations.length) {
             await delay(500);
           }
-        };
+        }
 
-        await Promise.all([
-          processStations(airlyStations, async (id) => {
-            const measurements = await fetchMeasurements(Number(id.replace('airly-', '')));
-            return {
-              source: {
-                id,
-                name: `Airly ${measurements.location?.address?.street || ''}`,
-                provider: 'Airly',
-                location: measurements.location,
-                address: measurements.location?.address
-              },
-              current: {
-                ...measurements.current,
-                provider: 'Airly',
-                timestamp: measurements.current.fromDateTime
-              }
-            };
-          }, 'Airly'),
-          processStations(giosStations, fetchGIOSData, 'GIOŚ'),
-          processStations(syngeosStations, fetchSyngeosData, 'Syngeos')
-        ]);
-
-        console.log('All stations processed');
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -177,14 +172,25 @@ export function AirlyMap() {
   }, []);
 
   return (
-    <Card className="dark:bg-[#1A1F2C] font-['Montserrat']">
-      <CardHeader>
-        <CardTitle className="text-xl">Mapa czujników jakości powietrza - Trójmiasto</CardTitle>
+    <Card className="dark:bg-[#1A1F2C] font-['Montserrat'] shadow-lg">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-xl font-bold">Mapa jakości powietrza - Trójmiasto</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[600px] rounded-lg overflow-hidden relative" ref={mapRef}>
+        {/* Map container with accessibility attributes */}
+        <div 
+          className="relative w-full h-[600px] rounded-lg overflow-hidden"
+          ref={mapRef}
+          role="application"
+          aria-label="Mapa jakości powietrza w Trójmieście"
+        >
+          {/* Loading overlay */}
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div 
+              className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+              role="alert"
+              aria-busy="true"
+            >
               <div className="text-center">
                 <RefreshCw className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
                 <div className="text-sm text-gray-500">
@@ -193,8 +199,13 @@ export function AirlyMap() {
               </div>
             </div>
           )}
+          
+          {/* Error message */}
           {error && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div 
+              className="absolute inset-0 flex items-center justify-center"
+              role="alert"
+            >
               <div className="text-red-500 text-center p-4 bg-background/95 rounded-lg">
                 <div className="font-bold mb-2">Błąd</div>
                 <div>{error}</div>
@@ -202,11 +213,68 @@ export function AirlyMap() {
             </div>
           )}
         </div>
-        <div className="mt-4 text-sm text-muted-foreground">
-          Dane pochodzą z różnych źródeł: Airly, GIOŚ, Syngeos. Kliknij w znacznik na mapie, aby zobaczyć szczegółowe informacje o jakości powietrza.
-          Kolor znacznika odpowiada jakości powietrza w danym miejscu.
+
+        {/* Legend and information */}
+        <div className="mt-4 space-y-2">
+          <div className="text-sm text-muted-foreground">
+            Kliknij w znacznik na mapie, aby zobaczyć szczegółowe informacje o jakości powietrza.
+            Kolor znacznika odpowiada jakości powietrza w danym miejscu.
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+            <span className="inline-flex items-center">
+              <span className="w-3 h-3 rounded-full bg-[#34D399] mr-1"></span>
+              Bardzo dobra
+            </span>
+            <span className="inline-flex items-center">
+              <span className="w-3 h-3 rounded-full bg-[#FBBF24] mr-1"></span>
+              Dobra
+            </span>
+            <span className="inline-flex items-center">
+              <span className="w-3 h-3 rounded-full bg-[#F59E0B] mr-1"></span>
+              Umiarkowana
+            </span>
+            <span className="inline-flex items-center">
+              <span className="w-3 h-3 rounded-full bg-[#EF4444] mr-1"></span>
+              Zła
+            </span>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 }
+
+// Add global styles for the map
+const style = document.createElement('style');
+style.textContent = `
+  .leaflet-popup-content-wrapper {
+    background: rgba(26, 31, 44, 0.95);
+    color: white;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+  }
+
+  .leaflet-popup-tip {
+    background: rgba(26, 31, 44, 0.95);
+  }
+
+  .leaflet-container {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .dark-map-tiles {
+    filter: brightness(0.8) saturate(1.2);
+  }
+
+  .airly-popup .leaflet-popup-content {
+    margin: 0;
+    min-width: 280px;
+  }
+
+  @media (max-width: 640px) {
+    .airly-popup .leaflet-popup-content {
+      min-width: 240px;
+    }
+  }
+`;
+document.head.appendChild(style);
