@@ -1,34 +1,18 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RefreshCw } from "lucide-react";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
-import { createMarkerPopup } from "./AirQualityPopup";
-import { AirQualityData, Installation, Measurement } from "@/types/company";
-import { LatLngExpression, LatLngBounds } from 'leaflet';
+import { AirQualityData, Installation } from "@/types/company";
+import { MAP_CONFIG, CITIES } from "./config/mapConfig";
+import { createAirQualityMarker } from "./markers/AirQualityMarker";
+import { AirQualityLegend } from "./legend/AirQualityLegend";
+import { LoadingOverlay } from "./loading/LoadingOverlay";
+import { ErrorOverlay } from "./error/ErrorOverlay";
 
 // Rate limiting helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Updated map settings to cover both Gdańsk and Gdynia
-const MAP_CONFIG = {
-  // Center point between Gdańsk and Gdynia
-  center: [54.460, 18.5305] as LatLngExpression,
-  zoom: 11, // Adjusted zoom to show both cities
-  minZoom: 10,
-  maxZoom: 18,
-  bounds: new LatLngBounds(
-    [54.32, 18.45], // Southwest corner
-    [54.56, 18.70]  // Northeast corner
-  )
-};
-
-// Cities coordinates for fetching data
-const CITIES = [
-  { name: 'Gdańsk', lat: 54.372158, lon: 18.638306 },
-  { name: 'Gdynia', lat: 54.5189, lon: 18.5305 }
-] as const;
 
 export function AirlyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -37,53 +21,6 @@ export function AirlyMap() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({ total: 0, loaded: 0 });
-
-  // Function to create a marker for each air quality station
-  const createMarker = (data: AirQualityData, map: L.Map) => {
-    const { source, current } = data;
-    const marker = L.marker([source.location.latitude, source.location.longitude]);
-
-    // Get the air quality index from measurements
-    const index = current.indexes?.[0];
-    const color = index?.color || '#999999';
-    const value = index?.value || 0;
-
-    // Create a custom marker icon with air quality information
-    marker.setIcon(L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div 
-        style="
-          width: 32px;
-          height: 32px;
-          background-color: ${color};
-          border-radius: 50%;
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 12px;
-          font-weight: bold;
-        "
-        role="img"
-        aria-label="Air quality index: ${value}"
-      >${Math.round(value)}</div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    }));
-
-    // Create and bind popup with air quality information
-    const popupContent = createMarkerPopup(data);
-    marker.bindPopup(popupContent, {
-      maxWidth: 400,
-      className: 'airly-popup'
-    });
-
-    marker.addTo(map);
-    return marker;
-  };
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -163,7 +100,7 @@ export function AirlyMap() {
                 }
               };
 
-              const marker = createMarker(data, map);
+              const marker = createAirQualityMarker(data, map);
               markersRef.current.push(marker);
               setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
             } catch (error) {
@@ -209,61 +146,11 @@ export function AirlyMap() {
           role="application"
           aria-label="Mapa jakości powietrza w Trójmieście"
         >
-          {/* Loading overlay */}
-          {isLoading && (
-            <div 
-              className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-              role="alert"
-              aria-busy="true"
-            >
-              <div className="text-center">
-                <RefreshCw className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
-                <div className="text-sm text-gray-500">
-                  Ładowanie czujników... ({stats.loaded}/{stats.total})
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Error message */}
-          {error && (
-            <div 
-              className="absolute inset-0 flex items-center justify-center"
-              role="alert"
-            >
-              <div className="text-red-500 text-center p-4 bg-background/95 rounded-lg">
-                <div className="font-bold mb-2">Błąd</div>
-                <div>{error}</div>
-              </div>
-            </div>
-          )}
+          {isLoading && <LoadingOverlay loaded={stats.loaded} total={stats.total} />}
+          {error && <ErrorOverlay message={error} />}
         </div>
 
-        {/* Legend and information */}
-        <div className="mt-4 space-y-2">
-          <div className="text-sm text-muted-foreground">
-            Kliknij w znacznik na mapie, aby zobaczyć szczegółowe informacje o jakości powietrza.
-            Kolor znacznika odpowiada jakości powietrza w danym miejscu.
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center">
-              <span className="w-3 h-3 rounded-full bg-[#34D399] mr-1"></span>
-              Bardzo dobra
-            </span>
-            <span className="inline-flex items-center">
-              <span className="w-3 h-3 rounded-full bg-[#FBBF24] mr-1"></span>
-              Dobra
-            </span>
-            <span className="inline-flex items-center">
-              <span className="w-3 h-3 rounded-full bg-[#F59E0B] mr-1"></span>
-              Umiarkowana
-            </span>
-            <span className="inline-flex items-center">
-              <span className="w-3 h-3 rounded-full bg-[#EF4444] mr-1"></span>
-              Zła
-            </span>
-          </div>
-        </div>
+        <AirQualityLegend />
       </CardContent>
     </Card>
   );
@@ -303,3 +190,4 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
