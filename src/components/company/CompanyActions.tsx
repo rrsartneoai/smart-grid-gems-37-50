@@ -135,11 +135,9 @@ export function CompanyActions() {
       return;
     }
 
-    const newProject: CompanyData = {
+    const newProject = {
       id: (companiesData.length + 1).toString(),
       name: newProjectName,
-      description: "Nowy projekt monitorowania jakości powietrza",
-      logo: "/logo-demo.png",
       energyData: [],
       stats: defaultStats,
     };
