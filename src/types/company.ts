@@ -1,4 +1,3 @@
-
 import { LucideIcon } from 'lucide-react';
 
 // Base company interfaces
@@ -106,7 +105,7 @@ export interface Installation {
   location: {
     latitude: number;
     longitude: number;
-    address: {
+    address?: {
       street?: string;
       number?: string;
       city?: string;

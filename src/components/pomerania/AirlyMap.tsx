@@ -29,7 +29,7 @@ const MAP_CONFIG = {
 const CITIES = [
   { name: 'Gdańsk', lat: 54.372158, lon: 18.638306 },
   { name: 'Gdynia', lat: 54.5189, lon: 18.5305 }
-];
+] as const;
 
 export function AirlyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -125,11 +125,18 @@ export function AirlyMap() {
         console.log('Map initialized successfully');
 
         // Fetch installations for all cities
-        let allInstallations: Installation[] = [];
-        for (const city of CITIES) {
-          const installations = await fetchInstallations(city.lat, city.lon);
-          allInstallations = [...allInstallations, ...installations];
-        }
+        const fetchedInstallations = await Promise.all(
+          CITIES.map(city => fetchInstallations(city.lat, city.lon))
+        );
+        
+        // Flatten and deduplicate installations by ID
+        const allInstallations = Array.from(
+          new Map(
+            fetchedInstallations
+              .flat()
+              .map(install => [install.id, install])
+          ).values()
+        );
 
         setStats({ total: allInstallations.length, loaded: 0 });
 
@@ -138,7 +145,7 @@ export function AirlyMap() {
         for (let i = 0; i < allInstallations.length; i += batchSize) {
           const batch = allInstallations.slice(i, i + batchSize);
           
-          await Promise.all(batch.map(async (installation: Installation) => {
+          await Promise.all(batch.map(async (installation) => {
             try {
               console.log(`Fetching data for installation ${installation.id}...`);
               const measurements = await fetchMeasurements(installation.id);
@@ -165,7 +172,6 @@ export function AirlyMap() {
             }
           }));
 
-          // Add delay between batches
           if (i + batchSize < allInstallations.length) {
             await delay(500);
           }
