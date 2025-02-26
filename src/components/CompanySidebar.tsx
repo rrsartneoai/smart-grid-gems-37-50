@@ -14,8 +14,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { CompanyActions } from "@/components/company/CompanyActions";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
+  selectedCompany: null,
   selectedCompanyId: "1",
-  setSelectedCompanyId: (id: string) => set({ selectedCompanyId: id }),
+  setSelectedCompany: (company) => set({ selectedCompany: company }),
+  setSelectedCompanyId: (id) => set({ selectedCompanyId: id }),
 }));
 
 export function CompanySidebar() {

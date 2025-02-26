@@ -1,17 +1,19 @@
-
 import { CompanyData } from "@/types/company";
+import { Activity, Battery, Cpu, Gauge, Power, Zap, DollarSign, Flame } from "lucide-react";
 
 export const companiesData: CompanyData[] = [
   {
     id: "demo",
     name: "Demo Projekt",
+    description: "Projekt demonstracyjny monitorowania jakości powietrza",
+    logo: "/logo-demo.png",
     energyData: [],
     stats: [
       {
         title: "PM2.5",
         value: "0.6",
         unit: "µg/m³",
-        icon: "Activity",
+        icon: Activity,
         description: "↗️ +2.1% od ostatniego pomiaru",
         details: [
           { label: "Norma WHO", value: "10 µg/m³" },
@@ -23,7 +25,7 @@ export const companiesData: CompanyData[] = [
         title: "PM10",
         value: "7.8",
         unit: "µg/m³",
-        icon: "Battery",
+        icon: Battery,
         description: "↘️ -1.2% od ostatniej godziny",
         details: [
           { label: "Norma WHO", value: "20 µg/m³" },
@@ -35,7 +37,7 @@ export const companiesData: CompanyData[] = [
         title: "O₃ (Ozon)",
         value: "97.8",
         unit: "µg/m³",
-        icon: "Cpu",
+        icon: Cpu,
         description: "↗️ +1.5% od ostatniego odczytu",
         details: [
           { label: "Norma WHO", value: "100 µg/m³" },
@@ -47,7 +49,7 @@ export const companiesData: CompanyData[] = [
         title: "NO₂",
         value: "21.1",
         unit: "µg/m³",
-        icon: "Gauge",
+        icon: Gauge,
         description: "↘️ -0.8% od ostatniej godziny",
         details: [
           { label: "Norma WHO", value: "40 µg/m³" },
@@ -59,7 +61,7 @@ export const companiesData: CompanyData[] = [
         title: "SO₂",
         value: "19.6",
         unit: "µg/m³",
-        icon: "Power",
+        icon: Power,
         description: "Stabilny poziom",
         details: [
           { label: "Norma WHO", value: "20 µg/m³" },
@@ -71,7 +73,7 @@ export const companiesData: CompanyData[] = [
         title: "CO",
         value: "2117",
         unit: "µg/m³",
-        icon: "Zap",
+        icon: Zap,
         description: "Dobry poziom",
         details: [
           { label: "Norma EU", value: "10000 µg/m³" },
@@ -83,7 +85,7 @@ export const companiesData: CompanyData[] = [
         title: "Indeks CAQI",
         value: "27.3",
         unit: "",
-        icon: "Activity",
+        icon: DollarSign,
         description: "Dobra jakość powietrza",
         details: [
           { label: "Interpretacja", value: "Dobra" },
@@ -95,7 +97,7 @@ export const companiesData: CompanyData[] = [
         title: "Wilgotność",
         value: "54.7",
         unit: "%",
-        icon: "Droplet",
+        icon: Flame,
         description: "Optymalna wilgotność",
         details: [
           { label: "Min 24h", value: "45%" },

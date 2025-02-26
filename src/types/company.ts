@@ -1,11 +1,40 @@
 
+import { LucideIcon } from 'lucide-react';
+
+// Base company interfaces
+export interface Company {
+  id: string;
+  name: string;
+  description: string;
+  logo: string;
+  energyData: EnergyData[];
+  stats: CompanyStats[];
+}
+
 export interface CompanyData {
   id: string;
   name: string;
   description: string;
   logo: string;
-  energyData?: any[];
-  stats?: any[];
+  energyData?: EnergyData[];
+  stats?: CompanyStats[];
+}
+
+export interface CompanyStats {
+  title: string;
+  value: string;
+  unit?: string;
+  icon: LucideIcon;
+  description: string;
+  details: Array<{ label: string; value: string }>;
+}
+
+export interface EnergyData {
+  name: string;
+  consumption: number;
+  production: number;
+  efficiency: number;
+  timestamp?: string;
 }
 
 export interface CompanyStoreState {
@@ -15,6 +44,7 @@ export interface CompanyStoreState {
   setSelectedCompanyId?: (id: string) => void;
 }
 
+// Air quality related interfaces
 export interface AirQualitySource {
   id: string;
   name: string;

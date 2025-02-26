@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
@@ -7,13 +6,14 @@ import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
 import { createMarkerPopup } from "./AirQualityPopup";
 import { AirQualityData, Installation, Measurement } from "@/types/company";
+import { LatLngExpression } from 'leaflet';
 
 // Rate limiting helper
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Default map settings
 const MAP_CONFIG = {
-  center: [54.372158, 18.638306], // Gdańsk
+  center: [54.372158, 18.638306] as LatLngExpression,
   zoom: 12,
   minZoom: 10,
   maxZoom: 18
