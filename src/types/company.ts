@@ -64,6 +64,7 @@ export interface AirQualitySource {
 export interface AirQualityMeasurement {
   fromDateTime: string;
   tillDateTime: string;
+  timestamp?: string;
   values: Array<{
     name: string;
     value: number;
@@ -82,6 +83,15 @@ export interface AirQualityMeasurement {
     limit: number;
     percent: number;
   }>;
+  pm25?: number;
+  pm10?: number;
+  no2?: number;
+  o3?: number;
+  so2?: number;
+  co?: number;
+  temperature?: number;
+  humidity?: number;
+  pressure?: number;
 }
 
 export interface AirQualityData {

@@ -2,7 +2,6 @@
 import { AirQualityData, AirQualitySource } from "@/types/company";
 import { isInTriCity } from "@/utils/locationUtils";
 
-// Update Syngeos API endpoint to use HTTPS and the correct path
 const SYNGEOS_API = 'https://api.syngeos.pl/public/data/air';
 
 export const fetchSyngeosStations = async (): Promise<AirQualitySource[]> => {
@@ -44,13 +43,19 @@ export const fetchSyngeosData = async (stationId: string): Promise<AirQualityDat
         stations.find(s => s.id === stationId)!
       ),
       current: {
-        timestamp: new Date().toISOString(),
+        fromDateTime: new Date().toISOString(),
+        tillDateTime: new Date().toISOString(),
+        values: [
+          { name: 'PM2.5', value: data.pm25 },
+          { name: 'PM10', value: data.pm10 }
+        ],
+        indexes: [],
+        standards: [],
         pm25: data.pm25,
         pm10: data.pm10,
         temperature: data.temperature,
         humidity: data.humidity,
-        pressure: data.pressure,
-        provider: 'Syngeos'
+        pressure: data.pressure
       }
     };
   } catch (error) {

@@ -58,13 +58,15 @@ export const fetchGIOSData = async (stationId: string): Promise<AirQualityData |
         stations.find(s => s.id === stationId)!
       ),
       current: {
-        timestamp: new Date().toISOString(),
-        pm25: measurements.pm25,
-        pm10: measurements.pm10,
-        no2: measurements.no2,
-        so2: measurements.so2,
-        o3: measurements.o3,
-        provider: 'GIOŚ'
+        fromDateTime: new Date().toISOString(),
+        tillDateTime: new Date().toISOString(),
+        values: Object.entries(measurements).map(([name, value]) => ({
+          name,
+          value
+        })),
+        indexes: [],
+        standards: [],
+        ...measurements
       }
     };
   } catch (error) {
