@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { getGeminiResponse } from '@/lib/gemini';
@@ -79,8 +80,7 @@ async function extractMainTopics(text: string): Promise<string[]> {
   try {
     console.log('Rozpoczynam ekstrakcję głównych tematów...');
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro",
-      apiVersion: "v1" // Using the correct API version
+      model: "gemini-1.5-pro"
     });
     
     const prompt = `
