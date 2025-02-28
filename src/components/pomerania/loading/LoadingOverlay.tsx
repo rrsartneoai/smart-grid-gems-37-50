@@ -3,8 +3,8 @@ import React from 'react';
 import { RefreshCw } from 'lucide-react';
 
 interface LoadingOverlayProps {
-  loaded?: number;
-  total?: number;
+  loaded: number;
+  total: number;
 }
 
 export const LoadingOverlay = ({ loaded, total }: LoadingOverlayProps) => {
@@ -17,11 +17,10 @@ export const LoadingOverlay = ({ loaded, total }: LoadingOverlayProps) => {
       <div className="text-center">
         <RefreshCw className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
         <div className="text-sm text-gray-500">
-          {loaded && total 
-            ? `Ładowanie czujników... (${loaded}/${total})`
-            : "Ładowanie danych..."}
+          Ładowanie czujników... ({loaded}/{total})
         </div>
       </div>
     </div>
   );
 };
+
