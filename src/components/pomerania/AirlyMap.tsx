@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
-import { AirQualityData, Installation } from "@/types/company";
+import { Installation } from "./types";
 import { MAP_CONFIG, CITIES } from "./config/mapConfig";
 import { createAirQualityMarker } from "./markers/AirQualityMarker";
 import { AirQualityLegend } from "./legend/AirQualityLegend";
@@ -81,15 +81,15 @@ export function AirlyMap() {
         for (let i = 0; i < allInstallations.length; i += batchSize) {
           const batch = allInstallations.slice(i, i + batchSize);
           
-          await Promise.all(batch.map(async (installation) => {
+          await Promise.all(batch.map(async (installation: Installation) => {
             try {
               console.log(`Fetching data for installation ${installation.id}...`);
               const measurements = await fetchMeasurements(installation.id);
               
-              const data: AirQualityData = {
+              const data = {
                 source: {
                   id: `airly-${installation.id}`,
-                  name: `Airly ${installation.location.address?.street || ''}`,
+                  name: `Airly ${installation.address?.street || ''}`,
                   provider: 'Airly',
                   location: installation.location
                 },
@@ -190,4 +190,3 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-
