@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SpacesTabContent } from "./SpacesTabContent";
 import { CompanyAnalysis } from "@/components/analysis/CompanyAnalysis";
 import { IoTStatus } from "@/components/status/IoTStatus";
-import { SensorsPanel } from "@/components/sensors/SensorsPanel";
+import SensorsPanel from "@/components/sensors/SensorsPanel";
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import { PomeranianAirQuality } from "@/components/pomerania/PomeranianAirQuality";
 import { useTranslation } from 'react-i18next';

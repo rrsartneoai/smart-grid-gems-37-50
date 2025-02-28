@@ -8,7 +8,7 @@ import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
 import { DeviceStatus } from "@/components/network/DeviceStatus";
 import { NetworkMap } from "@/components/network/NetworkMap";
 import { FailureAnalysis } from "@/components/network/FailureAnalysis";
-import { EnergyMap } from "@/components/map/EnergyMap";
+import AirQualityMap from "@/components/map/EnergyMap";
 import { FileUpload } from "@/components/FileUpload";
 import { Chatbot } from "@/components/Chatbot";
 import { useToast } from "@/hooks/use-toast";
@@ -104,7 +104,7 @@ export const SpacesTabContent = () => {
         </div>
 
         <div className="grid gap-6 p-8">
-          <EnergyMap />
+          <AirQualityMap />
         </div>
 
         <div className="mt-8 grid gap-8 md:grid-cols-2">
