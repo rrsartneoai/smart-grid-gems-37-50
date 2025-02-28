@@ -14,26 +14,21 @@ export interface AirlyAddress {
   displayAddress2?: string;
 }
 
+export interface AirlySponsor {
+  id: number;
+  name: string;
+  description: string;
+  logo: string;
+  link: string;
+}
+
 export interface AirlyInstallation {
   id: number;
   location: AirlyLocation;
   address?: AirlyAddress;
   elevation?: number;
   airly: boolean;
-  sponsor?: {
-    id: number;
-    name: string;
-    description: string;
-    logo: string;
-    link: string;
-  };
-  sponsor?: {
-    id: number;
-    name: string;
-    description: string;
-    logo: string;
-    link: string;
-  };
+  sponsor?: AirlySponsor;
 }
 
 export interface AirlyMeasurement {

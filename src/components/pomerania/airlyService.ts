@@ -1,5 +1,5 @@
 
-import { Installation, Measurement } from './types';
+import { AirlyInstallation, AirlyMeasurement } from './types';
 
 const API_KEY = 'zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -41,9 +41,13 @@ const setCache = <T>(key: string, data: T): void => {
   }
 };
 
-export const fetchInstallations = async (lat: number, lng: number): Promise<Installation[]> => {
+// Default coordinates for the Pomeranian region (Gdańsk)
+const DEFAULT_LAT = 54.372158;
+const DEFAULT_LNG = 18.638306;
+
+export const fetchInstallations = async (lat = DEFAULT_LAT, lng = DEFAULT_LNG): Promise<AirlyInstallation[]> => {
   const cacheKey = `installations-${lat}-${lng}`;
-  const cached = getFromCache<Installation[]>(cacheKey);
+  const cached = getFromCache<AirlyInstallation[]>(cacheKey);
   
   if (cached) {
     console.log('Using cached installations data');
@@ -74,9 +78,9 @@ export const fetchInstallations = async (lat: number, lng: number): Promise<Inst
   }
 };
 
-export const fetchMeasurements = async (installationId: number): Promise<Measurement> => {
+export const fetchMeasurements = async (installationId: number): Promise<AirlyMeasurement> => {
   const cacheKey = `measurements-${installationId}`;
-  const cached = getFromCache<Measurement>(cacheKey);
+  const cached = getFromCache<AirlyMeasurement>(cacheKey);
   
   if (cached) {
     console.log(`Using cached measurements data for installation ${installationId}`);

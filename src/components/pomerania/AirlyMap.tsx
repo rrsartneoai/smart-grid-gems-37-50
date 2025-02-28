@@ -10,7 +10,7 @@ import { LoadingOverlay } from "./loading/LoadingOverlay";
 import { AirlyInstallation } from "./types";
 import { createAirQualityMarker } from "./markers/AirQualityMarker";
 import { createAirQualityPopup } from "./AirQualityPopup";
-import { defaultMapOptions, mapCenter } from "./config/mapConfig";
+import { mapCenter, defaultMapOptions } from "./config/mapConfig";
 
 function MapUpdater({ installations }: { installations: AirlyInstallation[] }) {
   const map = useMap();
@@ -19,7 +19,6 @@ function MapUpdater({ installations }: { installations: AirlyInstallation[] }) {
     const markers = L.layerGroup();
 
     installations.forEach((installation) => {
-      const { latitude, longitude } = installation.location;
       const marker = createAirQualityMarker(installation);
       
       marker.addTo(markers);
