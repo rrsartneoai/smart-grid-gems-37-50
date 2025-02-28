@@ -22,7 +22,8 @@ function MapUpdater({ installations }: { installations: AirlyInstallation[] }) {
       const marker = createAirQualityMarker(installation);
       
       marker.addTo(markers);
-      marker.bindPopup(() => createAirQualityPopup(installation));
+      // Use the string version of the popup
+      marker.bindPopup(createAirQualityPopup(installation));
     });
 
     markers.addTo(map);
