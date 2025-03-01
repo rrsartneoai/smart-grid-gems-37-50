@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -66,7 +67,7 @@ export function ChatMessage({
         setIsPlayingAudio(true);
         
         // Create a session and play the text
-        await conversation.startSession();
+        await conversation.startSession({});
         
         // Generate speech based on message content
         await conversation.speak(content);
