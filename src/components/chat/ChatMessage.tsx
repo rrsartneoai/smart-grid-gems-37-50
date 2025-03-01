@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -66,12 +65,10 @@ export function ChatMessage({
         
         setIsPlayingAudio(true);
         
-        // Directly use the TTS functionality without a full conversation session
-        // The ElevenLabs React SDK requires an agent ID or URL for startSession,
-        // but we don't need a full conversation session for just TTS
-        await conversation.textToSpeech({
-          text: content,
-          voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte - polska wymowa
+        // Use a proper conversation session with required parameters
+        await conversation.startSession({
+          agentId: "default", // Use a default agent ID
+          input: content,     // Provide the text we want to speak
         });
       }
     } catch (error) {
