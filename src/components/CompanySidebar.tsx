@@ -20,7 +20,12 @@ export const useCompanyStore = create<CompanyStoreState>((set) => ({
   setSelectedCompanyId: (id) => set({ selectedCompanyId: id }),
 }));
 
-export function CompanySidebar() {
+interface CompanySidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function CompanySidebar({ isOpen, onClose }: CompanySidebarProps) {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,12 +41,19 @@ export function CompanySidebar() {
     setCollapsed(!collapsed);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen && onClose) {
+      onClose();
+    }
+  };
+
   const filteredCompanies = companiesData.filter(company => 
     company.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={isOpen !== undefined ? isOpen : open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
