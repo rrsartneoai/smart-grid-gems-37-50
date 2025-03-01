@@ -66,11 +66,13 @@ export function ChatMessage({
         
         setIsPlayingAudio(true);
         
-        // Create a session and play the text
-        await conversation.startSession({});
-        
-        // Generate speech based on message content
-        await conversation.speak(content);
+        // Directly use the TTS functionality without a full conversation session
+        // The ElevenLabs React SDK requires an agent ID or URL for startSession,
+        // but we don't need a full conversation session for just TTS
+        await conversation.textToSpeech({
+          text: content,
+          voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte - polska wymowa
+        });
       }
     } catch (error) {
       console.error('Error playing text:', error);
