@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -66,16 +65,11 @@ export function ChatMessage({
         
         setIsPlayingAudio(true);
         
-        // Utwórz sesję TTS i odtwórz tekst
-        const model = await conversation.startSession({
-          url: "https://api.elevenlabs.io/v1/text-to-speech/XB0fDUnXU5powFXDhCwa/stream"
-        });
+        // Create a session and play the text
+        await conversation.startSession();
         
-        // Generuj mowę na podstawie treści wiadomości
-        await conversation.addMessage({
-          text: content,
-          type: "text",
-        });
+        // Generate speech based on message content
+        await conversation.speak(content);
       }
     } catch (error) {
       console.error('Error playing text:', error);

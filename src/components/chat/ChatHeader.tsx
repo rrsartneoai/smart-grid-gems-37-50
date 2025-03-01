@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Save, Volume2Off } from "lucide-react";
+import { Save, VolumeOff } from "lucide-react";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface ChatHeaderProps {
@@ -43,7 +43,7 @@ export function ChatHeader({
                   className="h-8 w-8"
                   onClick={onStopSpeaking}
                 >
-                  <Volume2Off className="h-4 w-4" />
+                  <VolumeOff className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
