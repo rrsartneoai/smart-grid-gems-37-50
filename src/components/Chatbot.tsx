@@ -1,3 +1,4 @@
+
 import { useRef, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,7 +35,7 @@ export function Chatbot() {
     apiKey: localStorage.getItem('ELEVENLABS_API_KEY') || '',
     overrides: {
       tts: {
-        voiceId: "XB0fDUnXU5powFXDhCwa",
+        voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte - polska wymowa
       },
     },
     onError: (error) => {
@@ -89,6 +90,14 @@ export function Chatbot() {
       window.removeEventListener('setInitialQuery', handleInitialQuery as EventListener);
     };
   }, [setInput, handleSubmit]);
+
+  // Sprawdź, czy użytkownik ma już ustawiony klucz API ElevenLabs
+  useEffect(() => {
+    const hasElevenLabsKey = !!localStorage.getItem('ELEVENLABS_API_KEY');
+    if (!hasElevenLabsKey) {
+      console.log('Brak klucza API ElevenLabs - funkcja odtwarzania głosowego nie będzie działać bez klucza');
+    }
+  }, []);
 
   return (
     <Card className="w-full max-w-2xl mx-auto h-[600px] md:h-[700px] flex flex-col bg-background shadow-lg rounded-xl">

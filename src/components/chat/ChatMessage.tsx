@@ -1,54 +1,134 @@
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Bot, User } from "lucide-react";
-import { ChatEnergyData } from "./ChatEnergyData";
-import { motion } from "framer-motion";
+import { pl } from "date-fns/locale";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Speaker } from "lucide-react";
+import { useConversation } from "@11labs/react";
 
-interface ChatMessageProps {
-  role: "assistant" | "user";
+type MessageProps = {
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
   dataVisualizations?: Array<{
-    type: "consumption" | "production" | "efficiency" | "airQuality" | "temperature" | "humidity";
+    type: "airQuality" | "temperature" | "humidity";
     title: string;
   }>;
-}
+};
 
-export function ChatMessage({ role, content, timestamp, dataVisualizations }: ChatMessageProps) {
+export function ChatMessage({
+  role,
+  content,
+  timestamp,
+  dataVisualizations
+}: MessageProps) {
+  const time = format(timestamp, "HH:mm", { locale: pl });
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  
+  const conversation = useConversation({
+    apiKey: localStorage.getItem('ELEVENLABS_API_KEY') || '',
+    overrides: {
+      tts: {
+        voiceId: "XB0fDUnXU5powFXDhCwa", // Charlotte - polska wymowa
+      }
+    },
+    onError: (error) => {
+      console.error('ElevenLabs error:', error);
+      setIsPlayingAudio(false);
+    },
+  });
+
+  // Zatrzymaj odtwarzanie po odmontowaniu komponentu
+  useEffect(() => {
+    return () => {
+      if (isPlayingAudio) {
+        conversation.endSession();
+      }
+    };
+  }, [isPlayingAudio, conversation]);
+
+  const handlePlayText = async () => {
+    try {
+      if (isPlayingAudio) {
+        conversation.endSession();
+        setIsPlayingAudio(false);
+      } else {
+        // Sprawdź, czy jest dostępny klucz API ElevenLabs
+        if (!localStorage.getItem('ELEVENLABS_API_KEY')) {
+          const apiKey = prompt('Podaj klucz API ElevenLabs, aby korzystać z funkcji odtwarzania głosowego:');
+          if (apiKey) {
+            localStorage.setItem('ELEVENLABS_API_KEY', apiKey);
+          } else {
+            return; // Anulowano wprowadzanie klucza
+          }
+        }
+        
+        setIsPlayingAudio(true);
+        
+        // Utwórz sesję TTS i odtwórz tekst
+        const model = await conversation.startSession({
+          url: "https://api.elevenlabs.io/v1/text-to-speech/XB0fDUnXU5powFXDhCwa/stream"
+        });
+        
+        // Generuj mowę na podstawie treści wiadomości
+        await conversation.addMessage({
+          text: content,
+          type: "text",
+        });
+      }
+    } catch (error) {
+      console.error('Error playing text:', error);
+      setIsPlayingAudio(false);
+    }
+  };
+
+  // Zatrzymaj odtwarzanie, gdy asystent kończy mówić
+  useEffect(() => {
+    if (!conversation.isSpeaking && isPlayingAudio) {
+      setIsPlayingAudio(false);
+    }
+  }, [conversation.isSpeaking, isPlayingAudio]);
+
   return (
     <div className={`flex gap-3 ${role === "assistant" ? "flex-row" : "flex-row-reverse"}`}>
-      <Avatar className="h-8 w-8 md:h-10 md:w-10 shrink-0">
+      <Avatar className="mt-1">
         {role === "assistant" ? (
-          <>
-            <AvatarImage src="/lovable-uploads/045f69f0-5424-4c58-a887-6e9e984d428b.png" />
-            <AvatarFallback><Bot className="h-4 w-4 md:h-5 md:w-5" /></AvatarFallback>
-          </>
-        ) : (
-          <>
-            <AvatarFallback><User className="h-4 w-4 md:h-5 md:w-5" /></AvatarFallback>
-          </>
-        )}
+          <AvatarImage src="/lovable-uploads/045f69f0-5424-4c58-a887-6e9e984d428b.png" />
+        ) : null}
+        <AvatarFallback>
+          {role === "assistant" ? "AI" : "Ty"}
+        </AvatarFallback>
       </Avatar>
-      <div className={`flex flex-col gap-2 max-w-[85%] md:max-w-[75%] ${role === "assistant" ? "items-start" : "items-end"}`}>
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className={`rounded-2xl px-4 py-2.5 ${
+      
+      <div className={`flex flex-col max-w-[80%] md:max-w-[85%] lg:max-w-[90%] ${role === "assistant" ? "" : "items-end"}`}>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <span>{role === "assistant" ? "Asystent" : "Ty"}</span>
+          <span>•</span>
+          <span>{time}</span>
+          
+          {role === "assistant" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-full ml-1"
+              onClick={handlePlayText}
+              title={isPlayingAudio ? "Zatrzymaj odtwarzanie" : "Odtwórz głosowo"}
+            >
+              <Speaker className={`h-4 w-4 ${isPlayingAudio ? "text-primary animate-pulse" : ""}`} />
+            </Button>
+          )}
+        </div>
+        
+        <div
+          className={`rounded-lg p-3 ${
             role === "assistant"
-              ? "bg-card text-card-foreground shadow-sm"
+              ? "bg-muted text-foreground"
               : "bg-primary text-primary-foreground"
           }`}
         >
-          <p className="text-sm md:text-base whitespace-pre-wrap">{content}</p>
-          {dataVisualizations?.map((viz, index) => (
-            <ChatEnergyData key={index} dataType={viz.type} title={viz.title} />
-          ))}
-        </motion.div>
-        <span className="text-xs text-muted-foreground px-1">
-          {format(timestamp, "HH:mm")}
-        </span>
+          <div className="whitespace-pre-wrap">{content}</div>
+        </div>
       </div>
     </div>
   );

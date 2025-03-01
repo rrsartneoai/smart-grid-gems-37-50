@@ -1,44 +1,49 @@
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Save, StopCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Save, Volume2Off } from "lucide-react";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface ChatHeaderProps {
-  isSpeaking: boolean;
-  isTyping: boolean;
-  onStopSpeaking: () => void;
+  isSpeaking?: boolean;
+  onStopSpeaking?: () => void;
   onSaveHistory: () => void;
+  isTyping: boolean;
 }
 
-export function ChatHeader({ isSpeaking, isTyping, onStopSpeaking, onSaveHistory }: ChatHeaderProps) {
+export function ChatHeader({
+  isSpeaking,
+  onStopSpeaking,
+  onSaveHistory,
+  isTyping
+}: ChatHeaderProps) {
   return (
-    <div className="p-4 border-b flex items-center justify-between bg-card">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-12 w-12 shadow-sm">
-          <AvatarImage src="/lovable-uploads/045f69f0-5424-4c58-a887-6e9e984d428b.png" />
-          <AvatarFallback><Bot className="h-6 w-6" /></AvatarFallback>
-        </Avatar>
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight">Asystent Stanu Jakości Powietrza</h3>
-          <p className="text-sm text-muted-foreground">
-            {isTyping ? "Pisze..." : "Zawsze online"}
-          </p>
-        </div>
-      </div>
-      <div className="flex gap-3">
+    <div className="p-4 border-b flex items-center justify-between bg-background shadow-sm">
+      <h3 className="text-lg font-semibold">
+        Asystent AI
+        {isTyping && (
+          <span className="text-xs text-muted-foreground ml-2 animate-pulse">
+            pisze...
+          </span>
+        )}
         {isSpeaking && (
+          <span className="text-xs text-primary ml-2 animate-pulse">
+            mówi...
+          </span>
+        )}
+      </h3>
+      
+      <div className="flex gap-2">
+        {isSpeaking && onStopSpeaking && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="icon"
+                  className="h-8 w-8"
                   onClick={onStopSpeaking}
-                  className="text-red-500 shadow-sm"
                 >
-                  <StopCircle className="h-5 w-5" />
+                  <Volume2Off className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -47,20 +52,21 @@ export function ChatHeader({ isSpeaking, isTyping, onStopSpeaking, onSaveHistory
             </Tooltip>
           </TooltipProvider>
         )}
+        
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
+                className="h-8 w-8"
                 onClick={onSaveHistory}
-                className="shadow-sm"
               >
-                <Save className="h-5 w-5" />
+                <Save className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Zapisz historię rozmowy</p>
+              <p>Zapisz historię konwersacji</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
