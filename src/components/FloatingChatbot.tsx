@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Chatbot } from './Chatbot';
 import { Button } from './ui/button';
@@ -10,7 +11,9 @@ export function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const currentHash = location.hash.slice(1);
-  const isAllowedSection = ['insights', 'status', 'sensors'].includes(currentHash);
+  
+  // Remove the section restriction to make it available everywhere
+  // const isAllowedSection = ['insights', 'status', 'sensors'].includes(currentHash);
 
   useEffect(() => {
     const handleOpenAssistant = () => setIsOpen(true);
@@ -18,7 +21,8 @@ export function FloatingChatbot() {
     return () => window.removeEventListener('openAssistant', handleOpenAssistant);
   }, []);
 
-  if (!isAllowedSection) return null;
+  // Remove the conditional return that was restricting where the chatbot appears
+  // if (!isAllowedSection) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50">

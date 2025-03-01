@@ -12,7 +12,7 @@ import { IoTStatus } from "@/components/status/IoTStatus";
 import SensorsPanel from "@/components/sensors/SensorsPanel";
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FloatingChatbot } from "@/components/FloatingChatbot";
 import { Chatbot } from "@/components/Chatbot";
 import { NotificationCenter } from "@/components/ui/notifications/NotificationCenter";
@@ -31,6 +31,7 @@ import jsPDF from 'jspdf';
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
 import { PomeranianAirQuality } from "@/components/pomerania/PomeranianAirQuality";
+import { Menu } from "lucide-react";
 import '../i18n/config';
 
 const Index = () => {
@@ -40,6 +41,7 @@ const Index = () => {
   const { scrollY } = useScroll();
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0]);
   const headerTranslateY = useTransform(scrollY, [0, 100], [0, -100]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleExport = async (format: 'pdf' | 'jpg') => {
     if (!spacesRef.current) return;
@@ -101,6 +103,10 @@ const Index = () => {
     });
   });
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Tutorial />
@@ -113,6 +119,15 @@ const Index = () => {
       >
         <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-b">
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden" 
+              onClick={toggleMobileMenu}
+              aria-label="Toggle mobile menu"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
             <ApiKeySettings />
             <div className="flex flex-col items-center sm:items-start gap-1">
               <h1 className="text-xl font-semibold text-center sm:text-left">
@@ -143,8 +158,8 @@ const Index = () => {
       <div className="pt-28">
         <SidebarProvider>
           <div className="min-h-screen flex w-full flex-col lg:flex-row">
-            <CompanySidebar />
-            <main className="flex-1 p-4 lg:pl-[320px] transition-all duration-300">
+            <CompanySidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+            <main className={`flex-1 p-4 lg:pl-[320px] transition-all duration-300 ${isMobileMenuOpen ? 'blur-sm lg:blur-none' : ''}`}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

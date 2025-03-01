@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { getGeminiResponse } from '@/lib/gemini';
@@ -18,13 +17,12 @@ export const generateRAGResponse = async (query: string): Promise<string> => {
   if (documentChunks.length === 0) {
     console.log('Brak dokumentów w pamięci');
     
-    if (isAirQualityRelated) {
-      const enhancedPrompt = `Odpowiedz na pytanie dotyczące jakości powietrza: ${query}. 
-      Skup się na informacjach dotyczących wpływu na zdrowie i zalecanych działaniach profilaktycznych.`;
-      return getGeminiResponse(enhancedPrompt);
-    }
+    // Even without documents, try to provide a meaningful response
+    const enhancedPrompt = `Odpowiedz na pytanie: ${query}. 
+      ${isAirQualityRelated ? 'Skup się na informacjach dotyczących wpływu na zdrowie i zalecanych działaniach profilaktycznych.' : ''}
+      Odpowiedz w sposób przyjazny i pomocny.`;
     
-    return "Nie wgrano jeszcze żadnego dokumentu. Proszę najpierw wgrać dokument, aby móc zadawać pytania.";
+    return getGeminiResponse(enhancedPrompt);
   }
 
   const relevantChunks = searchRelevantChunks(query);
@@ -32,19 +30,18 @@ export const generateRAGResponse = async (query: string): Promise<string> => {
   if (relevantChunks.length === 0) {
     console.log('Nie znaleziono pasujących fragmentów');
     
-    if (isAirQualityRelated) {
-      const enhancedPrompt = `Odpowiedz na pytanie dotyczące jakości powietrza: ${query}. 
-      Uwzględnij wpływ na zdrowie i zalecane działania profilaktyczne.`;
-      return getGeminiResponse(enhancedPrompt);
-    }
+    // If no relevant chunks found, still try to provide a helpful response
+    const enhancedPrompt = `Odpowiedz na pytanie: ${query}. 
+      ${isAirQualityRelated ? 'Uwzględnij wpływ na zdrowie i zalecane działania profilaktyczne.' : ''}
+      Odpowiedz w sposób przyjazny i pomocny.`;
     
-    return "Nie znalazłem odpowiednich informacji w wgranym dokumencie, które pomogłyby odpowiedzieć na to pytanie.";
+    return getGeminiResponse(enhancedPrompt);
   }
 
   const context = relevantChunks.join('\n\n');
   const prompt = `Na podstawie poniższego kontekstu, ${query === 'podsumuj' ? 'przedstaw krótkie podsumowanie głównych punktów dokumentu' : 'odpowiedz na pytanie'}. 
   ${isAirQualityRelated ? 'Zwróć szczególną uwagę na informacje dotyczące jakości powietrza i ich wpływu na zdrowie.' : ''}
-  Jeśli odpowiedź nie znajduje się w kontekście, powiedz o tym.
+  Jeśli odpowiedź nie znajduje się w kontekście, powiedz, że nie masz tej informacji, ale spróbuj pomóc na podstawie swojej ogólnej wiedzy.
 
   Kontekst:
   ${context}
