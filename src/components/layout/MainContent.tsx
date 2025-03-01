@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanyAnalysis } from "@/components/analysis/CompanyAnalysis";
 import { IoTStatus } from "@/components/status/IoTStatus";
-import { SensorsPanel } from "@/components/sensors/SensorsPanel";
+import SensorsPanel from "@/components/sensors/SensorsPanel";
 import { PomeranianAirQuality } from "@/components/pomerania/PomeranianAirQuality";
 import { IntegrationsPanel } from "@/components/integrations/IntegrationsPanel";
 import { SpacesTab } from "@/components/tabs/SpacesTab";

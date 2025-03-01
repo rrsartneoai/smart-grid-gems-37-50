@@ -6,7 +6,7 @@ import { AirQualityChart } from "@/components/dashboard/AirQualityChart";
 import { DeviceStatus } from "@/components/network/DeviceStatus";
 import { NetworkMap } from "@/components/network/NetworkMap";
 import { FailureAnalysis } from "@/components/network/FailureAnalysis";
-import { EnergyMap } from "@/components/map/EnergyMap";
+import EnergyMap from "@/components/map/EnergyMap";
 import { FileUpload } from "@/components/FileUpload";
 import { Chatbot } from "@/components/Chatbot";
 import { useToast } from "@/hooks/use-toast";
