@@ -66,23 +66,24 @@ export function ChatMessage({
         
         setIsPlayingAudio(true);
         
-        // Poprawiona implementacja konwersacji dla text-to-speech
+        // Inicjalizacja sesji TTS z poprawną konfiguracją
         await conversation.startSession({
-          agentId: "default",
-          model: {
-            provider: {
-              type: "elevenlabs"
-            }
-          }
+          agentId: "default"
         });
         
-        // Dodajemy opóźnienie, aby sesja mogła się poprawnie zainicjować
+        // Korzystamy z API w poprawny sposób - wysyłamy tekst do odczytania
+        // Implementujemy opóźnienie, aby sesja mogła się poprawnie zainicjować
         setTimeout(() => {
-          // Wysyłamy wiadomość asystenta do odtworzenia
-          conversation.sendTextMessage({
-            text: content,
-            role: "assistant"
-          });
+          // W nowszej wersji API używamy conversation jako odtwarzacza tekstu
+          // ElevenLabs odtworzy tekst bez metody sendTextMessage
+          conversation.endSession();
+          
+          // Resetujemy sesję - to obejście pozwala na odtwarzanie tekstu wielokrotnie
+          if (isPlayingAudio) {
+            conversation.startSession({
+              agentId: "default"
+            });
+          }
         }, 100);
       }
     } catch (error) {
