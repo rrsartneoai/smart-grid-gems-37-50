@@ -66,11 +66,24 @@ export function ChatMessage({
         
         setIsPlayingAudio(true);
         
-        // Use the correct parameters for startSession
+        // Poprawiona implementacja konwersacji dla text-to-speech
         await conversation.startSession({
           agentId: "default",
-          message: content // Use 'message' instead of 'input' to provide the text
+          model: {
+            provider: {
+              type: "elevenlabs"
+            }
+          }
         });
+        
+        // Dodajemy opóźnienie, aby sesja mogła się poprawnie zainicjować
+        setTimeout(() => {
+          // Wysyłamy wiadomość asystenta do odtworzenia
+          conversation.sendTextMessage({
+            text: content,
+            role: "assistant"
+          });
+        }, 100);
       }
     } catch (error) {
       console.error('Error playing text:', error);
