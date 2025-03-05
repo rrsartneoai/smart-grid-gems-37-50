@@ -1,6 +1,6 @@
 
 import { AQICNResponse } from './aqicnTypes';
-import { AirQualityData } from '@/types/company';
+import { AirQualityData } from '@/types/airQuality.types';
 
 /**
  * Convert AQICN data to our application format

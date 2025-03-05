@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import L from 'leaflet';
-import { AirQualityData } from '@/types/company';
+import { AirQualityData } from '@/types/airQuality.types';
 import { MAP_CONFIG } from '../config/mapConfig';
 import { createAirQualityMarker } from '../markers/AirQualityMarker';
 import { fetchAllAQICNStations } from '@/services/airQuality/aqicnService';

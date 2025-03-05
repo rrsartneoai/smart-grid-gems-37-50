@@ -1,5 +1,5 @@
 
-import { Company } from "@/types/company";
+import { Company } from "@/types/company.types";
 import { Activity, Battery, Cpu, Gauge, Power, Zap, DollarSign, Flame } from "lucide-react";
 
 export const companiesData: Company[] = [

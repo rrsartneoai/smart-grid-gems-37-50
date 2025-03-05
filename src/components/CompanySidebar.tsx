@@ -7,7 +7,7 @@ import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search, MessageSquare } fro
 import { companiesData } from "@/data/companies";
 import { create } from "zustand";
 import { Button } from "@/components/ui/button";
-import { CompanyStoreState, Company } from "@/types/company";
+import { CompanyStoreState, Company } from "@/types/company.types";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { useLocation, useNavigate } from "react-router-dom";

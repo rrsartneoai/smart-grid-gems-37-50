@@ -1,8 +1,7 @@
-
 import { AQICNResponse, TRICITY_STATION_IDS } from './aqicnTypes';
 import { getFromCache, setCache } from './aqicnCache';
 import { convertAQICNDataToAppFormat } from './aqicnTransform';
-import { AirQualityData } from '@/types/company';
+import { AirQualityData } from '@/types/airQuality.types';
 
 // AQICN API Token
 const API_TOKEN = '5a1271b20fbbb9c972814a7b8d31512e061e83e6';

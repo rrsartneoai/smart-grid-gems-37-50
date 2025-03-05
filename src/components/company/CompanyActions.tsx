@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { Separator } from "@/components/ui/separator";
-import { CompanyStat, Company } from "@/types/company";
+import { CompanyStat, Company } from "@/types/company.types";
 import { Activity, Battery, Cpu, DollarSign, Flame, Gauge, Power, Timer, Wifi, Zap } from "lucide-react";
 
 export function CompanyActions() {

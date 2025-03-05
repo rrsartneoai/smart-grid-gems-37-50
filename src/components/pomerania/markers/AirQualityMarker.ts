@@ -1,6 +1,6 @@
 
 import L from 'leaflet';
-import { AirQualityData } from '@/types/company';
+import { AirQualityData } from '@/types/airQuality.types';
 import { createMarkerPopup } from '../AirQualityPopup';
 
 export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
