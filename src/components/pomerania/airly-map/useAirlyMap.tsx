@@ -4,7 +4,7 @@ import L from 'leaflet';
 import { AirQualityData } from '@/types/company';
 import { MAP_CONFIG } from '../config/mapConfig';
 import { createAirQualityMarker } from '../markers/AirQualityMarker';
-import { AQICN_STATIONS } from './AirQualityStations';
+import { fetchAllAQICNStations } from '@/services/airQuality/aqicnService';
 
 export interface UseAirlyMapState {
   isLoading: boolean;
@@ -29,7 +29,7 @@ export const useAirlyMap = () => {
   // State
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState({ total: AQICN_STATIONS.length, loaded: 0 });
+  const [stats, setStats] = useState({ total: 0, loaded: 0 });
   const [selectedStation, setSelectedStation] = useState<AirQualityData | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
@@ -39,8 +39,7 @@ export const useAirlyMap = () => {
     const initializeMap = async () => {
       setIsLoading(true);
       setError(null);
-      setStats({ total: AQICN_STATIONS.length, loaded: 0 });
-
+      
       try {
         // Initialize the map
         console.log('Initializing map...');
@@ -79,24 +78,20 @@ export const useAirlyMap = () => {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        // Process static AQICN station data
-        for (const station of AQICN_STATIONS) {
-          try {
-            const data = {
-              source: {
-                id: `aqicn-${station.id}`,
-                name: `${station.name} ${station.address?.street || ''}`,
-                provider: 'AQICN',
-                location: station.location
-              },
-              current: {
-                ...station.current,
-                provider: 'AQICN',
-                timestamp: station.current.fromDateTime
-              }
-            };
+        // Fetch real-time AQICN data for Tricity area
+        console.log('Fetching real-time air quality data...');
+        setStats({ total: 7, loaded: 0 }); // Initial estimate of stations
 
-            const marker = createAirQualityMarker(data, map);
+        const stations = await fetchAllAQICNStations();
+        
+        setStats(prev => ({ ...prev, total: stations.length }));
+        
+        // Process and display stations on the map
+        stations.forEach((station, index) => {
+          if (!station) return;
+          
+          try {
+            const marker = createAirQualityMarker(station, map);
             
             // Add click handler to open the detailed dialog
             marker.on('click', () => {
@@ -107,9 +102,9 @@ export const useAirlyMap = () => {
             markersRef.current.push(marker);
             setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
           } catch (error) {
-            console.error(`Error processing station ${station.id}:`, error);
+            console.error(`Error processing station ${index}:`, error);
           }
-        }
+        });
 
         setIsLoading(false);
       } catch (error) {
