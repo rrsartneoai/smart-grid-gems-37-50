@@ -34,10 +34,11 @@ export interface AQICNResponse {
 // Station IDs for Tricity area - updated with working IDs
 export const TRICITY_STATION_IDS = [
   'A252829', // Osinskiego, Gdansk - This one is working
-  '@8767',   // Gdynia Pogorze (new ID)
-  '@8770',   // Sopot (new ID)
-  '@8768',   // Gdansk Wrzeszcz (new ID)
-  '@8769',   // Gdansk Nowy Port (new ID)
-  '@8771',   // Gdynia Srodmiescie (new ID)
-  '@8772'    // Gdynia Dabrowa (new ID)
+  '@2684',   // Station from provided API token
+  '@8767',   // Gdynia Pogorze
+  '@8770',   // Sopot
+  '@8768',   // Gdansk Wrzeszcz
+  '@8769',   // Gdansk Nowy Port
+  '@8771',   // Gdynia Srodmiescie
+  '@8772'    // Gdynia Dabrowa
 ];

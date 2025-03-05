@@ -1,5 +1,4 @@
-
-import { AirQualityData, AirQualitySource } from "@/types/company";
+import { AirQualityData, AirQualityIndex, AirQualitySource } from '@/types';
 import { isInTriCity } from "@/utils/locationUtils";
 
 const GIOS_API_BASE = 'https://api.gios.gov.pl/pjp-api/rest';
