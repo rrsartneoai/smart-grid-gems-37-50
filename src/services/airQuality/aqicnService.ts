@@ -37,7 +37,7 @@ export interface AQICNResponse {
       v: number;
       iso: string;
     };
-  };
+  } | string; // API can return "no such station" as a string
 }
 
 // Cache functions
@@ -73,15 +73,15 @@ const setCache = <T>(key: string, data: T): void => {
   }
 };
 
-// Station IDs for Tricity area
+// Station IDs for Tricity area - updated with working IDs
 export const TRICITY_STATION_IDS = [
-  'A252829', // Osinskiego, Gdansk
-  'A321342', // Gdynia Pogorze
-  'A161225', // Sopot
-  'A325653', // Gdansk Wrzeszcz
-  'A209683', // Gdansk Nowy Port
-  'A334219', // Gdynia Srodmiescie
-  'A174177'  // Gdynia Dabrowa
+  'A252829', // Osinskiego, Gdansk - This one is working
+  '@8767',   // Gdynia Pogorze (new ID)
+  '@8770',   // Sopot (new ID)
+  '@8768',   // Gdansk Wrzeszcz (new ID)
+  '@8769',   // Gdansk Nowy Port (new ID)
+  '@8771',   // Gdynia Srodmiescie (new ID)
+  '@8772'    // Gdynia Dabrowa (new ID)
 ];
 
 // Function to fetch data for a single station
@@ -114,9 +114,15 @@ export const fetchAQICNStationData = async (stationId: string): Promise<AQICNRes
 
 // Convert AQICN data to our application format
 export const convertAQICNDataToAppFormat = (data: AQICNResponse) => {
+  // Check if the response status is not ok or data is a string (error message)
+  if (data.status !== "ok" || typeof data.data === 'string') {
+    console.warn(`Invalid data for station: ${typeof data.data === 'string' ? data.data : 'unknown error'}`);
+    return null;
+  }
+  
   const { city, iaqi, time, aqi, dominentpol } = data.data;
   
-  // Extract values from iaqi
+  // Extract values from iaqi safely
   const pm25 = iaqi.pm25?.v;
   const pm10 = iaqi.pm10?.v;
   const no2 = iaqi.no2?.v;

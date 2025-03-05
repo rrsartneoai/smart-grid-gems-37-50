@@ -13,7 +13,7 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
   const value = index?.value || 0;
 
   // Add historical data simulation if not present
-  if (!data.historicalData) {
+  if (!data.historicalData || data.historicalData.length === 0) {
     data.historicalData = [
       {
         parameter: 'pm25',
@@ -23,8 +23,8 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
           date.setHours(date.getHours() - i);
           return date.toISOString();
         }),
-        min: Math.floor((data.current.pm25 || 10) * 0.6),
-        max: Math.ceil((data.current.pm25 || 10) * 1.4)
+        min: Math.floor((current.pm25 || 10) * 0.6),
+        max: Math.ceil((current.pm25 || 10) * 1.4)
       },
       {
         parameter: 'pm10',
@@ -34,10 +34,14 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
           date.setHours(date.getHours() - i);
           return date.toISOString();
         }),
-        min: Math.floor((data.current.pm10 || 15) * 0.6),
-        max: Math.ceil((data.current.pm10 || 15) * 1.4)
-      },
-      {
+        min: Math.floor((current.pm10 || 15) * 0.6),
+        max: Math.ceil((current.pm10 || 15) * 1.4)
+      }
+    ];
+    
+    // Add more parameters if they exist in the current data
+    if (current.no2) {
+      data.historicalData.push({
         parameter: 'no2',
         values: Array.from({ length: 48 }, () => Math.floor(Math.random() * 15) + 2),
         timestamps: Array.from({ length: 48 }, (_, i) => {
@@ -47,8 +51,11 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
         }),
         min: 1,
         max: 3
-      },
-      {
+      });
+    }
+    
+    if (current.so2) {
+      data.historicalData.push({
         parameter: 'so2',
         values: Array.from({ length: 48 }, () => Math.floor(Math.random() * 8) + 1),
         timestamps: Array.from({ length: 48 }, (_, i) => {
@@ -58,8 +65,11 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
         }),
         min: 1,
         max: 2
-      },
-      {
+      });
+    }
+    
+    if (current.co) {
+      data.historicalData.push({
         parameter: 'co',
         values: Array.from({ length: 48 }, () => Math.floor(Math.random() * 5) + 1),
         timestamps: Array.from({ length: 48 }, (_, i) => {
@@ -69,8 +79,8 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
         }),
         min: 2,
         max: 3
-      }
-    ];
+      });
+    }
   }
 
   // Create a custom marker icon with air quality information

@@ -5,6 +5,7 @@ import { AirQualityData } from '@/types/company';
 import { MAP_CONFIG } from '../config/mapConfig';
 import { createAirQualityMarker } from '../markers/AirQualityMarker';
 import { fetchAllAQICNStations } from '@/services/airQuality/aqicnService';
+import { toast } from 'sonner';
 
 export interface UseAirlyMapState {
   isLoading: boolean;
@@ -84,6 +85,13 @@ export const useAirlyMap = () => {
 
         const stations = await fetchAllAQICNStations();
         
+        if (!stations || stations.length === 0) {
+          toast.error('Nie udało się pobrać danych o jakości powietrza.');
+          setError('Nie udało się pobrać danych. Spróbuj później.');
+          setIsLoading(false);
+          return;
+        }
+        
         setStats(prev => ({ ...prev, total: stations.length }));
         
         // Process and display stations on the map
@@ -106,10 +114,18 @@ export const useAirlyMap = () => {
           }
         });
 
+        if (markersRef.current.length === 0) {
+          setError('Nie udało się wyświetlić żadnej stacji pomiarowej.');
+          toast.error('Problem z wyświetleniem stacji pomiarowych.');
+        } else {
+          toast.success(`Załadowano ${markersRef.current.length} stacji pomiarowych.`);
+        }
+
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing map:', error);
         setError('Wystąpił błąd podczas ładowania danych. Spróbuj odświeżyć stronę.');
+        toast.error('Błąd inicjalizacji mapy.');
         setIsLoading(false);
       }
     };
