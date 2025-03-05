@@ -8,6 +8,8 @@ import { AirQualityLegend } from "./legend/AirQualityLegend";
 import { LoadingOverlay } from "./loading/LoadingOverlay";
 import { ErrorOverlay } from "./error/ErrorOverlay";
 import { createAirQualityMarker } from "./markers/AirQualityMarker";
+import { AirQualityDetailDialog } from "./AirQualityDetailDialog";
+import { AirQualityData } from "@/types/company";
 
 // Comprehensive AQICN station data for Tricity area (Trójmiasto)
 const AQICN_STATIONS = [
@@ -261,6 +263,8 @@ export function AirlyMap() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({ total: AQICN_STATIONS.length, loaded: 0 });
+  const [selectedStation, setSelectedStation] = useState<AirQualityData | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -318,6 +322,13 @@ export function AirlyMap() {
             };
 
             const marker = createAirQualityMarker(data, map);
+            
+            // Add click handler to open the detailed dialog
+            marker.on('click', () => {
+              setSelectedStation(marker.options.data);
+              setIsDetailDialogOpen(true);
+            });
+            
             markersRef.current.push(marker);
             setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
           } catch (error) {
@@ -345,6 +356,10 @@ export function AirlyMap() {
     };
   }, []);
 
+  const handleCloseDetailDialog = () => {
+    setIsDetailDialogOpen(false);
+  };
+
   return (
     <Card className="dark:bg-[#1A1F2C] font-['Montserrat'] shadow-lg">
       <CardHeader className="pb-3">
@@ -363,6 +378,13 @@ export function AirlyMap() {
         </div>
 
         <AirQualityLegend />
+        
+        {/* Detail dialog */}
+        <AirQualityDetailDialog 
+          isOpen={isDetailDialogOpen} 
+          onClose={handleCloseDetailDialog} 
+          data={selectedStation} 
+        />
       </CardContent>
     </Card>
   );

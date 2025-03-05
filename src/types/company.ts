@@ -1,3 +1,4 @@
+
 export interface Coordinates {
   lon: number;
   lat: number;
@@ -122,6 +123,7 @@ export interface AirQualityData {
     temperature?: number;
     pressure?: number;
     humidity?: number;
+    wind?: number;
     timestamp?: string;
     fromDateTime?: string;
     standards?: {
@@ -130,6 +132,13 @@ export interface AirQualityData {
     }[];
     provider?: string;
   };
+  historicalData?: {
+    parameter: string;
+    values: number[];
+    timestamps: string[];
+    min: number;
+    max: number;
+  }[];
 }
 
 export interface WeatherSettings {
@@ -140,4 +149,46 @@ export interface WeatherSettings {
     airQuality: boolean;
     map: boolean;
   };
+}
+
+// Adding the missing types for other components in the project
+export interface Company {
+  id: string;
+  name: string;
+  logo: string;
+  description: string;
+  contact: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+  stats: CompanyStats;
+  energyData: {
+    consumption: number[];
+    production: number[];
+    dates: string[];
+  };
+}
+
+export interface CompanyStats {
+  employees: number;
+  customers: number;
+  projects: number;
+  energySaved: number;
+}
+
+export interface CompanyData {
+  companies: Company[];
+}
+
+export interface CompanyStoreState {
+  selectedCompany: Company | null;
+  setSelectedCompany: (company: Company) => void;
+}
+
+export interface AirQualitySource {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
 }
