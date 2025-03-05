@@ -1,142 +1,143 @@
+export interface Coordinates {
+  lon: number;
+  lat: number;
+}
 
-import { LucideIcon } from 'lucide-react';
-
-// Base company interfaces
-export interface Company {
-  id: string;
-  name: string;
+export interface WeatherCondition {
+  id: number;
+  main: string;
   description: string;
-  logo: string;
-  energyData: EnergyData[];
-  stats: CompanyStats[];
+  icon: string;
 }
 
-export interface CompanyData {
-  id: string;
+export interface MainWeatherData {
+  temp: number;
+  feels_like: number;
+  temp_min: number;
+  temp_max: number;
+  pressure: number;
+  humidity: number;
+  sea_level?: number;
+  grnd_level?: number;
+}
+
+export interface Wind {
+  speed: number;
+  deg: number;
+  gust?: number;
+}
+
+export interface Rain {
+  "1h"?: number;
+  "3h"?: number;
+}
+
+export interface Snow {
+  "1h"?: number;
+  "3h"?: number;
+}
+
+export interface SystemInfo {
+  type: number;
+  id: number;
+  country: string;
+  sunrise: number;
+  sunset: number;
+}
+
+export interface CurrentWeather {
+  coord: Coordinates;
+  weather: WeatherCondition[];
+  base: string;
+  main: MainWeatherData;
+  visibility: number;
+  wind: Wind;
+  clouds: { all: number };
+  rain?: Rain;
+  snow?: Snow;
+  dt: number;
+  sys: SystemInfo;
+  timezone: number;
+  id: number;
   name: string;
-  description: string;
-  logo: string;
-  energyData?: EnergyData[];
-  stats?: CompanyStats[];
+  cod: number;
 }
 
-export interface CompanyStats {
-  title: string;
-  value: string;
-  unit?: string;
-  icon: LucideIcon;
-  description: string;
-  details: Array<{ label: string; value: string }>;
+export interface ForecastItem {
+  dt: number;
+  main: MainWeatherData;
+  weather: WeatherCondition[];
+  clouds: { all: number };
+  wind: Wind;
+  visibility: number;
+  pop: number;
+  rain?: { "3h": number };
+  snow?: { "3h": number };
+  sys: { pod: string };
+  dt_txt: string;
 }
 
-export interface EnergyData {
-  name: string;
-  consumption: number;
-  production: number;
-  efficiency: number;
-  timestamp?: string;
-}
-
-export interface CompanyStoreState {
-  selectedCompany: CompanyData | null;
-  selectedCompanyId?: string;
-  setSelectedCompany: (company: CompanyData | null) => void;
-  setSelectedCompanyId?: (id: string) => void;
-}
-
-// Address interface for reuse
-export interface Address {
-  street?: string;
-  number?: string;
-  city?: string;
-  displayAddress1?: string;
-  displayAddress2?: string;
-}
-
-// Location interface for reuse
-export interface Location {
-  latitude: number;
-  longitude: number;
-  address?: Address;
-}
-
-// Air quality related interfaces
-export interface AirQualitySource {
-  id: string;
-  name: string;
-  provider: string;
-  location: Location;
-}
-
-export interface AirQualityMeasurement {
-  timestamp: string;
-  fromDateTime?: string;
-  tillDateTime?: string;
-  values?: Array<{
+export interface WeatherForecast {
+  cod: string;
+  message: number;
+  cnt: number;
+  list: ForecastItem[];
+  city: {
+    id: number;
     name: string;
-    value: number;
-  }>;
-  indexes?: Array<{
-    name: string;
-    value: number;
-    level: string;
-    description: string;
-    advice: string;
-    color: string;
-  }>;
-  standards?: Array<{
-    name: string;
-    pollutant: string;
-    limit: number;
-    percent: number;
-  }>;
-  pm25?: number;
-  pm10?: number;
-  no2?: number;
-  so2?: number;
-  o3?: number;
-  co?: number;
-  temperature?: number;
-  humidity?: number;
-  pressure?: number;
-  provider: string;
+    coord: Coordinates;
+    country: string;
+    population: number;
+    timezone: number;
+    sunrise: number;
+    sunset: number;
+  };
 }
 
 export interface AirQualityData {
-  source: AirQualitySource;
-  current: AirQualityMeasurement;
-}
-
-export interface Installation {
-  id: number;
-  location: Location;
-}
-
-export interface Measurement {
+  source: {
+    id: string;
+    name: string;
+    provider: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   current: {
-    fromDateTime: string;
-    tillDateTime: string;
-    values: Array<{
-      name: string;
+    indexes: {
+      name?: string;
       value: number;
-    }>;
-    indexes: Array<{
-      name: string;
-      value: number;
-      level: string;
+      level?: string;
       description: string;
       advice: string;
       color: string;
-    }>;
-    standards: Array<{
-      name: string;
+    }[];
+    pm25?: number;
+    pm10?: number;
+    no2?: number;
+    o3?: number;
+    so2?: number;
+    co?: number;
+    temperature?: number;
+    pressure?: number;
+    humidity?: number;
+    timestamp?: string;
+    fromDateTime?: string;
+    standards?: {
       pollutant: string;
-      limit: number;
       percent: number;
-    }>;
+    }[];
+    provider?: string;
   };
-  forecast: any[];
-  history: any[];
-  location: Location;
 }
 
+export interface WeatherSettings {
+  units: "metric" | "imperial";
+  displayOptions: {
+    details: boolean;
+    forecast: boolean;
+    airQuality: boolean;
+    map: boolean;
+  };
+}
