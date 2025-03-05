@@ -199,13 +199,13 @@ export interface CompanyStoreState {
 export interface AirQualitySource {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
-  provider?: string;
-  location?: {
+  provider: string;  // Changed from optional to required
+  location: {
     latitude: number;
     longitude: number;
   };
+  latitude?: number;  // These are kept for backward compatibility
+  longitude?: number;
 }
 
 // Add this to extension of Leaflet's Marker options to include data property

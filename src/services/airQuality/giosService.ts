@@ -21,7 +21,7 @@ export const fetchGIOSStations = async (): Promise<AirQualitySource[]> => {
       .map((station: any) => ({
         id: `gios-${station.id}`,
         name: station.stationName,
-        provider: 'GIOŚ',
+        provider: 'GIOŚ', // Now required
         location: {
           latitude: parseFloat(station.gegrLat),
           longitude: parseFloat(station.gegrLon)
@@ -53,11 +53,43 @@ export const fetchGIOSData = async (stationId: string): Promise<AirQualityData |
       }
     });
 
+    // Find station from the stations list
+    const stationsSource = await fetchGIOSStations();
+    const source = stationsSource.find(s => s.id === stationId);
+    
+    if (!source) {
+      throw new Error(`Station with ID ${stationId} not found`);
+    }
+
+    // Calculate AQI level and color based on PM2.5 values
+    const pm25Value = measurements.pm25 || 0;
+    let level = "good";
+    let color = "#9ACD32"; // Default good color
+    let description = "Dobra";
+    let advice = "Jakość powietrza jest zadowalająca";
+
+    if (pm25Value > 25) {
+      level = "moderate";
+      color = "#FFFF00";
+      description = "Umiarkowana";
+      advice = "Jakość powietrza jest akceptowalna";
+    } else if (pm25Value > 50) {
+      level = "unhealthy";
+      color = "#FF9900";
+      description = "Niezdrowa";
+      advice = "Ogranicz aktywność na zewnątrz";
+    }
+
     return {
-      source: await fetchGIOSStations().then(stations => 
-        stations.find(s => s.id === stationId)!
-      ),
+      source: source,
       current: {
+        indexes: [{ 
+          value: pm25Value,
+          level: level,
+          description: description,
+          advice: advice,
+          color: color
+        }],
         timestamp: new Date().toISOString(),
         pm25: measurements.pm25,
         pm10: measurements.pm10,
