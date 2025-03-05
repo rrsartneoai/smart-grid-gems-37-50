@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AirlyMap } from "./AirlyMap";
+import { AirlyMap } from "./airly-map/AirlyMap";
 import { AirQualitySpaces } from "./AirQualitySpaces";
 
 export const PomeranianAirQuality = () => {
