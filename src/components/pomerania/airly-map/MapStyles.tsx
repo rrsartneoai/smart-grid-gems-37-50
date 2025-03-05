@@ -30,6 +30,18 @@ export const MapStyles: React.FC = () => {
         min-width: 280px;
       }
 
+      /* Ensure popups don't overlap - give them more space */
+      .leaflet-popup {
+        margin-bottom: 70px;
+      }
+      
+      /* Improve popup positioning */
+      .leaflet-container a.leaflet-popup-close-button {
+        top: 8px;
+        right: 8px;
+        color: white;
+      }
+
       @media (max-width: 640px) {
         .airly-popup .leaflet-popup-content {
           min-width: 240px;

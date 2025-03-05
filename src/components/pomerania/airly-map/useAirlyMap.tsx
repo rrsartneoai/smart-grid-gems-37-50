@@ -24,6 +24,7 @@ export const useAirlyMap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const popupRef = useRef<L.Popup | null>(null);
 
   // State
   const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +67,14 @@ export const useAirlyMap = () => {
         L.control.zoom({
           position: 'bottomright'
         }).addTo(map);
+
+        // Close popup when opening another one
+        map.on('popupopen', function(e) {
+          if (popupRef.current && popupRef.current !== e.popup) {
+            map.closePopup(popupRef.current);
+          }
+          popupRef.current = e.popup;
+        });
 
         mapInstance.current = map;
         console.log('Map initialized successfully');
