@@ -95,17 +95,21 @@ export function SpacesTab() {
           <DeviceStatus />
         </div>
 
-{/*         <div className="grid gap-6 p-8">
-          <NetworkMap /> */}
+        {/* Commented out section for NetworkMap
+        <div className="grid gap-6 p-8">
+          <NetworkMap />
         </div>
+        */}
 
         <div className="grid gap-6 p-8">
           <FailureAnalysis />
         </div>
 
-{/*         <div className="grid gap-6 p-8">
+        {/* Commented out section for EnergyMap
+        <div className="grid gap-6 p-8">
           <EnergyMap />
-        </div> */}
+        </div>
+        */}
 
         <div className="mt-8 grid gap-8 md:grid-cols-2">
           <div className="w-full">
