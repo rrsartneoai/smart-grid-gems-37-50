@@ -7,7 +7,7 @@ import { Menu, ChevronLeft, ChevronRight, Plus, Bot, Search, MessageSquare } fro
 import { companiesData } from "@/data/companies";
 import { create } from "zustand";
 import { Button } from "@/components/ui/button";
-import { CompanyStoreState } from "@/types/company";
+import { CompanyStoreState, Company } from "@/types/company";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,7 +15,7 @@ import { CompanyActions } from "@/components/company/CompanyActions";
 
 export const useCompanyStore = create<CompanyStoreState>((set) => ({
   selectedCompany: null,
-  selectedCompanyId: "1",
+  selectedCompanyId: "demo",
   setSelectedCompany: (company) => set({ selectedCompany: company }),
   setSelectedCompanyId: (id) => set({ selectedCompanyId: id }),
 }));
@@ -107,7 +107,7 @@ interface SidebarContentProps {
   collapsed?: boolean;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filteredCompanies: typeof companiesData;
+  filteredCompanies: Company[];
   isAIAssistantVisible: boolean;
   navigate: (path: string) => void;
 }

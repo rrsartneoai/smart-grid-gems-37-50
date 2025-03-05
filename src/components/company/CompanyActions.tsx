@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, MinusCircle, RotateCcw } from "lucide-react";
@@ -15,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCompanyStore } from "@/components/CompanySidebar";
 import { Separator } from "@/components/ui/separator";
-import { CompanyStats, Company } from "@/types/company";
+import { CompanyStat, Company } from "@/types/company";
 import { Activity, Battery, Cpu, DollarSign, Flame, Gauge, Power, Timer, Wifi, Zap } from "lucide-react";
 
 export function CompanyActions() {
@@ -23,9 +24,9 @@ export function CompanyActions() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const { setSelectedCompanyId } = useCompanyStore();
-  const [archivedProjects, setArchivedProjects] = useState<typeof companiesData>([]);
+  const [archivedProjects, setArchivedProjects] = useState<Company[]>([]);
 
-  const defaultStats: CompanyStats[] = [
+  const defaultStats: CompanyStat[] = [
     {
       title: "PM2.5",
       value: "0.6",
@@ -155,7 +156,7 @@ export function CompanyActions() {
     setIsDialogOpen(false);
   };
 
-  const handleArchiveProject = (project: (typeof companiesData)[0]) => {
+  const handleArchiveProject = (project: Company) => {
     const index = companiesData.findIndex(c => c.id === project.id);
     if (index !== -1) {
       const [removedProject] = companiesData.splice(index, 1);
@@ -172,7 +173,7 @@ export function CompanyActions() {
     }
   };
 
-  const handleRestoreProject = (project: (typeof companiesData)[0]) => {
+  const handleRestoreProject = (project: Company) => {
     const index = archivedProjects.findIndex(c => c.id === project.id);
     if (index !== -1) {
       const [restoredProject] = archivedProjects.splice(index, 1);

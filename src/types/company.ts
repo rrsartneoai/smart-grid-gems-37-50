@@ -1,4 +1,3 @@
-
 export interface Coordinates {
   lon: number;
   lat: number;
@@ -151,25 +150,32 @@ export interface WeatherSettings {
   };
 }
 
-// Adding the missing types for other components in the project
+// Updated CompanyStats interface to match how it's being used
+export interface CompanyStat {
+  title: string;
+  value: string | number;
+  unit?: string;
+  icon: any;
+  description: string;
+  details: { label: string; value: string }[];
+}
+
+// Updating Company interface
 export interface Company {
   id: string;
   name: string;
-  logo: string;
+  logo?: string;
   description: string;
-  contact: {
+  contact?: {
     email: string;
     phone: string;
     address: string;
   };
-  stats: CompanyStats;
-  energyData: {
-    consumption: number[];
-    production: number[];
-    dates: string[];
-  };
+  stats: CompanyStat[];
+  energyData: any[]; // This can be more specific if needed
 }
 
+// Keeping the original CompanyStats for backward compatibility
 export interface CompanyStats {
   employees: number;
   customers: number;
@@ -177,13 +183,17 @@ export interface CompanyStats {
   energySaved: number;
 }
 
+// Updated CompanyData interface
 export interface CompanyData {
   companies: Company[];
 }
 
+// Updated CompanyStoreState to include selectedCompanyId
 export interface CompanyStoreState {
   selectedCompany: Company | null;
+  selectedCompanyId: string;
   setSelectedCompany: (company: Company) => void;
+  setSelectedCompanyId: (id: string) => void;
 }
 
 export interface AirQualitySource {
@@ -191,4 +201,16 @@ export interface AirQualitySource {
   name: string;
   latitude: number;
   longitude: number;
+  provider?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+// Add this to extension of Leaflet's Marker options to include data property
+declare module 'leaflet' {
+  interface MarkerOptions {
+    data?: any;
+  }
 }

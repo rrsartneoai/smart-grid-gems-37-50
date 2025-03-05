@@ -5,7 +5,7 @@ import { createMarkerPopup } from '../AirQualityPopup';
 
 export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
   const { source, current } = data;
-  const marker = L.marker([source.location.latitude, source.location.longitude]);
+  const marker = L.marker([source.location.latitude, source.location.longitude], { data });
 
   // Get the air quality index from measurements
   const index = current.indexes?.[0];
@@ -105,9 +105,6 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
     maxWidth: 400,
     className: 'airly-popup'
   });
-
-  // Store the data with the marker for use in the detail dialog
-  marker.options.data = data;
 
   marker.addTo(map);
   return marker;
