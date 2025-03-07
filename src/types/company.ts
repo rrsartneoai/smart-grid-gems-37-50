@@ -90,6 +90,7 @@ export interface AirQualityMeasurement {
     limit: number;
     percent: number;
   }>;
+  pm1?: number;
   pm25?: number;
   pm10?: number;
   no2?: number;
@@ -99,6 +100,9 @@ export interface AirQualityMeasurement {
   temperature?: number;
   humidity?: number;
   pressure?: number;
+  windSpeed?: number;
+  windDirection?: number;
+  windHeading?: number;
   provider: string;
 }
 

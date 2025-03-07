@@ -77,6 +77,7 @@ export const transformAqicnToAirQualityData = (stationId: string, data: any, sta
   const temperature = data.iaqi?.t?.v;
   const humidity = data.iaqi?.h?.v;
   const pressure = data.iaqi?.p?.v;
+  const windSpeed = data.iaqi?.w?.v;  // Wind speed
   
   // Get AQI index and determine color and level
   const aqi = data.aqi;
@@ -168,6 +169,7 @@ export const transformAqicnToAirQualityData = (stationId: string, data: any, sta
       temperature: temperature,
       humidity: humidity,
       pressure: pressure,
+      windSpeed: windSpeed,
       provider: 'AQICN'
     }
   };
