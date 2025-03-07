@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { generateRAGResponse } from "@/utils/ragUtils";
 import { Message } from "@/types/chat";
+import { generateRAGResponse } from "@/utils/ragUtils";
 import { processSensorQuery, isSensorRelatedQuery } from "@/hooks/useSensorQueries";
 import { getAirQualityData } from "@/hooks/useAirQualityData";
 
@@ -32,8 +32,28 @@ export const useChat = () => {
     });
   };
 
+  const addUserMessage = (content: string) => {
+    const userMessage = {
+      role: "user" as const,
+      content: content,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+  };
+
+  const addAssistantMessage = (text: string, visualizations?: Message["dataVisualizations"]) => {
+    const newMessage = {
+      role: "assistant" as const,
+      content: text,
+      timestamp: new Date(),
+      dataVisualizations: visualizations,
+    };
+    setMessages((prev) => [...prev, newMessage]);
+  };
+
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (input: string) => {
+      // Process query logic moved here to simplify the architecture
       if (isSensorRelatedQuery(input)) {
         try {
           const sensorResponse = await processSensorQuery(input);
@@ -52,13 +72,7 @@ export const useChat = () => {
       return { text: response };
     },
     onSuccess: (response) => {
-      const newMessage = {
-        role: "assistant" as const,
-        content: response.text,
-        timestamp: new Date(),
-        dataVisualizations: response.visualizations,
-      };
-      setMessages((prev) => [...prev, newMessage]);
+      addAssistantMessage(response.text, response.visualizations);
     },
     onError: () => {
       toast({
@@ -73,12 +87,7 @@ export const useChat = () => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage = {
-      role: "user" as const,
-      content: input,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
+    addUserMessage(input);
     sendMessage(input);
     setInput("");
   };
