@@ -5,6 +5,12 @@ import { createMarkerPopup } from '../AirQualityPopup';
 
 export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
   const { source, current } = data;
+  // Check if map is defined and valid
+  if (!map || !map.getContainer()) {
+    console.error('Map is undefined or invalid');
+    return null;
+  }
+  
   const marker = L.marker([source.location.latitude, source.location.longitude]);
 
   // Get the air quality index from measurements
@@ -45,7 +51,12 @@ export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
     className: 'airly-popup'
   });
 
-  marker.addTo(map);
-  return marker;
+  // Add the marker to the map if the map is valid
+  try {
+    marker.addTo(map);
+    return marker;
+  } catch (error) {
+    console.error('Error adding marker to map:', error);
+    return null;
+  }
 };
-

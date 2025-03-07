@@ -86,7 +86,7 @@ export function AirlyMap() {
         for (const station of aqicnStations) {
           try {
             const marker = createAirQualityMarker(station, map);
-            markersRef.current.push(marker);
+            if (marker) markersRef.current.push(marker);
             setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
           } catch (error) {
             console.error(`Error adding AQICN station to map:`, error);
@@ -118,7 +118,7 @@ export function AirlyMap() {
               };
 
               const marker = createAirQualityMarker(data, map);
-              markersRef.current.push(marker);
+              if (marker) markersRef.current.push(marker);
               setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
             } catch (error) {
               console.error(`Error processing installation ${installation.id}:`, error);
@@ -197,12 +197,32 @@ style.textContent = `
 
   .airly-popup .leaflet-popup-content {
     margin: 0;
-    min-width: 280px;
+    min-width: 300px;
+    max-width: 400px;
+  }
+
+  .airly-popup .leaflet-popup-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .airly-popup .leaflet-popup-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  .airly-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+
+  .airly-popup .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
   }
 
   @media (max-width: 640px) {
     .airly-popup .leaflet-popup-content {
       min-width: 240px;
+      max-width: 300px;
     }
   }
 `;
