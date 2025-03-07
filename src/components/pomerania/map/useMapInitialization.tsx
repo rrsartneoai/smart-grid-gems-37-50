@@ -56,78 +56,121 @@ export function useMapInitialization() {
         mapInstance.current = map;
         console.log('Map initialized successfully');
 
-        // Fetch installations for all cities
-        const fetchedInstallations = await Promise.all(
-          CITIES.map(city => fetchInstallations(city.lat, city.lon))
-        );
-        
-        // Flatten and deduplicate installations by ID
-        const allInstallations = Array.from(
-          new Map(
-            fetchedInstallations
-              .flat()
-              .map(install => [install.id, install])
-          ).values()
-        );
-
-        // Also fetch AQICN data for all stations
-        const aqicnStations = await fetchAllAqicnStations();
-        
-        const totalStations = allInstallations.length + aqicnStations.length;
-        setStats({ total: totalStations, loaded: 0 });
-
-        // Add AQICN stations to the map first
-        for (const station of aqicnStations) {
-          try {
-            const marker = createAirQualityMarker(station, map);
-            if (marker) markersRef.current.push(marker);
-            setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
-          } catch (error) {
-            console.error(`Error adding AQICN station to map:`, error);
-          }
-        }
-
-        // Process Airly installations in batches to prevent rate limiting
-        const batchSize = 5;
-        for (let i = 0; i < allInstallations.length; i += batchSize) {
-          const batch = allInstallations.slice(i, i + batchSize);
+        try {
+          // Try to fetch AQICN stations first
+          const aqicnStations = await fetchAllAqicnStations().catch(err => {
+            console.error('Error fetching AQICN stations:', err);
+            return [];
+          });
           
-          await Promise.all(batch.map(async (installation: Installation) => {
+          // Set initial stats
+          setStats({ total: aqicnStations.length, loaded: 0 });
+          
+          // Add AQICN stations to the map
+          for (const station of aqicnStations) {
             try {
-              console.log(`Fetching data for installation ${installation.id}...`);
-              const measurements = await fetchMeasurements(installation.id);
-              
-              const data = {
-                source: {
-                  id: `airly-${installation.id}`,
-                  name: `Airly ${installation.address?.street || ''}`,
-                  provider: 'Airly',
-                  location: installation.location
-                },
-                current: {
-                  ...measurements.current,
-                  provider: 'Airly',
-                  timestamp: measurements.current.fromDateTime
-                }
-              };
-
-              const marker = createAirQualityMarker(data, map);
+              const marker = createAirQualityMarker(station, map);
               if (marker) markersRef.current.push(marker);
               setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
             } catch (error) {
-              console.error(`Error processing installation ${installation.id}:`, error);
+              console.error(`Error adding AQICN station to map:`, error);
             }
-          }));
-
-          if (i + batchSize < allInstallations.length) {
-            await delay(500);
           }
-        }
+          
+          // Now try to fetch Airly installations
+          try {
+            // Fetch installations for all cities
+            const fetchPromises = CITIES.map(city => 
+              fetchInstallations(city.lat, city.lon)
+                .catch(err => {
+                  console.warn(`Error fetching installations for ${city.name}:`, err);
+                  return [];
+                })
+            );
+            
+            const fetchedInstallations = await Promise.all(fetchPromises);
+            
+            // Flatten and deduplicate installations by ID
+            const allInstallations = Array.from(
+              new Map(
+                fetchedInstallations
+                  .flat()
+                  .map(install => [install.id, install])
+              ).values()
+            );
+            
+            // Update total count
+            setStats(prev => ({ 
+              total: prev.total + allInstallations.length, 
+              loaded: prev.loaded 
+            }));
+            
+            // Process Airly installations in batches to prevent rate limiting
+            const batchSize = 3; // Reduced batch size
+            for (let i = 0; i < allInstallations.length; i += batchSize) {
+              const batch = allInstallations.slice(i, i + batchSize);
+              
+              await Promise.all(batch.map(async (installation: Installation) => {
+                try {
+                  console.log(`Fetching data for installation ${installation.id}...`);
+                  const measurements = await fetchMeasurements(installation.id)
+                    .catch(err => {
+                      console.warn(`Error fetching measurements for installation ${installation.id}:`, err);
+                      return null;
+                    });
+                  
+                  if (measurements) {
+                    const data = {
+                      source: {
+                        id: `airly-${installation.id}`,
+                        name: `Airly ${installation.address?.street || ''}`,
+                        provider: 'Airly',
+                        location: installation.location
+                      },
+                      current: {
+                        ...measurements.current,
+                        provider: 'Airly',
+                        timestamp: measurements.current.fromDateTime
+                      }
+                    };
 
-        setIsLoading(false);
+                    const marker = createAirQualityMarker(data, map);
+                    if (marker) markersRef.current.push(marker);
+                  }
+                  
+                  setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
+                } catch (error) {
+                  console.error(`Error processing installation ${installation.id}:`, error);
+                  setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
+                }
+              }));
+
+              if (i + batchSize < allInstallations.length) {
+                await delay(1000); // Increased delay to 1 second
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching Airly data:', error);
+            // Continue with the app even if Airly data fails
+          }
+          
+          // If we have at least some data, consider it a success
+          if (markersRef.current.length > 0) {
+            setIsLoading(false);
+          } else {
+            setError('Nie można załadować danych o jakości powietrza. Spróbuj ponownie później.');
+            setIsLoading(false);
+          }
+          
+        } catch (error) {
+          console.error('Error loading air quality data:', error);
+          setError('Wystąpił problem z pobieraniem danych o jakości powietrza.');
+          setIsLoading(false);
+        }
+        
       } catch (error) {
         console.error('Error initializing map:', error);
-        setError('Wystąpił błąd podczas ładowania danych. Spróbuj odświeżyć stronę.');
+        setError('Wystąpił błąd podczas inicjalizacji mapy. Spróbuj odświeżyć stronę.');
         setIsLoading(false);
       }
     };

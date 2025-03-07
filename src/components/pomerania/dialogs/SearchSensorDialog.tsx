@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormLabel } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -37,7 +37,7 @@ export function SearchSensorDialog({ isOpen, onOpenChange, onSubmit }: SearchSen
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <FormLabel>Lokalizacja</FormLabel>
+            <Label>Lokalizacja</Label>
             <Input 
               placeholder="np. Gdańsk, Sopot, Gdynia" 
               value={location}
@@ -46,7 +46,7 @@ export function SearchSensorDialog({ isOpen, onOpenChange, onSubmit }: SearchSen
           </div>
           
           <div className="space-y-2">
-            <FormLabel>Promień wyszukiwania (km)</FormLabel>
+            <Label>Promień wyszukiwania (km)</Label>
             <Input 
               type="number" 
               value={radius}

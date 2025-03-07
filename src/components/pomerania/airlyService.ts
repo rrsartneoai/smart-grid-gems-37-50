@@ -3,6 +3,7 @@ import { Installation, Measurement } from './types';
 
 const API_KEY = 'zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP';
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const LONG_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes for rate limited responses
 
 interface CachedData<T> {
   data: T;
@@ -29,7 +30,7 @@ const getFromCache = <T>(key: string): T | null => {
   }
 };
 
-const setCache = <T>(key: string, data: T): void => {
+const setCache = <T>(key: string, data: T, duration = CACHE_DURATION): void => {
   try {
     const cacheData: CachedData<T> = {
       data,
@@ -60,6 +61,23 @@ export const fetchInstallations = async (lat: number, lng: number): Promise<Inst
         }
       }
     );
+    
+    if (response.status === 429) {
+      console.warn('Airly API rate limit reached');
+      // Try to get even expired cache data
+      const expired = localStorage.getItem(cacheKey);
+      if (expired) {
+        try {
+          const { data } = JSON.parse(expired);
+          // Save the expired data with a longer expiration
+          setCache(cacheKey, data, LONG_CACHE_DURATION);
+          return data;
+        } catch (e) {
+          console.error('Error parsing expired cache:', e);
+        }
+      }
+      throw new Error(`Failed to fetch installations: ${response.status}`);
+    }
     
     if (!response.ok) {
       throw new Error(`Failed to fetch installations: ${response.status} ${response.statusText}`);
@@ -93,6 +111,23 @@ export const fetchMeasurements = async (installationId: number): Promise<Measure
         }
       }
     );
+    
+    if (response.status === 429) {
+      console.warn('Airly API rate limit reached for measurements');
+      // Try to get even expired cache data
+      const expired = localStorage.getItem(cacheKey);
+      if (expired) {
+        try {
+          const { data } = JSON.parse(expired);
+          // Save the expired data with a longer expiration
+          setCache(cacheKey, data, LONG_CACHE_DURATION);
+          return data;
+        } catch (e) {
+          console.error('Error parsing expired cache:', e);
+        }
+      }
+      throw new Error(`Failed to fetch measurements: ${response.status}`);
+    }
     
     if (!response.ok) {
       throw new Error(`Failed to fetch measurements: ${response.status} ${response.statusText}`);
