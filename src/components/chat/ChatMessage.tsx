@@ -35,6 +35,12 @@ export function ChatMessage({
     playAudio();
   };
 
+  // Check if content contains data related to air quality
+  const hasAirQualityData = content.includes("Indeks jakości powietrza") ||
+                            content.includes("AQI") ||
+                            content.includes("PM2.5") ||
+                            content.includes("PM10");
+
   return (
     <div className={`flex gap-3 ${role === "assistant" ? "flex-row" : "flex-row-reverse"}`}>
       <MessageAvatar role={role} />

@@ -3,9 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { Message } from "@/types/chat";
-import { generateRAGResponse } from "@/utils/ragUtils";
-import { processSensorQuery, isSensorRelatedQuery } from "@/hooks/useSensorQueries";
-import { getAirQualityData } from "@/hooks/useAirQualityData";
+import { useQueryProcessor } from "@/hooks/chat/useQueryProcessor";
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -17,6 +15,7 @@ export const useChat = () => {
   ]);
   const [input, setInput] = useState("");
   const { toast } = useToast();
+  const { processQuery } = useQueryProcessor();
 
   const clearConversation = () => {
     setMessages([
@@ -53,23 +52,7 @@ export const useChat = () => {
 
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (input: string) => {
-      // Process query logic moved here to simplify the architecture
-      if (isSensorRelatedQuery(input)) {
-        try {
-          const sensorResponse = await processSensorQuery(input);
-          return sensorResponse;
-        } catch (error) {
-          console.error("Error processing sensor query:", error);
-        }
-      }
-      
-      const localData = getAirQualityData(input);
-      if (localData.text !== "Nie znalazłem tej informacji w dostępnych danych.") {
-        return localData;
-      }
-      
-      const response = await generateRAGResponse(input);
-      return { text: response };
+      return await processQuery(input);
     },
     onSuccess: (response) => {
       addAssistantMessage(response.text, response.visualizations);
