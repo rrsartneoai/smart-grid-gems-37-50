@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SensorCard } from "./SensorCard";
 import { CityTabs } from "./CityTabs";
-import { sensorsData } from "./SensorsData";
+import { sensorsData, SensorData } from "./SensorsData";
 import { Input } from "@/components/ui/input";
 import { AlertsConfig } from "./AlertsConfig";
 import { DataComparison } from "./DataComparison";
