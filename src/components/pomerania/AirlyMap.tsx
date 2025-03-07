@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchInstallations, fetchMeasurements } from "./airlyService";
+import { fetchAllAqicnStations } from "@/services/airQuality/aqicnService";
 import { Installation } from "./types";
+import { AirQualityData } from "@/types/company";
 import { MAP_CONFIG, CITIES } from "./config/mapConfig";
 import { createAirQualityMarker } from "./markers/AirQualityMarker";
 import { AirQualityLegend } from "./legend/AirQualityLegend";
@@ -47,7 +49,7 @@ export function AirlyMap() {
 
         // Add a dark theme map layer
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          attribution: '©OpenStreetMap, ©CartoDB, ©Airly',
+          attribution: '©OpenStreetMap, ©CartoDB, ©Airly, ©AQICN',
           subdomains: 'abcd',
           className: 'dark-map-tiles'
         }).addTo(map);
@@ -74,9 +76,24 @@ export function AirlyMap() {
           ).values()
         );
 
-        setStats({ total: allInstallations.length, loaded: 0 });
+        // Also fetch AQICN data for all stations
+        const aqicnStations = await fetchAllAqicnStations();
+        
+        const totalStations = allInstallations.length + aqicnStations.length;
+        setStats({ total: totalStations, loaded: 0 });
 
-        // Process installations in batches to prevent rate limiting
+        // Add AQICN stations to the map first
+        for (const station of aqicnStations) {
+          try {
+            const marker = createAirQualityMarker(station, map);
+            markersRef.current.push(marker);
+            setStats(prev => ({ ...prev, loaded: prev.loaded + 1 }));
+          } catch (error) {
+            console.error(`Error adding AQICN station to map:`, error);
+          }
+        }
+
+        // Process Airly installations in batches to prevent rate limiting
         const batchSize = 5;
         for (let i = 0; i < allInstallations.length; i += batchSize) {
           const batch = allInstallations.slice(i, i + batchSize);
