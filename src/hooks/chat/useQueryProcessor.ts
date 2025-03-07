@@ -150,8 +150,15 @@ export const useQueryProcessor = () => {
     }
     
     // Finally, fall back to RAG response
-    const response = await generateRAGResponse(input);
-    return { text: response };
+    try {
+      const response = await generateRAGResponse(input);
+      return { text: response };
+    } catch (error) {
+      console.error("Error generating RAG response:", error);
+      return { 
+        text: "Przepraszam, wystąpił błąd podczas przetwarzania zapytania. Proszę spróbować ponownie."
+      };
+    }
   };
 
   return { processQuery };

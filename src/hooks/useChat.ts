@@ -4,50 +4,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { Message } from "@/types/chat";
 import { useQueryProcessor } from "@/hooks/chat/useQueryProcessor";
+import { useMessageState } from "@/hooks/chat/useMessageState";
 
 export const useChat = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "Witaj! Jestem twoim asystentem monitorowania stanu jakości powietrza. Jak mogę ci pomóc?",
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
+  const { 
+    messages, 
+    input, 
+    setInput, 
+    addUserMessage, 
+    addAssistantMessage, 
+    clearMessages 
+  } = useMessageState();
+  
   const { toast } = useToast();
   const { processQuery } = useQueryProcessor();
 
   const clearConversation = () => {
-    setMessages([
-      {
-        role: "assistant",
-        content: "Witaj! Jestem twoim asystentem monitorowania stanu jakości powietrza. Jak mogę ci pomóc?",
-        timestamp: new Date(),
-      },
-    ]);
+    clearMessages();
     toast({
       title: "Konwersacja wyczyszczona",
       description: "Historia czatu została zresetowana.",
     });
-  };
-
-  const addUserMessage = (content: string) => {
-    const userMessage = {
-      role: "user" as const,
-      content: content,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-  };
-
-  const addAssistantMessage = (text: string, visualizations?: Message["dataVisualizations"]) => {
-    const newMessage = {
-      role: "assistant" as const,
-      content: text,
-      timestamp: new Date(),
-      dataVisualizations: visualizations,
-    };
-    setMessages((prev) => [...prev, newMessage]);
   };
 
   const { mutate: sendMessage, isPending } = useMutation({

@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { MessageAvatar } from "./message/MessageAvatar";
 import { MessageHeader } from "./message/MessageHeader";
 import { MessageBody } from "./message/MessageBody";
@@ -55,7 +54,7 @@ export function ChatMessage({
         
         <MessageBody content={content} role={role} />
         
-        {role === "assistant" && (
+        {role === "assistant" && dataVisualizations && dataVisualizations.length > 0 && (
           <DataVisualizations visualizations={dataVisualizations} />
         )}
       </div>
