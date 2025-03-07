@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormLabel } from "@/components/ui/form";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 interface SearchSensorDialogProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function SearchSensorDialog({ isOpen, onOpenChange, onSubmit }: SearchSen
   const handleSearch = () => {
     if (onSubmit && location) {
       onSubmit(location, radius);
+      toast.info(`Wyszukiwanie czujników w pobliżu ${location} (promień: ${radius}km)`);
     } else {
       onOpenChange(false);
     }

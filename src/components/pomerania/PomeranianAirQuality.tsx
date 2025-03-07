@@ -32,6 +32,10 @@ export const PomeranianAirQuality = () => {
 
   const handleSearchSensor = (location: string, radius: number) => {
     console.log("Searching for sensors near:", location, "within radius:", radius, "km");
+    
+    // Here you would implement the actual sensor search functionality
+    // For example by calling an API endpoint or filtering local data
+    
     toast.info(`Wyszukiwanie czujników w pobliżu ${location} (promień: ${radius}km)`);
     setIsSearchDialogOpen(false);
   };
