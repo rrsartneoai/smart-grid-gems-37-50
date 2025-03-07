@@ -29,6 +29,17 @@ export function SensorWidget({ data, title }: SensorWidgetProps) {
     return "bg-purple-900";
   };
   
+  // Get AQI label
+  const getAqiLabel = (aqi: number | undefined) => {
+    if (!aqi) return "";
+    if (aqi <= 50) return "Dobra";
+    if (aqi <= 100) return "Umiarkowana";
+    if (aqi <= 150) return "Niezdrowa dla wrażliwych";
+    if (aqi <= 200) return "Niezdrowa";
+    if (aqi <= 300) return "Bardzo niezdrowa";
+    return "Niebezpieczna";
+  };
+  
   return (
     <Card className="mb-4 shadow-sm border-muted-foreground/20">
       <CardHeader className="pb-2 pt-4">
@@ -36,7 +47,7 @@ export function SensorWidget({ data, title }: SensorWidgetProps) {
           {title}
           {data.airQualityIndex && (
             <span className={`${getAqiColor(data.airQualityIndex)} text-white text-xs px-2 py-1 rounded-full`}>
-              AQI: {data.airQualityIndex}
+              AQI: {data.airQualityIndex} {getAqiLabel(data.airQualityIndex)}
             </span>
           )}
         </CardTitle>

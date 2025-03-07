@@ -1,4 +1,3 @@
-
 import { Installation, Measurement } from './types';
 
 const API_KEY = 'zORU0m4cOxlElF9X4YcvhaR3sfiiqgFP';
@@ -142,7 +141,6 @@ export const fetchMeasurements = async (installationId: number): Promise<Measure
   }
 };
 
-// Helper function to clear all cached data
 export const clearAirlyCache = () => {
   try {
     const keys = Object.keys(localStorage);
@@ -157,28 +155,23 @@ export const clearAirlyCache = () => {
   }
 };
 
-// New function to get clean sensor data for the chatbot
 export const getSensorReadingsByLocation = async (location: string): Promise<any> => {
   try {
-    // Convert location name to coordinates (simplified)
     const coordinates = getCoordinatesForLocation(location);
     if (!coordinates) {
       return { error: "Nie znaleziono lokalizacji" };
     }
     
-    // Get installations for this location
     const installations = await fetchInstallations(coordinates.lat, coordinates.lng);
     if (!installations || installations.length === 0) {
       return { error: "Brak czujników w tej lokalizacji" };
     }
     
-    // Get measurements for the closest installation
     const closestInstallation = installations[0];
     const measurements = await fetchMeasurements(closestInstallation.id);
     
-    // Format the data for display
     const readingsData = {
-      location: closestInstallation.address?.city || location,
+      location: getDisplayLocationName(location, closestInstallation),
       provider: "Airly",
       timestamp: measurements.current?.fromDateTime || new Date().toISOString(),
       airQualityIndex: measurements.current?.indexes?.[0]?.value || null,
@@ -191,10 +184,10 @@ export const getSensorReadingsByLocation = async (location: string): Promise<any
       temperature: undefined,
       humidity: undefined,
       pressure: undefined,
-      installationId: closestInstallation.id
+      installationId: closestInstallation.id,
+      address: closestInstallation.address
     };
 
-    // Extract temperature, humidity, pressure from readings if available
     if (readingsData.readings?.TEMPERATURE) {
       readingsData.temperature = readingsData.readings.TEMPERATURE.value;
     }
@@ -214,7 +207,22 @@ export const getSensorReadingsByLocation = async (location: string): Promise<any
   }
 };
 
-// Helper function to map sensor names to units
+const getDisplayLocationName = (requestedLocation: string, installation: Installation): string => {
+  if (requestedLocation.toLowerCase().includes("starowiejska")) {
+    return "Gdynia, ul. Starowiejska";
+  }
+  
+  if (installation.address) {
+    const { street, city } = installation.address;
+    if (street && city) {
+      return `${city}, ul. ${street}`;
+    }
+    return city || "Nieznana lokalizacja";
+  }
+  
+  return requestedLocation;
+};
+
 const getUnitForReading = (name: string): string => {
   const units: Record<string, string> = {
     "PM1": "μg/m³",
@@ -232,7 +240,6 @@ const getUnitForReading = (name: string): string => {
   return units[name] || "";
 };
 
-// Simplified function to get coordinates for common locations
 const getCoordinatesForLocation = (location: string): { lat: number, lng: number } | null => {
   const locationMap: Record<string, { lat: number, lng: number }> = {
     "gdańsk": { lat: 54.372158, lng: 18.638306 },
@@ -241,21 +248,23 @@ const getCoordinatesForLocation = (location: string): { lat: number, lng: number
     "gdansk wrzeszcz": { lat: 54.3813, lng: 18.5954 },
     "sopot": { lat: 54.441581, lng: 18.560096 },
     "gdynia": { lat: 54.5189, lng: 18.5305 },
-    "trójmiasto": { lat: 54.441581, lng: 18.560096 }, // Center point
+    "gdynia ul starowiejska": { lat: 54.5163, lng: 18.5361 },
+    "trójmiasto": { lat: 54.441581, lng: 18.560096 },
     "trojmiasto": { lat: 54.441581, lng: 18.560096 }
   };
   
-  // Convert to lowercase and remove diacritics for comparison
   const normalizedLocation = location.toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
   
-  // Try exact match first
+  if (normalizedLocation.includes("starowiejska")) {
+    return locationMap["gdynia ul starowiejska"];
+  }
+  
   if (locationMap[normalizedLocation]) {
     return locationMap[normalizedLocation];
   }
   
-  // Try partial match
   for (const [key, coords] of Object.entries(locationMap)) {
     if (normalizedLocation.includes(key) || key.includes(normalizedLocation)) {
       return coords;
