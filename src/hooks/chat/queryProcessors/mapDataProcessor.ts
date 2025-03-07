@@ -23,7 +23,7 @@ export const processMapDataQuery = async (query: string): Promise<SensorResponse
   let stationName = "Gdynia";
 
   if (lowerQuery.includes("wrzeszcz") || lowerQuery.includes("gdańsk wrzeszcz")) {
-    stationId = "@237496"; // Try this instead of 2684 which is returning Unknown station
+    stationId = "@237496"; // Use correct station ID for Gdańsk Wrzeszcz
     stationName = "Gdańsk Wrzeszcz";
   } else if (lowerQuery.includes("gdynia")) {
     stationId = "@62983";
