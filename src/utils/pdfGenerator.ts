@@ -1,23 +1,73 @@
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Company } from '@/types';
+import autoTable from 'jspdf-autotable';
+import type { Company } from '@/types/company';
 
-export const generatePdf = async (company: Company) => {
-  const data = document.querySelector('#company-details');
-  if (!data) {
-    console.error('Company details element not found');
-    return;
-  }
+export const generatePDF = (company: Company | undefined) => {
+  if (!company) return;
 
-  const canvas = await html2canvas(data, {
-    scale: 2, // Increase scale for better resolution
+  // Create PDF with support for Polish characters
+  const doc = new jsPDF();
+  
+  // Add font that supports Polish characters
+  doc.setFont("helvetica");
+  
+  // Add title
+  doc.setFontSize(20);
+  doc.text(`Raport - ${company.name}`, 20, 20);
+  
+  // Add energy data table
+  doc.setFontSize(16);
+  doc.text('Dane energetyczne', 20, 40);
+  
+  const energyTableData = company.energyData.map(data => [
+    data.name,
+    data.consumption.toString(),
+    data.production.toString(),
+    data.efficiency.toString()
+  ]);
+
+  autoTable(doc, {
+    head: [['Okres', 'Zużycie', 'Produkcja', 'Wydajność']],
+    body: energyTableData,
+    startY: 45,
+    styles: {
+      font: 'helvetica',
+      fontStyle: 'normal'
+    },
+    headStyles: {
+      fillColor: [41, 128, 185],
+      textColor: 255,
+      font: 'helvetica',
+      fontStyle: 'bold'
+    }
   });
-  const imgData = canvas.toDataURL('image/png');
 
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const imgWidth = 210;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  // Add statistics
+  const currentY = (doc as any).lastAutoTable.finalY + 20;
+  doc.setFontSize(16);
+  doc.text('Statystyki', 20, currentY);
 
-  pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-  pdf.save(`${company.name}-details.pdf`);
+  const statsData = company.stats.map(stat => [
+    stat.title,
+    `${stat.value}${stat.unit || ''}`
+  ]);
+
+  autoTable(doc, {
+    head: [['Wskaźnik', 'Wartość']],
+    body: statsData,
+    startY: currentY + 5,
+    styles: {
+      font: 'helvetica',
+      fontStyle: 'normal'
+    },
+    headStyles: {
+      fillColor: [41, 128, 185],
+      textColor: 255,
+      font: 'helvetica',
+      fontStyle: 'bold'
+    }
+  });
+
+  // Save the PDF
+  doc.save(`raport-${company.name.toLowerCase().replace(/\s+/g, '-')}.pdf`);
 };

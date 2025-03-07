@@ -1,4 +1,5 @@
-import { AirQualityData } from '@/types/airQuality.types';
+
+import { AirQualityData } from '@/types/company';
 
 const formatValue = (value: number | undefined, unit: string) => {
   if (value === undefined || value === null) return 'brak danych';

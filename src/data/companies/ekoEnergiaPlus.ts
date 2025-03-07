@@ -1,4 +1,5 @@
-import { CompanyStats, Company } from '@/types';
+
+import { Company } from "@/types/company";
 import { Activity, DollarSign, Flame, Power, Zap } from "lucide-react";
 
 export const ekoEnergiaPlus: Company = {

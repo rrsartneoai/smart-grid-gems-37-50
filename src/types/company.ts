@@ -1,4 +1,3 @@
-
 export interface Coordinates {
   lon: number;
   lat: number;
@@ -92,6 +91,44 @@ export interface WeatherForecast {
     timezone: number;
     sunrise: number;
     sunset: number;
+  };
+}
+
+export interface AirQualityData {
+  source: {
+    id: string;
+    name: string;
+    provider: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+  };
+  current: {
+    indexes: {
+      name?: string;
+      value: number;
+      level?: string;
+      description: string;
+      advice: string;
+      color: string;
+    }[];
+    pm25?: number;
+    pm10?: number;
+    no2?: number;
+    o3?: number;
+    so2?: number;
+    co?: number;
+    temperature?: number;
+    pressure?: number;
+    humidity?: number;
+    timestamp?: string;
+    fromDateTime?: string;
+    standards?: {
+      pollutant: string;
+      percent: number;
+    }[];
+    provider?: string;
   };
 }
 
