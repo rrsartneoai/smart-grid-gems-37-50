@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -26,7 +25,6 @@ const getAirQualityData = (query: string): { text: string; visualizations?: Mess
     return { text: "Przepraszam, ale nie mogę znaleźć danych dla Gdańska." };
   }
 
-  // Check for specific air quality parameters
   if (lowercaseQuery.includes("pm2.5") || lowercaseQuery.includes("pm2,5")) {
     const pm25Sensor = gdanskData.sensors.find(s => s.name === "PM 2.5");
     if (pm25Sensor) {
@@ -47,7 +45,6 @@ const getAirQualityData = (query: string): { text: string; visualizations?: Mess
     }
   }
 
-  // General air quality queries
   if (lowercaseQuery.includes("jakość powietrza") || lowercaseQuery.includes("zanieczyszczenie")) {
     const airQualityInfo = gdanskData.sensors
       .filter(s => ["PM 2.5", "PM10"].includes(s.name))
@@ -60,7 +57,6 @@ const getAirQualityData = (query: string): { text: string; visualizations?: Mess
     };
   }
 
-  // Temperature and humidity as secondary parameters
   if (lowercaseQuery.includes("temperatura")) {
     const tempSensor = gdanskData.sensors.find(s => s.name === "Temp");
     if (tempSensor) {
@@ -84,7 +80,6 @@ const getAirQualityData = (query: string): { text: string; visualizations?: Mess
   return { text: "Nie znalazłem tej informacji w dostępnych danych." };
 };
 
-// Function to check if a query is related to air quality or sensor information
 const isSensorRelatedQuery = (query: string): boolean => {
   const lowercaseQuery = query.toLowerCase();
   const keywords = [
@@ -94,17 +89,14 @@ const isSensorRelatedQuery = (query: string): boolean => {
     "airly", "aqicn"
   ];
   
-  // Check for location markers paired with quality indicators
   const locations = ["gdańsk", "gdansk", "sopot", "gdynia", "trójmiasto", "trojmiasto", "wrzeszcz"];
   
-  // Check for keywords
   for (const keyword of keywords) {
     if (lowercaseQuery.includes(keyword)) {
       return true;
     }
   }
   
-  // Check for location + indicator patterns
   for (const location of locations) {
     if (lowercaseQuery.includes(location) && 
         (lowercaseQuery.includes("powietrze") || 
@@ -117,7 +109,6 @@ const isSensorRelatedQuery = (query: string): boolean => {
   return false;
 };
 
-// Function to extract location from query
 const extractLocation = (query: string): string | null => {
   const lowercaseQuery = query.toLowerCase();
   const locations = [
@@ -139,10 +130,8 @@ const extractLocation = (query: string): string | null => {
   return null;
 };
 
-// Function to get sensor data from multiple sources
 const getSensorData = async (location: string): Promise<any> => {
   try {
-    // First try Airly
     const airlyData = await getSensorReadingsByLocation(location);
     if (!airlyData.error) {
       return {
@@ -151,9 +140,7 @@ const getSensorData = async (location: string): Promise<any> => {
       };
     }
     
-    // If Airly fails, try AQICN
-    // Use a simplified version for AQICN stationId based on location
-    let stationId = "2684"; // Default to Gdańsk Wrzeszcz
+    let stationId = "2684";
     if (location.toLowerCase().includes("sopot")) {
       stationId = "@63286";
     } else if (location.toLowerCase().includes("gdynia")) {
@@ -188,9 +175,15 @@ const getSensorData = async (location: string): Promise<any> => {
       console.error("AQICN fetch error:", error);
     }
     
-    // If all fails, fallback to static data
     const gdanskData = sensorsData.gdansk;
     if (gdanskData) {
+      const pm25Sensor = gdanskData.sensors.find(s => s.name === "PM 2.5");
+      const pm10Sensor = gdanskData.sensors.find(s => s.name === "PM10");
+      
+      const calculatedAqi = pm25Sensor && pm10Sensor 
+        ? Math.round((parseFloat(pm25Sensor.value) * 2 + parseFloat(pm10Sensor.value)) / 3) 
+        : 0;
+      
       return {
         data: {
           location: location,
@@ -200,7 +193,7 @@ const getSensorData = async (location: string): Promise<any> => {
             acc[sensor.name] = { value: sensor.value, unit: sensor.unit };
             return acc;
           }, {}),
-          airQualityIndex: gdanskData.aqi || 0 // Added default value of 0 if aqi is missing
+          airQualityIndex: calculatedAqi
         },
         source: "SensorsData"
       };
@@ -213,12 +206,9 @@ const getSensorData = async (location: string): Promise<any> => {
   }
 };
 
-// Function to generate response for sensor data queries
 const processSensorQuery = async (query: string): Promise<{ text: string; visualizations?: Message["dataVisualizations"] }> => {
-  // Extract location from query or default to Gdańsk
   const location = extractLocation(query) || "gdańsk";
   
-  // Get sensor data
   const sensorData = await getSensorData(location);
   
   if (sensorData.error) {
@@ -228,14 +218,11 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
   const data = sensorData.data;
   const source = sensorData.source;
   
-  // Format response based on query type
   const lowercaseQuery = query.toLowerCase();
   
-  // Format date
   const date = new Date(data.timestamp);
   const formattedDate = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   
-  // PM2.5 specific query
   if (lowercaseQuery.includes("pm2.5") || lowercaseQuery.includes("pm2,5")) {
     const pm25 = data.readings["PM2.5"] || data.readings["PM 2.5"];
     if (pm25) {
@@ -255,7 +242,6 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
     }
   }
   
-  // PM10 specific query
   if (lowercaseQuery.includes("pm10")) {
     const pm10 = data.readings["PM10"] || data.readings["PM 10"];
     if (pm10) {
@@ -275,7 +261,6 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
     }
   }
   
-  // Temperature query
   if (lowercaseQuery.includes("temperatura")) {
     if (data.temperature) {
       return {
@@ -294,7 +279,6 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
     }
   }
   
-  // Humidity query
   if (lowercaseQuery.includes("wilgotność")) {
     if (data.humidity) {
       return {
@@ -313,7 +297,6 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
     }
   }
   
-  // General air quality query - return all data
   let responseText = `Jakość powietrza w ${data.location} (dane z ${source}, aktualizacja: ${formattedDate}):\n`;
   
   if (data.airQualityIndex) {
@@ -323,7 +306,6 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
     }
   }
   
-  // Add PM readings
   const pm25 = data.readings["PM2.5"] || data.readings["PM 2.5"];
   const pm10 = data.readings["PM10"] || data.readings["PM 10"];
   
@@ -335,7 +317,6 @@ const processSensorQuery = async (query: string): Promise<{ text: string; visual
     responseText += `\nPM10: ${pm10.value} ${pm10.unit}`;
   }
   
-  // Add other readings if available
   if (data.temperature) {
     responseText += `\nTemperatura: ${data.temperature}°C`;
   }
@@ -385,25 +366,20 @@ export const useChat = () => {
 
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async (input: string) => {
-      // Check if the query is related to sensors or air quality
       if (isSensorRelatedQuery(input)) {
         try {
-          // Process sensor-specific query
           const sensorResponse = await processSensorQuery(input);
           return sensorResponse;
         } catch (error) {
           console.error("Error processing sensor query:", error);
-          // Fall through to other methods if sensor-specific processing fails
         }
       }
       
-      // Check local sensor data as fallback
       const localData = getAirQualityData(input);
       if (localData.text !== "Nie znalazłem tej informacji w dostępnych danych.") {
         return localData;
       }
       
-      // If no sensor data found, try RAG with uploaded documents
       const response = await generateRAGResponse(input);
       return { text: response };
     },
