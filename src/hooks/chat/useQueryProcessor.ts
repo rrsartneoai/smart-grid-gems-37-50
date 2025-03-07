@@ -21,11 +21,15 @@ const isMapDataQuery = (query: string): boolean => {
 const processMapDataQuery = async (query: string): Promise<SensorResponse> => {
   const lowerQuery = query.toLowerCase();
   
-  // Determine which station to query based on the query content
-  let stationId = "2684"; // Default Gdańsk Wrzeszcz
-  let stationName = "Gdańsk Wrzeszcz";
+  // Updated station IDs based on the error message from the API
+  // Using @ prefix for user-contributed stations as per AQICN API requirements
+  let stationId = "@62983"; // Default to Gdynia as it's more likely to have data
+  let stationName = "Gdynia";
 
-  if (lowerQuery.includes("gdynia")) {
+  if (lowerQuery.includes("wrzeszcz") || lowerQuery.includes("gdańsk wrzeszcz")) {
+    stationId = "@237496"; // Try this instead of 2684 which is returning Unknown station
+    stationName = "Gdańsk Wrzeszcz";
+  } else if (lowerQuery.includes("gdynia")) {
     stationId = "@62983";
     stationName = "Gdynia";
   } else if (lowerQuery.includes("sopot")) {
@@ -48,7 +52,7 @@ const processMapDataQuery = async (query: string): Promise<SensorResponse> => {
     
     if (!data) {
       return { 
-        text: "Nie udało się pobrać danych z wybranej stacji pomiarowej. Spróbuj ponownie za chwilę."
+        text: `Nie udało się pobrać danych z wybranej stacji pomiarowej ${stationName}. Spróbuj zapytać o inną stację lub spróbuj ponownie za chwilę.`
       };
     }
     
@@ -99,7 +103,7 @@ const processMapDataQuery = async (query: string): Promise<SensorResponse> => {
   } catch (error) {
     console.error("Error fetching map sensor data:", error);
     return {
-      text: "Wystąpił błąd podczas pobierania danych z czujników na mapie. Proszę spróbować ponownie później."
+      text: `Wystąpił błąd podczas pobierania danych ze stacji ${stationName}. Spróbuj zapytać o inną stację lub spróbuj ponownie później.`
     };
   }
 };
@@ -126,10 +130,14 @@ export const useQueryProcessor = () => {
       }
       
       try {
+        console.log("Processing map data query:", input);
         const mapDataResponse = await processMapDataQuery(input);
         return mapDataResponse;
       } catch (error) {
         console.error("Error processing map data query:", error);
+        return {
+          text: "Wystąpił błąd podczas przetwarzania zapytania o dane z mapy. Spróbuj zapytać inaczej lub o inną stację."
+        };
       }
     }
     
@@ -140,6 +148,9 @@ export const useQueryProcessor = () => {
         return sensorResponse;
       } catch (error) {
         console.error("Error processing sensor query:", error);
+        return {
+          text: "Wystąpił błąd podczas przetwarzania zapytania o dane z czujników. Spróbuj zapytać inaczej."
+        };
       }
     }
     
