@@ -20,6 +20,9 @@ export function SearchSensorDialog({ isOpen, onOpenChange, onSubmit }: SearchSen
     if (onSubmit && location) {
       onSubmit(location, radius);
       toast.info(`Wyszukiwanie czujników w pobliżu ${location} (promień: ${radius}km)`);
+      onOpenChange(false); // Close dialog after submission
+    } else if (!location) {
+      toast.warning("Proszę wprowadzić lokalizację");
     } else {
       onOpenChange(false);
     }
@@ -37,8 +40,9 @@ export function SearchSensorDialog({ isOpen, onOpenChange, onSubmit }: SearchSen
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>Lokalizacja</Label>
+            <Label htmlFor="location">Lokalizacja</Label>
             <Input 
+              id="location"
               placeholder="np. Gdańsk, Sopot, Gdynia" 
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -46,8 +50,9 @@ export function SearchSensorDialog({ isOpen, onOpenChange, onSubmit }: SearchSen
           </div>
           
           <div className="space-y-2">
-            <Label>Promień wyszukiwania (km)</Label>
+            <Label htmlFor="radius">Promień wyszukiwania (km)</Label>
             <Input 
+              id="radius"
               type="number" 
               value={radius}
               onChange={(e) => setRadius(Number(e.target.value))}
