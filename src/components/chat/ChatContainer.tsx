@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
-import { ChatHeader } from "./chat/ChatHeader";
-import { ChatInput } from "./chat/ChatInput";
+import { ChatHeader } from "./ChatHeader";
+import { ChatInput } from "./ChatInput";
 import { ReactNode } from "react";
 
 interface ChatContainerProps {

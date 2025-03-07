@@ -200,7 +200,7 @@ const getSensorData = async (location: string): Promise<any> => {
             acc[sensor.name] = { value: sensor.value, unit: sensor.unit };
             return acc;
           }, {}),
-          airQualityIndex: gdanskData.aqi
+          airQualityIndex: gdanskData.aqi || 0 // Added default value of 0 if aqi is missing
         },
         source: "SensorsData"
       };
