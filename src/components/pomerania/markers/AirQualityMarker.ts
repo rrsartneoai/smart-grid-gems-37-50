@@ -1,7 +1,7 @@
 
 import L from 'leaflet';
 import { AirQualityData } from '@/types/company';
-import { createMarkerPopup } from '../AirQualityPopup';
+import { createMarkerPopup } from '../popup/AirQualityPopup';
 
 export const createAirQualityMarker = (data: AirQualityData, map: L.Map) => {
   const { source, current } = data;
