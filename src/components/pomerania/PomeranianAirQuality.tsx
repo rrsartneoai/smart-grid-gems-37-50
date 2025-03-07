@@ -11,15 +11,15 @@ export const PomeranianAirQuality = () => {
       {/* Airly.org Map Embed */}
       <Card className="dark:bg-[#1A1F2C] font-['Montserrat'] shadow-lg">
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl font-bold">Mapa jakości powietrza - Trójmiasto (AQICN)</CardTitle>
+          <CardTitle className="text-xl font-bold">Mapa jakości powietrza - Trójmiasto</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full h-[600px] rounded-lg overflow-hidden">
             <iframe 
-              src="https://aqicn.org/map/poland/pl/" 
+              src="https://airly.org/map/pl/#54.3520,18.6466,11" 
               className="w-full h-full border-0" 
-              title="Mapa jakości powietrza AQICN"
-              aria-label="Interaktywna mapa jakości powietrza AQICN dla Trójmiasta"
+              title="Mapa jakości powietrza"
+              aria-label="Interaktywna mapa jakości powietrza Airly dla Trójmiasta"
             />
           </div>
         </CardContent>
