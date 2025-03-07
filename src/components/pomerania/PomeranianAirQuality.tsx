@@ -9,6 +9,8 @@ import { AirQualitySpaces } from "./AirQualitySpaces";
 import { AddSensorDialog, SensorFormValues } from "./dialogs/AddSensorDialog";
 import { RemoveSensorDialog } from "./dialogs/RemoveSensorDialog";
 import { SearchSensorDialog } from "./dialogs/SearchSensorDialog";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const PomeranianAirQuality = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -18,7 +20,20 @@ export const PomeranianAirQuality = () => {
   const handleAddSensor = (data: SensorFormValues) => {
     console.log("Sensor data:", data);
     // Here you would add the sensor with the provided data
+    toast.success(`Dodano czujnik: ${data.name}`);
     setIsAddDialogOpen(false);
+  };
+
+  const handleRemoveSensor = (sensorId: string) => {
+    console.log("Removing sensor with ID:", sensorId);
+    toast.success("Usunięto czujnik");
+    setIsRemoveDialogOpen(false);
+  };
+
+  const handleSearchSensor = (location: string, radius: number) => {
+    console.log("Searching for sensors near:", location, "within radius:", radius, "km");
+    toast.info(`Wyszukiwanie czujników w pobliżu ${location} (promień: ${radius}km)`);
+    setIsSearchDialogOpen(false);
   };
 
   return (
@@ -46,11 +61,13 @@ export const PomeranianAirQuality = () => {
       <RemoveSensorDialog 
         isOpen={isRemoveDialogOpen} 
         onOpenChange={setIsRemoveDialogOpen}
+        onSubmit={handleRemoveSensor}
       />
       
       <SearchSensorDialog 
         isOpen={isSearchDialogOpen} 
         onOpenChange={setIsSearchDialogOpen}
+        onSubmit={handleSearchSensor}
       />
     </div>
   );

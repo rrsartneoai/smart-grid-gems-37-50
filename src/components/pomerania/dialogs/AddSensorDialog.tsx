@@ -39,7 +39,7 @@ export function AddSensorDialog({ isOpen, onOpenChange, onSubmit }: AddSensorDia
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] z-[9999]">
         <DialogHeader>
           <DialogTitle>Dodaj nowy czujnik</DialogTitle>
           <DialogDescription>
