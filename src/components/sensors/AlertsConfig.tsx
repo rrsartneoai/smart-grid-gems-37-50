@@ -1,36 +1,34 @@
+
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-
-interface AlertThreshold {
-  parameter: string;
-  threshold: number;
-}
+import { useAlertThresholds } from "./hooks/useAlertThresholds";
+import { AlertThresholdItem } from "./AlertThresholdItem";
 
 export const AlertsConfig = () => {
   const { toast } = useToast();
-  const [thresholds, setThresholds] = useState<AlertThreshold[]>([
-    { parameter: 'PM2.5', threshold: 25 },
-    { parameter: 'PM10', threshold: 50 },
-    { parameter: 'CO₂', threshold: 1000 }
-  ]);
+  const { thresholds, updateThreshold, saveThresholds: saveToBackend } = useAlertThresholds();
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleThresholdChange = (parameter: string, value: string) => {
-    setThresholds(prev =>
-      prev.map(t =>
-        t.parameter === parameter ? { ...t, threshold: Number(value) } : t
-      )
-    );
-  };
-
-  const saveThresholds = () => {
-    // In a real application, this would save to backend
-    toast({
-      title: "Zapisano progi alertów",
-      description: "Nowe wartości zostały zapisane pomyślnie."
-    });
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await saveToBackend();
+      toast({
+        title: "Zapisano progi alertów",
+        description: "Nowe wartości zostały zapisane pomyślnie."
+      });
+    } catch (error) {
+      toast({
+        title: "Błąd zapisywania",
+        description: "Nie udało się zapisać progów alertów.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -38,17 +36,18 @@ export const AlertsConfig = () => {
       <h3 className="text-lg font-semibold mb-4">Konfiguracja Alertów</h3>
       <div className="space-y-4">
         {thresholds.map((threshold) => (
-          <div key={threshold.parameter} className="flex items-center gap-4">
-            <span className="w-24">{threshold.parameter}</span>
-            <Input
-              type="number"
-              value={threshold.threshold}
-              onChange={(e) => handleThresholdChange(threshold.parameter, e.target.value)}
-              className="w-32"
-            />
-          </div>
+          <AlertThresholdItem
+            key={threshold.parameter}
+            threshold={threshold}
+            onChange={updateThreshold}
+          />
         ))}
-        <Button onClick={saveThresholds}>Zapisz</Button>
+        <Button 
+          onClick={handleSave} 
+          disabled={isSaving}
+        >
+          {isSaving ? "Zapisywanie..." : "Zapisz"}
+        </Button>
       </div>
     </Card>
   );
