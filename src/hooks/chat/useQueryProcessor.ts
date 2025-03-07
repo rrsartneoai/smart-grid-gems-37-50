@@ -1,10 +1,9 @@
-
 import { SensorResponse } from "@/types/chat";
 import { processSensorQuery, isSensorRelatedQuery } from "@/hooks/useSensorQueries";
 import { getAirQualityData } from "@/hooks/useAirQualityData";
 import { generateRAGResponse } from "@/utils/ragUtils";
 import { fetchAqicnData } from "@/services/airQuality/aqicnService";
-import { AQICN_STATIONS } from "@/services/airQuality/aqicnService";
+import { AQICN_STATIONS } from "@/services/airQuality/aqicnStations";
 
 // Check if the query is related to map data
 const isMapDataQuery = (query: string): boolean => {

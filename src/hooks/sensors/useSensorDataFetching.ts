@@ -1,4 +1,3 @@
-
 import { getSensorReadingsByLocation } from "@/components/pomerania/airlyService";
 import { fetchAqicnData } from "@/services/airQuality/aqicnService";
 import { sensorsData } from "@/components/sensors/SensorsData";

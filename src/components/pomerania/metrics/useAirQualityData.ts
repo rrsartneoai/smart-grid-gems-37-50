@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { MetricData } from "./types";
 import { fetchAqicnData } from "@/services/airQuality/aqicnService";

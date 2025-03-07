@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import L from 'leaflet';
 import { fetchInstallations, fetchMeasurements } from "../airlyService";
