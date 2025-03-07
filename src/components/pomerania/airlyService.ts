@@ -178,7 +178,7 @@ export const getSensorReadingsByLocation = async (location: string): Promise<any
     
     // Format the data for display
     const readingsData = {
-      location: closestInstallation.address?.displayAddress1 || location,
+      location: closestInstallation.address?.city || location,
       provider: "Airly",
       timestamp: measurements.current?.fromDateTime || new Date().toISOString(),
       airQualityIndex: measurements.current?.indexes?.[0]?.value || null,
@@ -188,11 +188,24 @@ export const getSensorReadingsByLocation = async (location: string): Promise<any
         acc[val.name] = { value: val.value, unit: getUnitForReading(val.name) };
         return acc;
       }, {}) || {},
-      temperature: measurements.current?.temperature,
-      humidity: measurements.current?.humidity,
-      pressure: measurements.current?.pressure,
+      temperature: undefined,
+      humidity: undefined,
+      pressure: undefined,
       installationId: closestInstallation.id
     };
+
+    // Extract temperature, humidity, pressure from readings if available
+    if (readingsData.readings?.TEMPERATURE) {
+      readingsData.temperature = readingsData.readings.TEMPERATURE.value;
+    }
+    
+    if (readingsData.readings?.HUMIDITY) {
+      readingsData.humidity = readingsData.readings.HUMIDITY.value;
+    }
+    
+    if (readingsData.readings?.PRESSURE) {
+      readingsData.pressure = readingsData.readings.PRESSURE.value;
+    }
     
     return readingsData;
   } catch (error) {
