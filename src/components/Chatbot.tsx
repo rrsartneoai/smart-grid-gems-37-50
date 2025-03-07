@@ -1,20 +1,12 @@
 
-import { useRef, useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect } from "react";
 import { useConversation } from "@11labs/react";
-import { ChatMessage } from "./chat/ChatMessage";
-import { ChatInput } from "./chat/ChatInput";
-import { ChatHeader } from "./chat/ChatHeader";
-import { ChatSuggestions } from "./chat/ChatSuggestions";
-import { format } from "date-fns";
-import { pl } from "date-fns/locale";
 import { useChat } from "@/hooks/useChat";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
-import { motion, AnimatePresence } from "framer-motion";
+import { ChatContainer } from "./chat/ChatContainer";
+import { MessageList } from "./chat/MessageList";
 
 export function Chatbot() {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
   const {
     messages,
@@ -44,15 +36,6 @@ export function Chatbot() {
   });
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
-    }
-  }, [messages]);
-
-  useEffect(() => {
     setIsTyping(isPending);
   }, [isPending]);
 
@@ -63,7 +46,7 @@ export function Chatbot() {
   const handleSaveHistory = () => {
     const historyText = messages
       .map((msg) => {
-        const time = format(msg.timestamp, "HH:mm", { locale: pl });
+        const time = new Date(msg.timestamp).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
         return `[${time}] ${msg.role === "user" ? "Użytkownik" : "Asystent"}: ${msg.content}`;
       })
       .join("\n\n");
@@ -72,11 +55,16 @@ export function Chatbot() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `chat-history-${format(new Date(), "yyyy-MM-dd-HH-mm")}.txt`;
+    a.download = `chat-history-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion);
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent);
   };
 
   useEffect(() => {
@@ -91,7 +79,7 @@ export function Chatbot() {
     };
   }, [setInput, handleSubmit]);
 
-  // Sprawdź, czy użytkownik ma już ustawiony klucz API ElevenLabs
+  // Check if user has set ElevenLabs API key
   useEffect(() => {
     const hasElevenLabsKey = !!localStorage.getItem('ELEVENLABS_API_KEY');
     if (!hasElevenLabsKey) {
@@ -100,58 +88,24 @@ export function Chatbot() {
   }, []);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto h-[600px] md:h-[700px] flex flex-col bg-background shadow-lg rounded-xl">
-      <ChatHeader
-        isSpeaking={conversation.isSpeaking}
-        onStopSpeaking={handleStopSpeaking}
-        onSaveHistory={handleSaveHistory}
+    <ChatContainer
+      isSpeaking={conversation.isSpeaking}
+      isTyping={isTyping}
+      onStopSpeaking={handleStopSpeaking}
+      onSaveHistory={handleSaveHistory}
+      input={input}
+      setInput={setInput}
+      handleSubmit={handleSubmit}
+      handleVoiceInput={handleVoiceInput}
+      handleClearConversation={clearConversation}
+      isRecording={isRecording}
+      isPending={isPending}
+    >
+      <MessageList 
+        messages={messages}
         isTyping={isTyping}
+        onSuggestionClick={handleSuggestionClick}
       />
-      
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 md:p-6 overflow-y-auto">
-        {messages.length === 1 && (
-          <ChatSuggestions onSuggestionClick={(suggestion) => {
-            setInput(suggestion);
-            handleSubmit({ preventDefault: () => {} } as React.FormEvent);
-          }} />
-        )}
-        <AnimatePresence>
-          <div className="space-y-4 md:space-y-6">
-            {messages.map((message, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ChatMessage {...message} />
-              </motion.div>
-            ))}
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
-              >
-                <span className="animate-pulse">●</span>
-                <span className="animate-pulse delay-75">●</span>
-                <span className="animate-pulse delay-150">●</span>
-              </motion.div>
-            )}
-          </div>
-        </AnimatePresence>
-      </ScrollArea>
-
-      <ChatInput
-        input={input}
-        setInput={setInput}
-        handleSubmit={handleSubmit}
-        handleVoiceInput={handleVoiceInput}
-        handleClearConversation={clearConversation}
-        isRecording={isRecording}
-        isPending={isPending}
-      />
-    </Card>
+    </ChatContainer>
   );
 }
