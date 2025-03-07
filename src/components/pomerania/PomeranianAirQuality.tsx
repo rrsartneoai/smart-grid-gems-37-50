@@ -23,7 +23,7 @@ export const PomeranianAirQuality = () => {
       
       <AirlyMap />
       
-      {/* AQICN Map Embed */}
+      {/* AQICN Map Embed - Centered on Gdańsk Wrzeszcz */}
       <Card className="dark:bg-[#1A1F2C] font-['Montserrat'] shadow-lg">
         <CardHeader className="pb-3">
           <CardTitle className="text-xl font-bold">Mapa jakości powietrza - Trójmiasto (AQICN)</CardTitle>
@@ -31,10 +31,10 @@ export const PomeranianAirQuality = () => {
         <CardContent>
           <div className="w-full h-[600px] rounded-lg overflow-hidden">
             <iframe 
-              src="https://aqicn.org/map/poland/gdansk/pl/" 
+              src="https://aqicn.org/map/poland/gdansk/pl/#@54.3803,18.6203,12z" 
               className="w-full h-full border-0" 
-              title="Mapa jakości powietrza AQICN"
-              aria-label="Interaktywna mapa jakości powietrza AQICN dla Trójmiasta"
+              title="Mapa jakości powietrza AQICN - Gdańsk Wrzeszcz"
+              aria-label="Interaktywna mapa jakości powietrza AQICN dla Gdańska Wrzeszcz"
             />
           </div>
         </CardContent>
